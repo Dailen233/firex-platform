@@ -1,6 +1,6 @@
 # CodeBuddy 首次接手提示词
 
-完整工程解压到 `~/projects/firex-frontend`，在CodeBuddy打开目录。首次用Plan模式粘贴以下内容，先检查现有代码，不重建工程。
+将新仓库克隆到 `~/projects/firex-platform`，在CodeBuddy打开该目录。首次用Plan模式粘贴以下内容，先检查现有代码，不重建工程。
 
 ```text
 你正在接手Fire-X前端R1/0.1.0。已有省级地图/省份列表→电厂详情→织金v4原始GLB→返回流程。请按软件工程模式工作。

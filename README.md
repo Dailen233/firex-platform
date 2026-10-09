@@ -8,7 +8,17 @@ Fire-X 新阶段团队协作工程。首轮前端基线为0.1.0；旧Fire-X仓�
 
 ## Ubuntu + CodeBuddy 接手
 
-将完整工程放到 `~/projects/firex-frontend`，在 VS Code/CodeBuddy 打开目录。建议 Node.js 22.12+ 或24；先查看 `node -v`，不要影响已有 Python/VGGT 环境。
+先克隆新仓库，在 VS Code/CodeBuddy 打开目录：
+
+```bash
+mkdir -p ~/projects
+cd ~/projects
+git clone git@github.com:Dailen233/firex-platform.git
+cd firex-platform
+code .
+```
+
+建议 Node.js 22.12+ 或24；先查看 `node -v`，不要影响已有 Python/VGGT 环境。
 
 ```bash
 npm ci
