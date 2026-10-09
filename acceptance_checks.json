@@ -1,0 +1,22 @@
+{
+  "checked_at": "2026-10-09",
+  "original_zip_crc_ok": true,
+  "model_zip_crc_ok": true,
+  "plants": 7,
+  "unique_plant_ids": 7,
+  "csv_geojson_consistency_errors": [],
+  "alerts_linked_and_explicitly_mock": true,
+  "scene_index_resolves_existing_manifest": true,
+  "model_sha256": "ee33bc331332d7345bb73e3a1363f9ce49234da7ec3424996ec5670f07a3aa37",
+  "model_hash_matches_original_manifest": true,
+  "model_nodes": 38,
+  "model_meshes": 38,
+  "province_boundary_geometry_available": false,
+  "browser_loading_verified": false,
+  "performance_verified": false,
+  "field_accuracy_verified": false,
+  "fire_simulation_verified": false,
+  "map_reference_point_difference_m_approx": 119.2859,
+  "point_difference_is_accuracy_measurement": false,
+  "verdict": "start frontend prototype; national map geometry and browser checks pending"
+}

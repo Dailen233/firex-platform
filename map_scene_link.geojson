@@ -1,0 +1,39 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "fx_chnenergy_zhijin_babu_pilot",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          105.8191383895118,
+          26.83176795
+        ]
+      },
+      "properties": {
+        "project_plant_key": "fx_chnenergy_zhijin_babu_pilot",
+        "external_plant_id": null,
+        "name": "国能织金发电有限公司",
+        "province_code": "520000",
+        "province_name": "贵州省",
+        "locality_hint": "织金县八步街道；与金元织金项目区分",
+        "scene_id": "zhijin_pilot",
+        "scene_manifest": "scene_manifest.json",
+        "scene_ready": true,
+        "scene_status": "draft",
+        "browser_loading_verified": false,
+        "point_method": "representative interior point of OSM plant boundary, not official surveyed plant centre",
+        "coordinate_accuracy": "derived_reference_unverified",
+        "source_url": "https://www.openstreetmap.org/way/560730385",
+        "source_osm_id": 560730385,
+        "source_notice": "OSM社区轮廓，未与当前影像独立核验",
+        "fire_monitoring_status": "not_connected",
+        "current_alert_level": null,
+        "is_fire_alert_mock": false
+      }
+    }
+  ],
+  "coordinate_reference": "RFC7946 longitude, latitude in WGS84; 2D only",
+  "notice": "one provisional linkage example, not a validated national plant dataset; source actor ID match pending"
+}

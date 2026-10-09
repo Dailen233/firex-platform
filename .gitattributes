@@ -1,0 +1,3 @@
+# Preserve imported handoff CRLF CSV and original Markdown end-of-file spacing.
+public/models/zhijin-v4/*.csv whitespace=cr-at-eol
+docs/source-materials/*.md whitespace=-blank-at-eof

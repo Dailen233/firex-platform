@@ -1,0 +1,74 @@
+[
+  {
+    "kind": "synthetic_coordinate_example",
+    "local_xyz_m": [
+      0,
+      313,
+      0
+    ],
+    "projected_E_N_h_m": [
+      581227.9057730192,
+      2968452.584594382,
+      1313.0
+    ],
+    "lon_lat_reference": [
+      105.8175,
+      26.835277999999995
+    ],
+    "roundtrip_arithmetic_error_m": 4.656612873077393e-10
+  },
+  {
+    "kind": "synthetic_coordinate_example",
+    "local_xyz_m": [
+      100,
+      350,
+      -200
+    ],
+    "projected_E_N_h_m": [
+      581327.9057730192,
+      2968652.584594382,
+      1350.0
+    ],
+    "lon_lat_reference": [
+      105.81851932604023,
+      26.837077757130384
+    ],
+    "roundtrip_arithmetic_error_m": 4.656612873077393e-10
+  },
+  {
+    "kind": "synthetic_coordinate_example",
+    "local_xyz_m": [
+      -2000,
+      400,
+      2000
+    ],
+    "projected_E_N_h_m": [
+      579227.9057730192,
+      2966452.584594382,
+      1400.0
+    ],
+    "lon_lat_reference": [
+      105.79724664360461,
+      26.817336994358307
+    ],
+    "roundtrip_arithmetic_error_m": 4.656612873077393e-10
+  },
+  {
+    "kind": "synthetic_coordinate_example",
+    "local_xyz_m": [
+      2000,
+      500,
+      -2000
+    ],
+    "projected_E_N_h_m": [
+      583227.9057730192,
+      2970452.584594382,
+      1500.0
+    ],
+    "lon_lat_reference": [
+      105.8377597384522,
+      26.853215915001158
+    ],
+    "roundtrip_arithmetic_error_m": 4.656612873077393e-10
+  }
+]

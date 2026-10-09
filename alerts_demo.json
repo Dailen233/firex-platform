@@ -1,0 +1,15 @@
+{
+  "schema": "Fire-X demo alerts",
+  "schema_version": "1.0",
+  "generated_at": "2026-10-08",
+  "is_mock": true,
+  "alerts": [
+    {
+      "alert_id": "DEMO-ZHIJIN-001",
+      "plant_id": "GEM_COAL_ZHIJIN",
+      "level": "warning",
+      "time": "2026-10-08T20:00:00+08:00",
+      "is_mock": true
+    }
+  ]
+}

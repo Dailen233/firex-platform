@@ -1,0 +1,39 @@
+﻿object_id,display_name,glb_node_name,category,display_height_m,height_status,base_estimate_m,identity_status
+B01,B01 干煤棚候选,B01,arched_shed_candidate,30.0,30m apex display assumption; original7.30m prediction retained separately,1313.0,inference_unverified
+B02,B02 主生产区设施候选,B02,unknown_facility_candidate,11.67279052734375,dataset prediction; not measured,1313.0,inference_unverified
+B03,B03 主生产区设施候选,B03,unknown_facility_candidate,15.27459716796875,dataset prediction; not measured,1313.0,inference_unverified
+B04,B04 主生产区设施候选,B04,unknown_facility_candidate,18.3544921875,dataset prediction; not measured,1313.0,inference_unverified
+B05,B05 烟囱附近设施，功能未定,B05,unknown_facility_candidate,10.631011962890625,dataset prediction; not measured,1313.0,inference_unverified
+B06,B06,B06,unknown_facility_candidate,5.5501708984375,dataset prediction; not measured,1304.0,unassigned
+B07,B07,B07,unknown_facility_candidate,4.59063720703125,dataset prediction; not measured,1313.0,unassigned
+B08,B08,B08,unknown_facility_candidate,4.783538818359375,dataset prediction; not measured,1322.0,unassigned
+B09,B09,B09,unknown_facility_candidate,4.342529296875,dataset prediction; not measured,1313.0,unassigned
+B10,B10,B10,unknown_facility_candidate,5.725799560546875,dataset prediction; not measured,1278.0,unassigned
+B11,B11,B11,unknown_facility_candidate,8.025909423828125,dataset prediction; not measured,1318.0,unassigned
+B12,B12,B12,unknown_facility_candidate,11.546478271484375,dataset prediction; not measured,1313.0,unassigned
+B13,B13,B13,unknown_facility_candidate,6.824310302734375,dataset prediction; not measured,1313.0,unassigned
+B14,B14,B14,unknown_facility_candidate,2.045257568359375,dataset prediction; not measured,1281.0,unassigned
+B15,B15,B15,unknown_facility_candidate,2.887603759765625,dataset prediction; not measured,1313.0,unassigned
+B16,B16,B16,unknown_facility_candidate,3.10833740234375,dataset prediction; not measured,1277.0,unassigned
+B17,B17,B17,unknown_facility_candidate,6.578887939453125,dataset prediction; not measured,1297.0,unassigned
+B18,B18,B18,unknown_facility_candidate,4.238128662109375,dataset prediction; not measured,1297.0,unassigned
+B19,B19,B19,unknown_facility_candidate,2.988372802734375,dataset prediction; not measured,1313.0,unassigned
+B20,B20,B20,unknown_facility_candidate,2.79608154296875,dataset prediction; not measured,1313.0,unassigned
+B21,B21,B21,unknown_facility_candidate,1.008819580078125,dataset prediction; not measured,1324.0,unassigned
+B22,B22,B22,unknown_facility_candidate,3.036590576171875,dataset prediction; not measured,1313.0,unassigned
+B23,B23,B23,unknown_facility_candidate,5.045166015625,dataset prediction; not measured,1297.0,unassigned
+B24,B24,B24,unknown_facility_candidate,3.27001953125,dataset prediction; not measured,1293.0,unassigned
+B25,B25,B25,unknown_facility_candidate,2.407257080078125,dataset prediction; not measured,1284.0,unassigned
+B26,B26,B26,unknown_facility_candidate,5.238555908203125,dataset prediction; not measured,1297.0,unassigned
+B27,B27,B27,unknown_facility_candidate,9.10955810546875,dataset prediction; not measured,1295.0,unassigned
+B28,B28,B28,unknown_facility_candidate,1.807586669921875,dataset prediction; not measured,1313.0,unassigned
+B29,B29,B29,unknown_facility_candidate,5.06280517578125,dataset prediction; not measured,1293.0,unassigned
+B30,B30,B30,unknown_facility_candidate,3.009918212890625,dataset prediction; not measured,1313.0,unassigned
+B31,B31,B31,unknown_facility_candidate,1.17095947265625,dataset prediction; not measured,1313.0,unassigned
+B32,B32,B32,unknown_facility_candidate,2.32275390625,dataset prediction; not measured,1313.0,unassigned
+B33,B33,B33,unknown_facility_candidate,1.699920654296875,dataset prediction; not measured,1297.0,unassigned
+B34,B34,B34,unknown_facility_candidate,0.27789306640625,dataset prediction; not measured,1313.0,unassigned
+CH01,烟囱参考模型,CH01,chimney,240.0,"240m documented in plant report, not newly surveyed",1313.0,OSM landmark reference
+CT-A,CT-A 冷却塔参考模型,CT-A,cooling_tower,150.0,"150m display assumption, not verified",1324.0,OSM landmark reference
+CT-B,CT-B 冷却塔参考模型,CT-B,cooling_tower,150.0,"150m display assumption, not verified",1323.0,OSM landmark reference
+terrain,周边基础地形与估计厂区平台,geometry_0,terrain,,historical mixed-source elevation with synthetic platform edits,,terrain_display_layer

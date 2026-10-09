@@ -1,0 +1,18 @@
+{
+  "facility_id": "B01",
+  "identity_status": "干煤棚候选，尚未完成逐栋身份核实",
+  "geometry_status": "不规则候选轮廓上的拱顶展示代理；不是实测复原",
+  "eave_height_assumption_m": 8.0,
+  "arch_rise_assumption_m": 22.0,
+  "height_status": "8m檐口、22m起拱、30m最高点均为可调展示假设；无实测依据",
+  "profile": "parabola h=8+22*(1-(2u/width)^2), clipped to original footprint",
+  "strip_spacing_m": 2.0,
+  "colour_status": "蓝色参考企业照片；不是贴图或精确色彩标定",
+  "interior_status": "实心代理，无真实内腔、煤堆、门洞、网架、柱或墙厚",
+  "official_report_clear_span_m": 100.0,
+  "span_status": "报告记载钢结构干煤棚跨度100m；不用于替换候选轮廓或推算高度",
+  "report_url": "https://sthj.guizhou.gov.cn/zwgk/zdlyxx/fsjg/fslxmspqgs/202406/P020241015404863681069.pdf",
+  "report_page": "PDF第30页，印刷页10",
+  "photo_url": "https://www.chnenergy.com.cn/gjnyjtww/chnjtyw/202106/44a7beb5674b486987d17440d6eadbb9.shtml",
+  "photo_publication_date": "2021-06-28，照片拍摄时间、尺度和姿态未核实"
+}

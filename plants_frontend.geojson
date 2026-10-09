@@ -1,0 +1,285 @@
+{
+  "type": "FeatureCollection",
+  "name": "FireX_frontend_samples_adapted_20261009",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "plant_id": "GEM_HYDRO_WUDONGDE",
+        "name": "乌东德水电站",
+        "aliases": "Wudongde Hydroelectric Plant",
+        "source_province": "云南省/四川省交界",
+        "display_province": "云南省",
+        "province_code": "530000",
+        "related_province_codes": [
+          "510000",
+          "530000"
+        ],
+        "technology": "Hydropower",
+        "operating_status": "Operating",
+        "capacity_mw": 10200,
+        "capacity_scope": "current_total_nameplate_capacity; official CTG",
+        "coordinate_crs": "WGS84 / EPSG:4326",
+        "coordinate_accuracy": "exact (GEM); not survey-grade",
+        "source_id": "GEM wiki project page",
+        "source_version": "GEM GHT March 2026 release context; page verified 2026-10-08",
+        "source_url": "https://www.gem.wiki/Wudongde_hydroelectric_plant",
+        "official_case_source": "https://eps.ctg.com.cn/cms/channel/1ywgg1/240609112.htm",
+        "scene_id": null,
+        "scene_ready": false,
+        "plant_id_namespace": "Fire-X project-defined sample IDs; not GEM native IDs",
+        "coordinate_verification_status": "source_page_matched; independent_imagery_check_pending",
+        "fire_monitoring_status": "not_connected",
+        "current_alert_level": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          102.6338,
+          26.318
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "plant_id": "GEM_HYDRO_BAIHETAN",
+        "name": "白鹤滩水电站",
+        "aliases": "Baihetan Hydroelectric Plant",
+        "source_province": "四川省/云南省交界",
+        "display_province": "四川省",
+        "province_code": "510000",
+        "related_province_codes": [
+          "510000",
+          "530000"
+        ],
+        "technology": "Hydropower",
+        "operating_status": "Operating",
+        "capacity_mw": 16000,
+        "capacity_scope": "plant_nameplate_capacity; GEM",
+        "coordinate_crs": "WGS84 / EPSG:4326",
+        "coordinate_accuracy": "exact (GEM); not survey-grade",
+        "source_id": "GEM wiki project page",
+        "source_version": "GEM GHT March 2026 release context; page verified 2026-10-08",
+        "source_url": "https://www.gem.wiki/Baihetan_hydroelectric_plant",
+        "official_case_source": "",
+        "scene_id": null,
+        "scene_ready": false,
+        "plant_id_namespace": "Fire-X project-defined sample IDs; not GEM native IDs",
+        "coordinate_verification_status": "source_page_matched; independent_imagery_check_pending",
+        "fire_monitoring_status": "not_connected",
+        "current_alert_level": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          102.8998,
+          27.2226
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "plant_id": "GEM_HYDRO_XILUODU",
+        "name": "溪洛渡水电站",
+        "aliases": "Xiluodu Hydroelectric Plant",
+        "source_province": "云南省/四川省交界流域",
+        "display_province": "云南省",
+        "province_code": "530000",
+        "related_province_codes": [
+          "510000",
+          "530000"
+        ],
+        "technology": "Hydropower",
+        "operating_status": "Operating",
+        "capacity_mw": 13860,
+        "capacity_scope": "plant_capacity; GEM value; current operating adjustment should be checked",
+        "coordinate_crs": "WGS84 / EPSG:4326",
+        "coordinate_accuracy": "exact (GEM); not survey-grade",
+        "source_id": "GEM wiki project page",
+        "source_version": "GEM GHT March 2026 release context; page verified 2026-10-08",
+        "source_url": "https://www.gem.wiki/Xiluodu_hydroelectric_plant",
+        "official_case_source": "https://www.cypc.com.cn/cypc/attachDir/2025/05/2025051511280455558.pdf",
+        "scene_id": null,
+        "scene_ready": false,
+        "plant_id_namespace": "Fire-X project-defined sample IDs; not GEM native IDs",
+        "coordinate_verification_status": "source_page_matched; independent_imagery_check_pending",
+        "fire_monitoring_status": "not_connected",
+        "current_alert_level": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          103.6491,
+          28.2566
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "plant_id": "GEM_HYDRO_XIANGJIABA",
+        "name": "向家坝水电站",
+        "aliases": "Xiangjiaba Hydroelectric Plant",
+        "source_province": "四川省/云南省交界",
+        "display_province": "四川省",
+        "province_code": "510000",
+        "related_province_codes": [
+          "510000",
+          "530000"
+        ],
+        "technology": "Hydropower",
+        "operating_status": "Operating",
+        "capacity_mw": 6400,
+        "capacity_scope": "plant_total_installed_capacity; CTG official report 2025-11-10; not measured instantaneous operating output",
+        "coordinate_crs": "WGS84 / EPSG:4326",
+        "coordinate_accuracy": "exact (GEM); not survey-grade",
+        "source_id": "GEM wiki + CTG official",
+        "source_version": "CTG official 2025-12-30; GEM page verified 2026-10-08",
+        "source_url": "https://www.gem.wiki/Xiangjiaba_hydroelectric_plant",
+        "official_case_source": "https://eps.ctg.com.cn/cms/channel/1ywgg1/240630000.htm",
+        "scene_id": null,
+        "scene_ready": false,
+        "plant_id_namespace": "Fire-X project-defined sample IDs; not GEM native IDs",
+        "coordinate_verification_status": "source_page_matched; independent_imagery_check_pending",
+        "fire_monitoring_status": "not_connected",
+        "current_alert_level": null,
+        "capacity_source_url": "https://www.ctg.com.cn/sxjt/xwzx55/zhxw23/2025111109411779818/index.html",
+        "capacity_source_date": "2025-11-10",
+        "capacity_source_conflict": {
+          "gem_value_mw": 7750,
+          "official_value_mw": 6400,
+          "status": "unresolved_scope_or_record_difference",
+          "note": "Do not explain the difference solely as an older versus newer capacity."
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          104.3924,
+          28.6408
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "plant_id": "GEM_HYDRO_PUBUGOU",
+        "name": "瀑布沟水电站",
+        "aliases": "Pubugou Hydroelectric Plant",
+        "source_province": "四川省",
+        "display_province": "四川省",
+        "province_code": "510000",
+        "related_province_codes": [
+          "510000"
+        ],
+        "technology": "Hydropower",
+        "operating_status": "Operating",
+        "capacity_mw": 3600,
+        "capacity_scope": "plant_nameplate_capacity; GEM",
+        "coordinate_crs": "WGS84 / EPSG:4326",
+        "coordinate_accuracy": "exact (GEM); not survey-grade",
+        "source_id": "GEM wiki project page",
+        "source_version": "GEM GHT March 2026 release context; page verified 2026-10-08",
+        "source_url": "https://www.gem.wiki/Pubugou_hydroelectric_plant",
+        "official_case_source": "",
+        "scene_id": null,
+        "scene_ready": false,
+        "plant_id_namespace": "Fire-X project-defined sample IDs; not GEM native IDs",
+        "coordinate_verification_status": "source_page_matched; independent_imagery_check_pending",
+        "fire_monitoring_status": "not_connected",
+        "current_alert_level": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          102.8476,
+          29.2061
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "plant_id": "GEM_HYDRO_JINPING1",
+        "name": "锦屏一级水电站",
+        "aliases": "Jinping Stage 1 Hydroelectric Plant",
+        "source_province": "四川省",
+        "display_province": "四川省",
+        "province_code": "510000",
+        "related_province_codes": [
+          "510000"
+        ],
+        "technology": "Hydropower",
+        "operating_status": "Operating",
+        "capacity_mw": 3600,
+        "capacity_scope": "plant_nameplate_capacity; GEM",
+        "coordinate_crs": "WGS84 / EPSG:4326",
+        "coordinate_accuracy": "exact (GEM); not survey-grade",
+        "source_id": "GEM wiki project page",
+        "source_version": "GEM GHT March 2026 release context; page verified 2026-10-08",
+        "source_url": "https://www.gem.wiki/Jinping_Stage_1_hydroelectric_plant",
+        "official_case_source": "",
+        "scene_id": null,
+        "scene_ready": false,
+        "plant_id_namespace": "Fire-X project-defined sample IDs; not GEM native IDs",
+        "coordinate_verification_status": "source_page_matched; independent_imagery_check_pending",
+        "fire_monitoring_status": "not_connected",
+        "current_alert_level": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          101.6337,
+          28.1833
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "plant_id": "GEM_COAL_ZHIJIN",
+        "name": "国能织金电厂",
+        "aliases": "Guodian Zhijin Power Station; Zhijin power station",
+        "source_province": "贵州省",
+        "display_province": "贵州省",
+        "province_code": "520000",
+        "related_province_codes": [
+          "520000"
+        ],
+        "technology": "Coal",
+        "operating_status": "Operating",
+        "capacity_mw": 1320,
+        "capacity_scope": "existing/operating project capacity documented by GEM; announced expansion not added",
+        "coordinate_crs": "WGS84 / EPSG:4326",
+        "coordinate_accuracy": "exact (GEM project coordinates); not survey-grade",
+        "source_id": "GEM wiki project page",
+        "source_version": "GEM page verified 2026-10-08",
+        "source_url": "https://www.gem.wiki/Guodian_Zhijin_power_station",
+        "official_case_source": "https://www.chnenergy.com.cn/gjnyjtww/chnjtyw/202106/44a7beb5674b486987d17440d6eadbb9.shtml",
+        "scene_id": "zhijin_pilot",
+        "scene_ready": true,
+        "plant_id_namespace": "Fire-X project-defined sample IDs; not GEM native IDs",
+        "coordinate_verification_status": "source_page_matched; independent_imagery_check_pending",
+        "fire_monitoring_status": "not_connected",
+        "current_alert_level": null,
+        "source_scene_id": "ZHIJIN_16KM2_TRIAL",
+        "project_plant_key": "fx_chnenergy_zhijin_babu_pilot",
+        "scene_asset_version": "v4",
+        "scene_manifest": "model_v4/scene_manifest.json",
+        "scene_link_verification_status": "provisional_identity_match_from_source_location_and_operator",
+        "browser_loading_verified": false,
+        "community_map_url": "https://www.openinframap.org/",
+        "official_case_source_scope": "official plant-photo reference; not capacity or dimensional survey"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          105.818927,
+          26.832824
+        ]
+      }
+    }
+  ]
+}

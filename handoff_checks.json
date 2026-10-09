@@ -1,0 +1,11 @@
+{
+  "model_bytes_unchanged": true,
+  "unique_object_ids": 38,
+  "node_links_resolved": 38,
+  "estimated_platform_features": 14,
+  "map_point_inside_source_OSM_boundary": true,
+  "all_relative_manifest_uris_exist": true,
+  "embedded_resources": true,
+  "coordinate_arithmetic_roundtrip_max_error_m": 4.656612873077393e-10,
+  "status": "file and metadata checks passed; no browser/engine or real-world accuracy verification"
+}

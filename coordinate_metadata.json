@@ -1,0 +1,52 @@
+{
+  "status": "terrain-only pilot, not verified current bare-earth terrain or completed plant model",
+  "candidate": "国能织金发电有限公司（贵州织金）；暂定试建对象",
+  "anchor_camera_lon_lat": [
+    105.8175,
+    26.835278
+  ],
+  "anchor_source": "2024年06月220kV变电站环评报告，PDF第15页现场照片",
+  "anchor_caveat": "camera position, not plant centre; camera CRS not stated, WGS84 assumed pending registration",
+  "projected_crs": "EPSG:32648",
+  "anchor_utm_easting_northing_m": [
+    581227.9057730192,
+    2968452.584594382
+  ],
+  "mesh_extent_m": [
+    4000,
+    4000
+  ],
+  "mesh_area_km2": 16,
+  "raster_extent_m": [
+    4040,
+    4040
+  ],
+  "output_sample_spacing_m": 40.0,
+  "source_grid_spacing_degrees": [
+    0.0002777777777777778,
+    0.0002777777777777778
+  ],
+  "source_url": "https://s3.amazonaws.com/elevation-tiles-prod/skadi/N26/N26E105.hgt.gz",
+  "source_sha256": "9a145a21ffc059416f88fd63fca051886b353a2c5b497f9e1f6a0cdc056e63a9",
+  "source_provider": "Mapzen Terrain Tiles; global source mixture includes USGS SRTM/GMTED",
+  "source_epoch_lineage_vertical_datum": "not verified per cell; no claim of 2024/2026 observations or bare earth",
+  "source_docs": [
+    "https://github.com/tilezen/joerd/blob/master/docs/formats.md",
+    "https://github.com/tilezen/joerd/blob/master/docs/data-sources.md"
+  ],
+  "resampling": "bilinear reprojection; output spacing is not measured accuracy",
+  "elevation_range_m": [
+    1135.5548095703125,
+    1590.080078125
+  ],
+  "vertical_origin_m": 1000.0,
+  "vertical_exaggeration": 1,
+  "obj_axes": "X east,Y north,Z up; Z = source height -1000m",
+  "glb_axes": "X east,Y up,Z south; Y = source height -1000m",
+  "mesh_vertices": 10201,
+  "mesh_triangles": 20000,
+  "visual_color": "elevation colour, not satellite/landcover/fire-risk imagery",
+  "validation": "finite raster, positive-up faces, GLB reload, vertex/face counts and dimensions checked",
+  "created_date": "2026-10-07",
+  "attribution": "Mapzen; SRTM and GMTED2010 terrain data courtesy of the U.S. Geological Survey (regional per-cell lineage pending)."
+}

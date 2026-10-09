@@ -1,0 +1,1849 @@
+{
+  "scene_id": "zhijin_pilot",
+  "asset_version": "v4",
+  "objects": [
+    {
+      "object_id": "B01",
+      "scene_id": "zhijin_pilot",
+      "glb_node_name": "B01",
+      "glb_node_index_in_v4": 36,
+      "glb_mesh_index_in_v4": 1,
+      "display_name": "B01 干煤棚候选",
+      "category": "arched_shed_candidate",
+      "bounds_local_xyz_m": [
+        [
+          328.2428283691406,
+          313.0,
+          299.0576477050781
+        ],
+        [
+          509.39495849609375,
+          343.0,
+          481.7194519042969
+        ]
+      ],
+      "focus_local_xyz_m": [
+        418.8188934326172,
+        328.0,
+        390.3885498046875
+      ],
+      "triangle_count": 556,
+      "identity_status": "inference_unverified",
+      "position_status": "source-reference coordinates; not independently registered to current imagery",
+      "fire_risk_level": null,
+      "platform_id": "P01",
+      "base_elevation_estimate_m": 1313.0,
+      "base_status": "estimated support-platform elevation, not measured",
+      "display_height_m": 30.0,
+      "source": {
+        "dataset": "GBA Part II",
+        "source": "ours2",
+        "id": "7MaZ9",
+        "region": "CHN"
+      },
+      "original_GBA_height_prediction_m": 7.3007893562316895,
+      "height_status": "30m apex display assumption; original7.30m prediction retained separately",
+      "footprint_status": "GBA candidate outline, not verified site boundary",
+      "identity_hypothesis": "干煤棚候选",
+      "shape_status": "parabolic proxy clipped to unverified irregular footprint; interior not modelled",
+      "horizontal_bbox_centre_lon_lat_reference": [
+        105.82168932611428,
+        26.83172920243972
+      ],
+      "horizontal_centre_status": "geometric bounding-box centre, not an official facility marker"
+    },
+    {
+      "object_id": "B02",
+      "scene_id": "zhijin_pilot",
+      "glb_node_name": "B02",
+      "glb_node_index_in_v4": 35,
+      "glb_mesh_index_in_v4": 2,
+      "display_name": "B02 主生产区设施候选",
+      "category": "unknown_facility_candidate",
+      "bounds_local_xyz_m": [
+        [
+          92.6272201538086,
+          313.0,
+          280.2630615234375
+        ],
+        [
+          245.06297302246094,
+          324.67279052734375,
+          410.3587646484375
+        ]
+      ],
+      "focus_local_xyz_m": [
+        168.84509658813477,
+        318.8363952636719,
+        345.3109130859375
+      ],
+      "triangle_count": 64,
+      "identity_status": "inference_unverified",
+      "position_status": "source-reference coordinates; not independently registered to current imagery",
+      "fire_risk_level": null,
+      "platform_id": "P01",
+      "base_elevation_estimate_m": 1313.0,
+      "base_status": "estimated support-platform elevation, not measured",
+      "display_height_m": 11.67279052734375,
+      "source": {
+        "dataset": "GBA Part II",
+        "source": "ours2",
+        "id": "7MaYT",
+        "region": "CHN"
+      },
+      "original_GBA_height_prediction_m": 11.672775268554688,
+      "height_status": "dataset prediction; not measured",
+      "footprint_status": "GBA candidate outline, not verified site boundary",
+      "identity_hypothesis": "主生产区设施候选",
+      "horizontal_bbox_centre_lon_lat_reference": [
+        105.81917673498472,
+        26.832150745055394
+      ],
+      "horizontal_centre_status": "geometric bounding-box centre, not an official facility marker"
+    },
+    {
+      "object_id": "B03",
+      "scene_id": "zhijin_pilot",
+      "glb_node_name": "B03",
+      "glb_node_index_in_v4": 34,
+      "glb_mesh_index_in_v4": 3,
+      "display_name": "B03 主生产区设施候选",
+      "category": "unknown_facility_candidate",
+      "bounds_local_xyz_m": [
+        [
+          166.082763671875,
+          313.0,
+          208.7806396484375
+        ],
+        [
+          294.4726257324219,
+          328.27459716796875,
+          329.93695068359375
+        ]
+      ],
+      "focus_local_xyz_m": [
+        230.27769470214844,
+        320.6372985839844,
+        269.3587951660156
+      ],
+      "triangle_count": 48,
+      "identity_status": "inference_unverified",
+      "position_status": "source-reference coordinates; not independently registered to current imagery",
+      "fire_risk_level": null,
+      "platform_id": "P01",
+      "base_elevation_estimate_m": 1313.0,
+      "base_status": "estimated support-platform elevation, not measured",
+      "display_height_m": 15.27459716796875,
+      "source": {
+        "dataset": "GBA Part II",
+        "source": "ours2",
+        "id": "7MaYI",
+        "region": "CHN"
+      },
+      "original_GBA_height_prediction_m": 15.274587631225586,
+      "height_status": "dataset prediction; not measured",
+      "footprint_status": "GBA candidate outline, not verified site boundary",
+      "identity_hypothesis": "主生产区设施候选",
+      "horizontal_bbox_centre_lon_lat_reference": [
+        105.81979987826686,
+        26.832832851030613
+      ],
+      "horizontal_centre_status": "geometric bounding-box centre, not an official facility marker"
+    },
+    {
+      "object_id": "B04",
+      "scene_id": "zhijin_pilot",
+      "glb_node_name": "B04",
+      "glb_node_index_in_v4": 33,
+      "glb_mesh_index_in_v4": 4,
+      "display_name": "B04 主生产区设施候选",
+      "category": "unknown_facility_candidate",
+      "bounds_local_xyz_m": [
+        [
+          53.0969352722168,
+          313.0,
+          167.51657104492188
+        ],
+        [
+          186.5170135498047,
+          331.3544921875,
+          313.2703552246094
+        ]
+      ],
+      "focus_local_xyz_m": [
+        119.80697441101074,
+        322.17724609375,
+        240.39346313476562
+      ],
+      "triangle_count": 32,
+      "identity_status": "inference_unverified",
+      "position_status": "source-reference coordinates; not independently registered to current imagery",
+      "fire_risk_level": null,
+      "platform_id": "P01",
+      "base_elevation_estimate_m": 1313.0,
+      "base_status": "estimated support-platform elevation, not measured",
+      "display_height_m": 18.3544921875,
+      "source": {
+        "dataset": "GBA Part II",
+        "source": "ours2",
+        "id": "7MaYC",
+        "region": "CHN"
+      },
+      "original_GBA_height_prediction_m": 18.354494094848633,
+      "height_status": "dataset prediction; not measured",
+      "footprint_status": "GBA candidate outline, not verified site boundary",
+      "identity_hypothesis": "主生产区设施候选",
+      "horizontal_bbox_centre_lon_lat_reference": [
+        105.81869006616787,
+        26.833100783987426
+      ],
+      "horizontal_centre_status": "geometric bounding-box centre, not an official facility marker"
+    },
+    {
+      "object_id": "B05",
+      "scene_id": "zhijin_pilot",
+      "glb_node_name": "B05",
+      "glb_node_index_in_v4": 32,
+      "glb_mesh_index_in_v4": 5,
+      "display_name": "B05 烟囱附近设施，功能未定",
+      "category": "unknown_facility_candidate",
+      "bounds_local_xyz_m": [
+        [
+          295.0282897949219,
+          313.0,
+          317.43658447265625
+        ],
+        [
+          368.8173828125,
+          323.6310119628906,
+          394.67327880859375
+        ]
+      ],
+      "focus_local_xyz_m": [
+        331.92283630371094,
+        318.3155059814453,
+        356.054931640625
+      ],
+      "triangle_count": 24,
+      "identity_status": "inference_unverified",
+      "position_status": "source-reference coordinates; not independently registered to current imagery",
+      "fire_risk_level": null,
+      "platform_id": "P01",
+      "base_elevation_estimate_m": 1313.0,
+      "base_status": "estimated support-platform elevation, not measured",
+      "display_height_m": 10.631011962890625,
+      "source": {
+        "dataset": "GBA Part II",
+        "source": "ours2",
+        "id": "7MaYR",
+        "region": "CHN"
+      },
+      "original_GBA_height_prediction_m": 10.631004333496094,
+      "height_status": "dataset prediction; not measured",
+      "footprint_status": "GBA candidate outline, not verified site boundary",
+      "identity_hypothesis": "烟囱附近设施，功能未定",
+      "horizontal_bbox_centre_lon_lat_reference": [
+        105.8208171143378,
+        26.832044238023215
+      ],
+      "horizontal_centre_status": "geometric bounding-box centre, not an official facility marker"
+    },
+    {
+      "object_id": "B06",
+      "scene_id": "zhijin_pilot",
+      "glb_node_name": "B06",
+      "glb_node_index_in_v4": 31,
+      "glb_mesh_index_in_v4": 6,
+      "display_name": "B06",
+      "category": "unknown_facility_candidate",
+      "bounds_local_xyz_m": [
+        [
+          -107.69942474365234,
+          304.0,
+          231.06752014160156
+        ],
+        [
+          -33.63931655883789,
+          309.5501708984375,
+          317.3078308105469
+        ]
+      ],
+      "focus_local_xyz_m": [
+        -70.66937065124512,
+        306.77508544921875,
+        274.1876754760742
+      ],
+      "triangle_count": 24,
+      "identity_status": "unassigned",
+      "position_status": "source-reference coordinates; not independently registered to current imagery",
+      "fire_risk_level": null,
+      "platform_id": "P04",
+      "base_elevation_estimate_m": 1304.0,
+      "base_status": "estimated support-platform elevation, not measured",
+      "display_height_m": 5.5501708984375,
+      "source": {
+        "dataset": "GBA Part II",
+        "source": "ours2",
+        "id": "7MaYF",
+        "region": "CHN"
+      },
+      "original_GBA_height_prediction_m": 5.55018949508667,
+      "height_status": "dataset prediction; not measured",
+      "footprint_status": "GBA candidate outline, not verified site boundary",
+      "identity_hypothesis": "未分配",
+      "horizontal_bbox_centre_lon_lat_reference": [
+        105.81677106515463,
+        26.832806772618788
+      ],
+      "horizontal_centre_status": "geometric bounding-box centre, not an official facility marker"
+    },
+    {
+      "object_id": "B07",
+      "scene_id": "zhijin_pilot",
+      "glb_node_name": "B07",
+      "glb_node_index_in_v4": 30,
+      "glb_mesh_index_in_v4": 7,
+      "display_name": "B07",
+      "category": "unknown_facility_candidate",
+      "bounds_local_xyz_m": [
+        [
+          453.6529235839844,
+          313.0,
+          426.0869140625
+        ],
+        [
+          512.8912353515625,
+          317.59063720703125,
+          497.5140075683594
+        ]
+      ],
+      "focus_local_xyz_m": [
+        483.27207946777344,
+        315.2953186035156,
+        461.8004608154297
+      ],
+      "triangle_count": 28,
+      "identity_status": "unassigned",
+      "position_status": "source-reference coordinates; not independently registered to current imagery",
+      "fire_risk_level": null,
+      "platform_id": "P01",
+      "base_elevation_estimate_m": 1313.0,
+      "base_status": "estimated support-platform elevation, not measured",
+      "display_height_m": 4.59063720703125,
+      "source": {
+        "dataset": "GBA Part II",
+        "source": "ours2",
+        "id": "7MaZd",
+        "region": "CHN"
+      },
+      "original_GBA_height_prediction_m": 4.590651988983154,
+      "height_status": "dataset prediction; not measured",
+      "footprint_status": "GBA candidate outline, not verified site boundary",
+      "identity_hypothesis": "未分配",
+      "horizontal_bbox_centre_lon_lat_reference": [
+        105.82233327084472,
+        26.831080736126715
+      ],
+      "horizontal_centre_status": "geometric bounding-box centre, not an official facility marker"
+    },
+    {
+      "object_id": "B08",
+      "scene_id": "zhijin_pilot",
+      "glb_node_name": "B08",
+      "glb_node_index_in_v4": 29,
+      "glb_mesh_index_in_v4": 8,
+      "display_name": "B08",
+      "category": "unknown_facility_candidate",
+      "bounds_local_xyz_m": [
+        [
+          -14.689335823059082,
+          322.0,
+          -74.46434020996094
+        ],
+        [
+          24.02518081665039,
+          326.7835388183594,
+          -30.058937072753906
+        ]
+      ],
+      "focus_local_xyz_m": [
+        4.667922496795654,
+        324.3917694091797,
+        -52.26163864135742
+      ],
+      "triangle_count": 20,
+      "identity_status": "unassigned",
+      "position_status": "source-reference coordinates; not independently registered to current imagery",
+      "fire_risk_level": null,
+      "platform_id": "P06",
+      "base_elevation_estimate_m": 1322.0,
+      "base_status": "estimated support-platform elevation, not measured",
+      "display_height_m": 4.783538818359375,
+      "source": {
+        "dataset": "GBA Part II",
+        "source": "ours2",
+        "id": "7MaXM",
+        "region": "CHN"
+      },
+      "original_GBA_height_prediction_m": 4.783559322357178,
+      "height_status": "dataset prediction; not measured",
+      "footprint_status": "GBA candidate outline, not verified site boundary",
+      "identity_hypothesis": "未分配",
+      "horizontal_bbox_centre_lon_lat_reference": [
+        105.81755036340006,
+        26.83574954049056
+      ],
+      "horizontal_centre_status": "geometric bounding-box centre, not an official facility marker"
+    },
+    {
+      "object_id": "B09",
+      "scene_id": "zhijin_pilot",
+      "glb_node_name": "B09",
+      "glb_node_index_in_v4": 28,
+      "glb_mesh_index_in_v4": 9,
+      "display_name": "B09",
+      "category": "unknown_facility_candidate",
+      "bounds_local_xyz_m": [
+        [
+          322.81927490234375,
+          313.0,
+          504.1637268066406
+        ],
+        [
+          364.43426513671875,
+          317.342529296875,
+          549.916259765625
+        ]
+      ],
+      "focus_local_xyz_m": [
+        343.62677001953125,
+        315.1712646484375,
+        527.0399932861328
+      ],
+      "triangle_count": 24,
+      "identity_status": "unassigned",
+      "position_status": "source-reference coordinates; not independently registered to current imagery",
+      "fire_risk_level": null,
+      "platform_id": "P01",
+      "base_elevation_estimate_m": 1313.0,
+      "base_status": "estimated support-platform elevation, not measured",
+      "display_height_m": 4.342529296875,
+      "source": {
+        "dataset": "GBA Part II",
+        "source": "ours2",
+        "id": "7MaZo",
+        "region": "CHN"
+      },
+      "original_GBA_height_prediction_m": 4.342520236968994,
+      "height_status": "dataset prediction; not measured",
+      "footprint_status": "GBA candidate outline, not verified site boundary",
+      "identity_hypothesis": "未分配",
+      "horizontal_bbox_centre_lon_lat_reference": [
+        105.82092376451168,
+        26.830499921956843
+      ],
+      "horizontal_centre_status": "geometric bounding-box centre, not an official facility marker"
+    },
+    {
+      "object_id": "B10",
+      "scene_id": "zhijin_pilot",
+      "glb_node_name": "B10",
+      "glb_node_index_in_v4": 27,
+      "glb_mesh_index_in_v4": 10,
+      "display_name": "B10",
+      "category": "unknown_facility_candidate",
+      "bounds_local_xyz_m": [
+        [
+          -214.1864776611328,
+          278.0,
+          412.8608093261719
+        ],
+        [
+          -172.3726348876953,
+          283.7257995605469,
+          451.3231201171875
+        ]
+      ],
+      "focus_local_xyz_m": [
+        -193.27955627441406,
+        280.86289978027344,
+        432.0919647216797
+      ],
+      "triangle_count": 24,
+      "identity_status": "unassigned",
+      "position_status": "source-reference coordinates; not independently registered to current imagery",
+      "fire_risk_level": null,
+      "platform_id": "P07",
+      "base_elevation_estimate_m": 1278.0,
+      "base_status": "estimated support-platform elevation, not measured",
+      "display_height_m": 5.725799560546875,
+      "source": {
+        "dataset": "GBA Part II",
+        "source": "ours2",
+        "id": "7MaZ5",
+        "region": "CHN"
+      },
+      "original_GBA_height_prediction_m": 5.725789546966553,
+      "height_status": "dataset prediction; not measured",
+      "footprint_status": "GBA candidate outline, not verified site boundary",
+      "identity_hypothesis": "未分配",
+      "horizontal_bbox_centre_lon_lat_reference": [
+        105.81552700019004,
+        26.831388347541616
+      ],
+      "horizontal_centre_status": "geometric bounding-box centre, not an official facility marker"
+    },
+    {
+      "object_id": "B11",
+      "scene_id": "zhijin_pilot",
+      "glb_node_name": "B11",
+      "glb_node_index_in_v4": 26,
+      "glb_mesh_index_in_v4": 11,
+      "display_name": "B11",
+      "category": "unknown_facility_candidate",
+      "bounds_local_xyz_m": [
+        [
+          29.637887954711914,
+          318.0,
+          -128.03717041015625
+        ],
+        [
+          71.48920440673828,
+          326.0259094238281,
+          -89.69408416748047
+        ]
+      ],
+      "focus_local_xyz_m": [
+        50.5635461807251,
+        322.01295471191406,
+        -108.86562728881836
+      ],
+      "triangle_count": 16,
+      "identity_status": "unassigned",
+      "position_status": "source-reference coordinates; not independently registered to current imagery",
+      "fire_risk_level": null,
+      "platform_id": "P08",
+      "base_elevation_estimate_m": 1318.0,
+      "base_status": "estimated support-platform elevation, not measured",
+      "display_height_m": 8.025909423828125,
+      "source": {
+        "dataset": "GBA Part II",
+        "source": "ours2",
+        "id": "7MaXv",
+        "region": "CHN"
+      },
+      "original_GBA_height_prediction_m": 8.025906562805176,
+      "height_status": "dataset prediction; not measured",
+      "footprint_status": "GBA candidate outline, not verified site boundary",
+      "identity_hypothesis": "未分配",
+      "horizontal_bbox_centre_lon_lat_reference": [
+        105.81801590526264,
+        26.836257884665315
+      ],
+      "horizontal_centre_status": "geometric bounding-box centre, not an official facility marker"
+    },
+    {
+      "object_id": "B12",
+      "scene_id": "zhijin_pilot",
+      "glb_node_name": "B12",
+      "glb_node_index_in_v4": 25,
+      "glb_mesh_index_in_v4": 12,
+      "display_name": "B12",
+      "category": "unknown_facility_candidate",
+      "bounds_local_xyz_m": [
+        [
+          371.97625732421875,
+          313.0,
+          275.6961669921875
+        ],
+        [
+          404.7109680175781,
+          324.5464782714844,
+          311.288330078125
+        ]
+      ],
+      "focus_local_xyz_m": [
+        388.34361267089844,
+        318.7732391357422,
+        293.49224853515625
+      ],
+      "triangle_count": 16,
+      "identity_status": "unassigned",
+      "position_status": "source-reference coordinates; not independently registered to current imagery",
+      "fire_risk_level": null,
+      "platform_id": "P01",
+      "base_elevation_estimate_m": 1313.0,
+      "base_status": "estimated support-platform elevation, not measured",
+      "display_height_m": 11.546478271484375,
+      "source": {
+        "dataset": "GBA Part II",
+        "source": "ours2",
+        "id": "7MaYD",
+        "region": "CHN"
+      },
+      "original_GBA_height_prediction_m": 11.546500205993652,
+      "height_status": "dataset prediction; not measured",
+      "footprint_status": "GBA candidate outline, not verified site boundary",
+      "identity_hypothesis": "未分配",
+      "horizontal_bbox_centre_lon_lat_reference": [
+        105.82138895962856,
+        26.83260575121153
+      ],
+      "horizontal_centre_status": "geometric bounding-box centre, not an official facility marker"
+    },
+    {
+      "object_id": "B13",
+      "scene_id": "zhijin_pilot",
+      "glb_node_name": "B13",
+      "glb_node_index_in_v4": 24,
+      "glb_mesh_index_in_v4": 13,
+      "display_name": "B13",
+      "category": "unknown_facility_candidate",
+      "bounds_local_xyz_m": [
+        [
+          241.4356689453125,
+          313.0,
+          353.7574462890625
+        ],
+        [
+          265.1340637207031,
+          319.8243103027344,
+          386.28472900390625
+        ]
+      ],
+      "focus_local_xyz_m": [
+        253.2848663330078,
+        316.4121551513672,
+        370.0210876464844
+      ],
+      "triangle_count": 20,
+      "identity_status": "unassigned",
+      "position_status": "source-reference coordinates; not independently registered to current imagery",
+      "fire_risk_level": null,
+      "platform_id": "P01",
+      "base_elevation_estimate_m": 1313.0,
+      "base_status": "estimated support-platform elevation, not measured",
+      "display_height_m": 6.824310302734375,
+      "source": {
+        "dataset": "GBA Part II",
+        "source": "ours2",
+        "id": "7MaYP",
+        "region": "CHN"
+      },
+      "original_GBA_height_prediction_m": 6.824323654174805,
+      "height_status": "dataset prediction; not measured",
+      "footprint_status": "GBA candidate outline, not verified site boundary",
+      "identity_hypothesis": "未分配",
+      "horizontal_bbox_centre_lon_lat_reference": [
+        105.82002486008618,
+        26.831922742045688
+      ],
+      "horizontal_centre_status": "geometric bounding-box centre, not an official facility marker"
+    },
+    {
+      "object_id": "B14",
+      "scene_id": "zhijin_pilot",
+      "glb_node_name": "B14",
+      "glb_node_index_in_v4": 23,
+      "glb_mesh_index_in_v4": 14,
+      "display_name": "B14",
+      "category": "unknown_facility_candidate",
+      "bounds_local_xyz_m": [
+        [
+          -141.93460083007812,
+          281.0,
+          462.8404846191406
+        ],
+        [
+          -121.49261474609375,
+          283.0452575683594,
+          483.5
+        ]
+      ],
+      "focus_local_xyz_m": [
+        -131.71360778808594,
+        282.0226287841797,
+        473.1702423095703
+      ],
+      "triangle_count": 12,
+      "identity_status": "unassigned",
+      "position_status": "source-reference coordinates; not independently registered to current imagery",
+      "fire_risk_level": null,
+      "platform_id": "P11",
+      "base_elevation_estimate_m": 1281.0,
+      "base_status": "estimated support-platform elevation, not measured",
+      "display_height_m": 2.045257568359375,
+      "source": {
+        "dataset": "GBA Part II",
+        "source": "ours2",
+        "id": "7MaZ7",
+        "region": "CHN"
+      },
+      "original_GBA_height_prediction_m": 2.045280694961548,
+      "height_status": "dataset prediction; not measured",
+      "footprint_status": "GBA candidate outline, not verified site boundary",
+      "identity_hypothesis": "未分配",
+      "horizontal_bbox_centre_lon_lat_reference": [
+        105.8161438871926,
+        26.831013924855466
+      ],
+      "horizontal_centre_status": "geometric bounding-box centre, not an official facility marker"
+    },
+    {
+      "object_id": "B15",
+      "scene_id": "zhijin_pilot",
+      "glb_node_name": "B15",
+      "glb_node_index_in_v4": 22,
+      "glb_mesh_index_in_v4": 15,
+      "display_name": "B15",
+      "category": "unknown_facility_candidate",
+      "bounds_local_xyz_m": [
+        [
+          515.7605590820312,
+          313.0,
+          402.28167724609375
+        ],
+        [
+          530.5782470703125,
+          315.8876037597656,
+          417.090576171875
+        ]
+      ],
+      "focus_local_xyz_m": [
+        523.1694030761719,
+        314.4438018798828,
+        409.6861267089844
+      ],
+      "triangle_count": 12,
+      "identity_status": "unassigned",
+      "position_status": "source-reference coordinates; not independently registered to current imagery",
+      "fire_risk_level": null,
+      "platform_id": "P01",
+      "base_elevation_estimate_m": 1313.0,
+      "base_status": "estimated support-platform elevation, not measured",
+      "display_height_m": 2.887603759765625,
+      "source": {
+        "dataset": "GBA Part II",
+        "source": "ours2",
+        "id": "7MaZ0",
+        "region": "CHN"
+      },
+      "original_GBA_height_prediction_m": 2.8875977993011475,
+      "height_status": "dataset prediction; not measured",
+      "footprint_status": "GBA candidate outline, not verified site boundary",
+      "identity_hypothesis": "未分配",
+      "horizontal_bbox_centre_lon_lat_reference": [
+        105.82273815952695,
+        26.831548883816513
+      ],
+      "horizontal_centre_status": "geometric bounding-box centre, not an official facility marker"
+    },
+    {
+      "object_id": "B16",
+      "scene_id": "zhijin_pilot",
+      "glb_node_name": "B16",
+      "glb_node_index_in_v4": 21,
+      "glb_mesh_index_in_v4": 16,
+      "display_name": "B16",
+      "category": "unknown_facility_candidate",
+      "bounds_local_xyz_m": [
+        [
+          498.9166259765625,
+          277.0,
+          571.3028564453125
+        ],
+        [
+          513.838134765625,
+          280.10833740234375,
+          583.1915283203125
+        ]
+      ],
+      "focus_local_xyz_m": [
+        506.37738037109375,
+        278.5541687011719,
+        577.2471923828125
+      ],
+      "triangle_count": 16,
+      "identity_status": "unassigned",
+      "position_status": "source-reference coordinates; not independently registered to current imagery",
+      "fire_risk_level": null,
+      "platform_id": "P12",
+      "base_elevation_estimate_m": 1277.0,
+      "base_status": "estimated support-platform elevation, not measured",
+      "display_height_m": 3.10833740234375,
+      "source": {
+        "dataset": "GBA Part II",
+        "source": "ours2",
+        "id": "7MaZC",
+        "region": "CHN"
+      },
+      "original_GBA_height_prediction_m": 3.108323097229004,
+      "height_status": "dataset prediction; not measured",
+      "footprint_status": "GBA candidate outline, not verified site boundary",
+      "identity_hypothesis": "未分配",
+      "horizontal_bbox_centre_lon_lat_reference": [
+        105.82255825262193,
+        26.830037145571946
+      ],
+      "horizontal_centre_status": "geometric bounding-box centre, not an official facility marker"
+    },
+    {
+      "object_id": "B17",
+      "scene_id": "zhijin_pilot",
+      "glb_node_name": "B17",
+      "glb_node_index_in_v4": 20,
+      "glb_mesh_index_in_v4": 17,
+      "display_name": "B17",
+      "category": "unknown_facility_candidate",
+      "bounds_local_xyz_m": [
+        [
+          252.72894287109375,
+          297.0,
+          181.72897338867188
+        ],
+        [
+          266.9861145019531,
+          303.5788879394531,
+          196.4991455078125
+        ]
+      ],
+      "focus_local_xyz_m": [
+        259.85752868652344,
+        300.28944396972656,
+        189.1140594482422
+      ],
+      "triangle_count": 12,
+      "identity_status": "unassigned",
+      "position_status": "source-reference coordinates; not independently registered to current imagery",
+      "fire_risk_level": null,
+      "platform_id": "P05",
+      "base_elevation_estimate_m": 1297.0,
+      "base_status": "estimated support-platform elevation, not measured",
+      "display_height_m": 6.578887939453125,
+      "source": {
+        "dataset": "GBA Part II",
+        "source": "ours2",
+        "id": "7MaYq",
+        "region": "CHN"
+      },
+      "original_GBA_height_prediction_m": 6.578913688659668,
+      "height_status": "dataset prediction; not measured",
+      "footprint_status": "GBA candidate outline, not verified site boundary",
+      "identity_hypothesis": "未分配",
+      "horizontal_bbox_centre_lon_lat_reference": [
+        105.82010276465653,
+        26.833555565727625
+      ],
+      "horizontal_centre_status": "geometric bounding-box centre, not an official facility marker"
+    },
+    {
+      "object_id": "B18",
+      "scene_id": "zhijin_pilot",
+      "glb_node_name": "B18",
+      "glb_node_index_in_v4": 19,
+      "glb_mesh_index_in_v4": 18,
+      "display_name": "B18",
+      "category": "unknown_facility_candidate",
+      "bounds_local_xyz_m": [
+        [
+          260.7730407714844,
+          297.0,
+          146.10775756835938
+        ],
+        [
+          278.7147216796875,
+          301.2381286621094,
+          163.82376098632812
+        ]
+      ],
+      "focus_local_xyz_m": [
+        269.74388122558594,
+        299.1190643310547,
+        154.96575927734375
+      ],
+      "triangle_count": 12,
+      "identity_status": "unassigned",
+      "position_status": "source-reference coordinates; not independently registered to current imagery",
+      "fire_risk_level": null,
+      "platform_id": "P05",
+      "base_elevation_estimate_m": 1297.0,
+      "base_status": "estimated support-platform elevation, not measured",
+      "display_height_m": 4.238128662109375,
+      "source": {
+        "dataset": "GBA Part II",
+        "source": "ours2",
+        "id": "7MaYk",
+        "region": "CHN"
+      },
+      "original_GBA_height_prediction_m": 4.238138198852539,
+      "height_status": "dataset prediction; not measured",
+      "footprint_status": "GBA candidate outline, not verified site boundary",
+      "identity_hypothesis": "未分配",
+      "horizontal_bbox_centre_lon_lat_reference": [
+        105.82020447466705,
+        26.8338632757064
+      ],
+      "horizontal_centre_status": "geometric bounding-box centre, not an official facility marker"
+    },
+    {
+      "object_id": "B19",
+      "scene_id": "zhijin_pilot",
+      "glb_node_name": "B19",
+      "glb_node_index_in_v4": 18,
+      "glb_mesh_index_in_v4": 19,
+      "display_name": "B19",
+      "category": "unknown_facility_candidate",
+      "bounds_local_xyz_m": [
+        [
+          504.6560974121094,
+          313.0,
+          476.41461181640625
+        ],
+        [
+          516.1898803710938,
+          315.9883728027344,
+          485.3479919433594
+        ]
+      ],
+      "focus_local_xyz_m": [
+        510.42298889160156,
+        314.4941864013672,
+        480.8813018798828
+      ],
+      "triangle_count": 12,
+      "identity_status": "unassigned",
+      "position_status": "source-reference coordinates; not independently registered to current imagery",
+      "fire_risk_level": null,
+      "platform_id": "P01",
+      "base_elevation_estimate_m": 1313.0,
+      "base_status": "estimated support-platform elevation, not measured",
+      "display_height_m": 2.988372802734375,
+      "source": {
+        "dataset": "GBA Part II",
+        "source": "ours2",
+        "id": "7MaZa",
+        "region": "CHN"
+      },
+      "original_GBA_height_prediction_m": 2.9883816242218018,
+      "height_status": "dataset prediction; not measured",
+      "footprint_status": "GBA candidate outline, not verified site boundary",
+      "identity_hypothesis": "未分配",
+      "horizontal_bbox_centre_lon_lat_reference": [
+        105.82260524788323,
+        26.830906888375424
+      ],
+      "horizontal_centre_status": "geometric bounding-box centre, not an official facility marker"
+    },
+    {
+      "object_id": "B20",
+      "scene_id": "zhijin_pilot",
+      "glb_node_name": "B20",
+      "glb_node_index_in_v4": 17,
+      "glb_mesh_index_in_v4": 20,
+      "display_name": "B20",
+      "category": "unknown_facility_candidate",
+      "bounds_local_xyz_m": [
+        [
+          552.1235961914062,
+          313.0,
+          508.7402648925781
+        ],
+        [
+          558.12109375,
+          315.79608154296875,
+          516.6818237304688
+        ]
+      ],
+      "focus_local_xyz_m": [
+        555.1223449707031,
+        314.3980407714844,
+        512.7110443115234
+      ],
+      "triangle_count": 12,
+      "identity_status": "unassigned",
+      "position_status": "source-reference coordinates; not independently registered to current imagery",
+      "fire_risk_level": null,
+      "platform_id": "P01",
+      "base_elevation_estimate_m": 1313.0,
+      "base_status": "estimated support-platform elevation, not measured",
+      "display_height_m": 2.79608154296875,
+      "source": {
+        "dataset": "GBA Part II",
+        "source": "ours2",
+        "id": "7MaZh",
+        "region": "CHN"
+      },
+      "original_GBA_height_prediction_m": 2.796083450317383,
+      "height_status": "dataset prediction; not measured",
+      "footprint_status": "GBA candidate outline, not verified site boundary",
+      "identity_hypothesis": "未分配",
+      "horizontal_bbox_centre_lon_lat_reference": [
+        105.82305298284065,
+        26.83061691746065
+      ],
+      "horizontal_centre_status": "geometric bounding-box centre, not an official facility marker"
+    },
+    {
+      "object_id": "B21",
+      "scene_id": "zhijin_pilot",
+      "glb_node_name": "B21",
+      "glb_node_index_in_v4": 16,
+      "glb_mesh_index_in_v4": 21,
+      "display_name": "B21",
+      "category": "unknown_facility_candidate",
+      "bounds_local_xyz_m": [
+        [
+          138.1748809814453,
+          324.0,
+          81.68025207519531
+        ],
+        [
+          144.1719970703125,
+          325.0088195800781,
+          89.621337890625
+        ]
+      ],
+      "focus_local_xyz_m": [
+        141.1734390258789,
+        324.50440979003906,
+        85.65079498291016
+      ],
+      "triangle_count": 12,
+      "identity_status": "unassigned",
+      "position_status": "source-reference coordinates; not independently registered to current imagery",
+      "fire_risk_level": null,
+      "platform_id": "P02",
+      "base_elevation_estimate_m": 1324.0,
+      "base_status": "estimated support-platform elevation, not measured",
+      "display_height_m": 1.008819580078125,
+      "source": {
+        "dataset": "GBA Part II",
+        "source": "ours2",
+        "id": "7MaYe",
+        "region": "CHN"
+      },
+      "original_GBA_height_prediction_m": 1.0088145732879639,
+      "height_status": "dataset prediction; not measured",
+      "footprint_status": "GBA candidate outline, not verified site boundary",
+      "identity_hypothesis": "未分配",
+      "horizontal_bbox_centre_lon_lat_reference": [
+        105.81891512988652,
+        26.834496538133365
+      ],
+      "horizontal_centre_status": "geometric bounding-box centre, not an official facility marker"
+    },
+    {
+      "object_id": "B22",
+      "scene_id": "zhijin_pilot",
+      "glb_node_name": "B22",
+      "glb_node_index_in_v4": 15,
+      "glb_mesh_index_in_v4": 22,
+      "display_name": "B22",
+      "category": "unknown_facility_candidate",
+      "bounds_local_xyz_m": [
+        [
+          388.6094970703125,
+          313.0,
+          560.1669921875
+        ],
+        [
+          397.116455078125,
+          316.0365905761719,
+          572.0473022460938
+        ]
+      ],
+      "focus_local_xyz_m": [
+        392.86297607421875,
+        314.51829528808594,
+        566.1071472167969
+      ],
+      "triangle_count": 8,
+      "identity_status": "unassigned",
+      "position_status": "source-reference coordinates; not independently registered to current imagery",
+      "fire_risk_level": null,
+      "platform_id": "P01",
+      "base_elevation_estimate_m": 1313.0,
+      "base_status": "estimated support-platform elevation, not measured",
+      "display_height_m": 3.036590576171875,
+      "source": {
+        "dataset": "GBA Part II",
+        "source": "ours2",
+        "id": "7MaZw",
+        "region": "CHN"
+      },
+      "original_GBA_height_prediction_m": 3.0365912914276123,
+      "height_status": "dataset prediction; not measured",
+      "footprint_status": "GBA candidate outline, not verified site boundary",
+      "identity_hypothesis": "未分配",
+      "horizontal_bbox_centre_lon_lat_reference": [
+        105.82141668532361,
+        26.830144352757234
+      ],
+      "horizontal_centre_status": "geometric bounding-box centre, not an official facility marker"
+    },
+    {
+      "object_id": "B23",
+      "scene_id": "zhijin_pilot",
+      "glb_node_name": "B23",
+      "glb_node_index_in_v4": 14,
+      "glb_mesh_index_in_v4": 23,
+      "display_name": "B23",
+      "category": "unknown_facility_candidate",
+      "bounds_local_xyz_m": [
+        [
+          -95.07283782958984,
+          297.0,
+          403.24444580078125
+        ],
+        [
+          -86.15082550048828,
+          302.045166015625,
+          413.9696044921875
+        ]
+      ],
+      "focus_local_xyz_m": [
+        -90.61183166503906,
+        299.5225830078125,
+        408.6070251464844
+      ],
+      "triangle_count": 8,
+      "identity_status": "unassigned",
+      "position_status": "source-reference coordinates; not independently registered to current imagery",
+      "fire_risk_level": null,
+      "platform_id": "P10",
+      "base_elevation_estimate_m": 1297.0,
+      "base_status": "estimated support-platform elevation, not measured",
+      "display_height_m": 5.045166015625,
+      "source": {
+        "dataset": "GBA Part II",
+        "source": "ours2",
+        "id": "7MaYY",
+        "region": "CHN"
+      },
+      "original_GBA_height_prediction_m": 5.0451741218566895,
+      "height_status": "dataset prediction; not measured",
+      "footprint_status": "GBA candidate outline, not verified site boundary",
+      "identity_hypothesis": "未分配",
+      "horizontal_bbox_centre_lon_lat_reference": [
+        105.816561677146,
+        26.831594408044054
+      ],
+      "horizontal_centre_status": "geometric bounding-box centre, not an official facility marker"
+    },
+    {
+      "object_id": "B24",
+      "scene_id": "zhijin_pilot",
+      "glb_node_name": "B24",
+      "glb_node_index_in_v4": 13,
+      "glb_mesh_index_in_v4": 24,
+      "display_name": "B24",
+      "category": "unknown_facility_candidate",
+      "bounds_local_xyz_m": [
+        [
+          -163.89878845214844,
+          293.0,
+          368.1781005859375
+        ],
+        [
+          -154.9412384033203,
+          296.27001953125,
+          377.04974365234375
+        ]
+      ],
+      "focus_local_xyz_m": [
+        -159.42001342773438,
+        294.635009765625,
+        372.6139221191406
+      ],
+      "triangle_count": 8,
+      "identity_status": "unassigned",
+      "position_status": "source-reference coordinates; not independently registered to current imagery",
+      "fire_risk_level": null,
+      "platform_id": "P09",
+      "base_elevation_estimate_m": 1293.0,
+      "base_status": "estimated support-platform elevation, not measured",
+      "display_height_m": 3.27001953125,
+      "source": {
+        "dataset": "GBA Part II",
+        "source": "ours2",
+        "id": "7MaYM",
+        "region": "CHN"
+      },
+      "original_GBA_height_prediction_m": 3.2700250148773193,
+      "height_status": "dataset prediction; not measured",
+      "footprint_status": "GBA candidate outline, not verified site boundary",
+      "identity_hypothesis": "未分配",
+      "horizontal_bbox_centre_lon_lat_reference": [
+        105.8158715797799,
+        26.8319233444456
+      ],
+      "horizontal_centre_status": "geometric bounding-box centre, not an official facility marker"
+    },
+    {
+      "object_id": "B25",
+      "scene_id": "zhijin_pilot",
+      "glb_node_name": "B25",
+      "glb_node_index_in_v4": 12,
+      "glb_mesh_index_in_v4": 25,
+      "display_name": "B25",
+      "category": "unknown_facility_candidate",
+      "bounds_local_xyz_m": [
+        [
+          586.6861572265625,
+          284.0,
+          324.802978515625
+        ],
+        [
+          595.6438598632812,
+          286.4072570800781,
+          333.6744384765625
+        ]
+      ],
+      "focus_local_xyz_m": [
+        591.1650085449219,
+        285.20362854003906,
+        329.23870849609375
+      ],
+      "triangle_count": 8,
+      "identity_status": "unassigned",
+      "position_status": "source-reference coordinates; not independently registered to current imagery",
+      "fire_risk_level": null,
+      "platform_id": "P13",
+      "base_elevation_estimate_m": 1284.0,
+      "base_status": "estimated support-platform elevation, not measured",
+      "display_height_m": 2.407257080078125,
+      "source": {
+        "dataset": "GBA Part II",
+        "source": "ours2",
+        "id": "7MaYK",
+        "region": "CHN"
+      },
+      "original_GBA_height_prediction_m": 2.407256603240967,
+      "height_status": "dataset prediction; not measured",
+      "footprint_status": "GBA candidate outline, not verified site boundary",
+      "identity_hypothesis": "未分配",
+      "horizontal_bbox_centre_lon_lat_reference": [
+        105.82342765841,
+        26.8322711723864
+      ],
+      "horizontal_centre_status": "geometric bounding-box centre, not an official facility marker"
+    },
+    {
+      "object_id": "B26",
+      "scene_id": "zhijin_pilot",
+      "glb_node_name": "B26",
+      "glb_node_index_in_v4": 11,
+      "glb_mesh_index_in_v4": 26,
+      "display_name": "B26",
+      "category": "unknown_facility_candidate",
+      "bounds_local_xyz_m": [
+        [
+          -80.3201904296875,
+          297.0,
+          391.35040283203125
+        ],
+        [
+          -74.35863494873047,
+          302.2385559082031,
+          397.2750549316406
+        ]
+      ],
+      "focus_local_xyz_m": [
+        -77.33941268920898,
+        299.61927795410156,
+        394.31272888183594
+      ],
+      "triangle_count": 12,
+      "identity_status": "unassigned",
+      "position_status": "source-reference coordinates; not independently registered to current imagery",
+      "fire_risk_level": null,
+      "platform_id": "P10",
+      "base_elevation_estimate_m": 1297.0,
+      "base_status": "estimated support-platform elevation, not measured",
+      "display_height_m": 5.238555908203125,
+      "source": {
+        "dataset": "GBA Part II",
+        "source": "ours2",
+        "id": "7MaYS",
+        "region": "CHN"
+      },
+      "original_GBA_height_prediction_m": 5.238552570343018,
+      "height_status": "dataset prediction; not measured",
+      "footprint_status": "GBA candidate outline, not verified site boundary",
+      "identity_hypothesis": "未分配",
+      "horizontal_bbox_centre_lon_lat_reference": [
+        105.81669616472429,
+        26.831722684469497
+      ],
+      "horizontal_centre_status": "geometric bounding-box centre, not an official facility marker"
+    },
+    {
+      "object_id": "B27",
+      "scene_id": "zhijin_pilot",
+      "glb_node_name": "B27",
+      "glb_node_index_in_v4": 10,
+      "glb_mesh_index_in_v4": 27,
+      "display_name": "B27",
+      "category": "unknown_facility_candidate",
+      "bounds_local_xyz_m": [
+        [
+          377.1434631347656,
+          295.0,
+          175.01199340820312
+        ],
+        [
+          383.10491943359375,
+          304.10955810546875,
+          180.93653869628906
+        ]
+      ],
+      "focus_local_xyz_m": [
+        380.1241912841797,
+        299.5547790527344,
+        177.9742660522461
+      ],
+      "triangle_count": 12,
+      "identity_status": "unassigned",
+      "position_status": "source-reference coordinates; not independently registered to current imagery",
+      "fire_risk_level": null,
+      "platform_id": "P14",
+      "base_elevation_estimate_m": 1295.0,
+      "base_status": "estimated support-platform elevation, not measured",
+      "display_height_m": 9.10955810546875,
+      "source": {
+        "dataset": "GBA Part II",
+        "source": "ours2",
+        "id": "7MaYp",
+        "region": "CHN"
+      },
+      "original_GBA_height_prediction_m": 9.109569549560547,
+      "height_status": "dataset prediction; not measured",
+      "footprint_status": "GBA candidate outline, not verified site boundary",
+      "identity_hypothesis": "未分配",
+      "horizontal_bbox_centre_lon_lat_reference": [
+        105.82131376833622,
+        26.833649113575067
+      ],
+      "horizontal_centre_status": "geometric bounding-box centre, not an official facility marker"
+    },
+    {
+      "object_id": "B28",
+      "scene_id": "zhijin_pilot",
+      "glb_node_name": "B28",
+      "glb_node_index_in_v4": 9,
+      "glb_mesh_index_in_v4": 28,
+      "display_name": "B28",
+      "category": "unknown_facility_candidate",
+      "bounds_local_xyz_m": [
+        [
+          528.1796875,
+          313.0,
+          488.15325927734375
+        ],
+        [
+          537.1452026367188,
+          314.8075866699219,
+          496.4283752441406
+        ]
+      ],
+      "focus_local_xyz_m": [
+        532.6624450683594,
+        313.90379333496094,
+        492.2908172607422
+      ],
+      "triangle_count": 8,
+      "identity_status": "unassigned",
+      "position_status": "source-reference coordinates; not independently registered to current imagery",
+      "fire_risk_level": null,
+      "platform_id": "P01",
+      "base_elevation_estimate_m": 1313.0,
+      "base_status": "estimated support-platform elevation, not measured",
+      "display_height_m": 1.807586669921875,
+      "source": {
+        "dataset": "GBA Part II",
+        "source": "ours2",
+        "id": "7MaZe",
+        "region": "CHN"
+      },
+      "original_GBA_height_prediction_m": 1.807603120803833,
+      "height_status": "dataset prediction; not measured",
+      "footprint_status": "GBA candidate outline, not verified site boundary",
+      "identity_hypothesis": "未分配",
+      "horizontal_bbox_centre_lon_lat_reference": [
+        105.8228283003797,
+        26.83080258333845
+      ],
+      "horizontal_centre_status": "geometric bounding-box centre, not an official facility marker"
+    },
+    {
+      "object_id": "B29",
+      "scene_id": "zhijin_pilot",
+      "glb_node_name": "B29",
+      "glb_node_index_in_v4": 8,
+      "glb_mesh_index_in_v4": 29,
+      "display_name": "B29",
+      "category": "unknown_facility_candidate",
+      "bounds_local_xyz_m": [
+        [
+          -137.21665954589844,
+          293.0,
+          347.26055908203125
+        ],
+        [
+          -131.255126953125,
+          298.06280517578125,
+          353.1851806640625
+        ]
+      ],
+      "focus_local_xyz_m": [
+        -134.23589324951172,
+        295.5314025878906,
+        350.2228698730469
+      ],
+      "triangle_count": 8,
+      "identity_status": "unassigned",
+      "position_status": "source-reference coordinates; not independently registered to current imagery",
+      "fire_risk_level": null,
+      "platform_id": "P09",
+      "base_elevation_estimate_m": 1293.0,
+      "base_status": "estimated support-platform elevation, not measured",
+      "display_height_m": 5.06280517578125,
+      "source": {
+        "dataset": "GBA Part II",
+        "source": "ours2",
+        "id": "7MaYL",
+        "region": "CHN"
+      },
+      "original_GBA_height_prediction_m": 5.062806606292725,
+      "height_status": "dataset prediction; not measured",
+      "footprint_status": "GBA candidate outline, not verified site boundary",
+      "identity_hypothesis": "未分配",
+      "horizontal_bbox_centre_lon_lat_reference": [
+        105.81612646035796,
+        26.83212402675193
+      ],
+      "horizontal_centre_status": "geometric bounding-box centre, not an official facility marker"
+    },
+    {
+      "object_id": "B30",
+      "scene_id": "zhijin_pilot",
+      "glb_node_name": "B30",
+      "glb_node_index_in_v4": 7,
+      "glb_mesh_index_in_v4": 30,
+      "display_name": "B30",
+      "category": "unknown_facility_candidate",
+      "bounds_local_xyz_m": [
+        [
+          217.74546813964844,
+          313.0,
+          407.21148681640625
+        ],
+        [
+          220.7594451904297,
+          316.0099182128906,
+          413.1387023925781
+        ]
+      ],
+      "focus_local_xyz_m": [
+        219.25245666503906,
+        314.5049591064453,
+        410.1750946044922
+      ],
+      "triangle_count": 12,
+      "identity_status": "unassigned",
+      "position_status": "source-reference coordinates; not independently registered to current imagery",
+      "fire_risk_level": null,
+      "platform_id": "P01",
+      "base_elevation_estimate_m": 1313.0,
+      "base_status": "estimated support-platform elevation, not measured",
+      "display_height_m": 3.009918212890625,
+      "source": {
+        "dataset": "GBA Part II",
+        "source": "ours2",
+        "id": "7MaYX",
+        "region": "CHN"
+      },
+      "original_GBA_height_prediction_m": 3.0098965167999268,
+      "height_status": "dataset prediction; not measured",
+      "footprint_status": "GBA candidate outline, not verified site boundary",
+      "identity_hypothesis": "未分配",
+      "horizontal_bbox_centre_lon_lat_reference": [
+        105.8196797774675,
+        26.831562220915227
+      ],
+      "horizontal_centre_status": "geometric bounding-box centre, not an official facility marker"
+    },
+    {
+      "object_id": "B31",
+      "scene_id": "zhijin_pilot",
+      "glb_node_name": "B31",
+      "glb_node_index_in_v4": 6,
+      "glb_mesh_index_in_v4": 31,
+      "display_name": "B31",
+      "category": "unknown_facility_candidate",
+      "bounds_local_xyz_m": [
+        [
+          226.70315551757812,
+          313.0,
+          410.0788879394531
+        ],
+        [
+          232.6621856689453,
+          314.17095947265625,
+          413.0771484375
+        ]
+      ],
+      "focus_local_xyz_m": [
+        229.68267059326172,
+        313.5854797363281,
+        411.57801818847656
+      ],
+      "triangle_count": 12,
+      "identity_status": "unassigned",
+      "position_status": "source-reference coordinates; not independently registered to current imagery",
+      "fire_risk_level": null,
+      "platform_id": "P01",
+      "base_elevation_estimate_m": 1313.0,
+      "base_status": "estimated support-platform elevation, not measured",
+      "display_height_m": 1.17095947265625,
+      "source": {
+        "dataset": "GBA Part II",
+        "source": "ours2",
+        "id": "7MaYZ",
+        "region": "CHN"
+      },
+      "original_GBA_height_prediction_m": 1.1709764003753662,
+      "height_status": "dataset prediction; not measured",
+      "footprint_status": "GBA candidate outline, not verified site boundary",
+      "identity_hypothesis": "未分配",
+      "horizontal_bbox_centre_lon_lat_reference": [
+        105.8197846467404,
+        26.831548947363917
+      ],
+      "horizontal_centre_status": "geometric bounding-box centre, not an official facility marker"
+    },
+    {
+      "object_id": "B32",
+      "scene_id": "zhijin_pilot",
+      "glb_node_name": "B32",
+      "glb_node_index_in_v4": 5,
+      "glb_mesh_index_in_v4": 32,
+      "display_name": "B32",
+      "category": "unknown_facility_candidate",
+      "bounds_local_xyz_m": [
+        [
+          316.793701171875,
+          313.0,
+          516.2147827148438
+        ],
+        [
+          319.1997375488281,
+          315.32275390625,
+          522.14208984375
+        ]
+      ],
+      "focus_local_xyz_m": [
+        317.99671936035156,
+        314.161376953125,
+        519.1784362792969
+      ],
+      "triangle_count": 8,
+      "identity_status": "unassigned",
+      "position_status": "source-reference coordinates; not independently registered to current imagery",
+      "fire_risk_level": null,
+      "platform_id": "P01",
+      "base_elevation_estimate_m": 1313.0,
+      "base_status": "estimated support-platform elevation, not measured",
+      "display_height_m": 2.32275390625,
+      "source": {
+        "dataset": "GBA Part II",
+        "source": "ours2",
+        "id": "7MaZj",
+        "region": "CHN"
+      },
+      "original_GBA_height_prediction_m": 2.3227574825286865,
+      "height_status": "dataset prediction; not measured",
+      "footprint_status": "GBA candidate outline, not verified site boundary",
+      "identity_hypothesis": "未分配",
+      "horizontal_bbox_centre_lon_lat_reference": [
+        105.8206663602861,
+        26.830572391379615
+      ],
+      "horizontal_centre_status": "geometric bounding-box centre, not an official facility marker"
+    },
+    {
+      "object_id": "B33",
+      "scene_id": "zhijin_pilot",
+      "glb_node_name": "B33",
+      "glb_node_index_in_v4": 4,
+      "glb_mesh_index_in_v4": 33,
+      "display_name": "B33",
+      "category": "unknown_facility_candidate",
+      "bounds_local_xyz_m": [
+        [
+          293.67645263671875,
+          297.0,
+          166.64547729492188
+        ],
+        [
+          296.0824279785156,
+          298.6999206542969,
+          172.5725860595703
+        ]
+      ],
+      "focus_local_xyz_m": [
+        294.8794403076172,
+        297.84996032714844,
+        169.6090316772461
+      ],
+      "triangle_count": 8,
+      "identity_status": "unassigned",
+      "position_status": "source-reference coordinates; not independently registered to current imagery",
+      "fire_risk_level": null,
+      "platform_id": "P05",
+      "base_elevation_estimate_m": 1297.0,
+      "base_status": "estimated support-platform elevation, not measured",
+      "display_height_m": 1.699920654296875,
+      "source": {
+        "dataset": "GBA Part II",
+        "source": "ours2",
+        "id": "7MaYn",
+        "region": "CHN"
+      },
+      "original_GBA_height_prediction_m": 1.6999273300170898,
+      "height_status": "dataset prediction; not measured",
+      "footprint_status": "GBA candidate outline, not verified site boundary",
+      "identity_hypothesis": "未分配",
+      "horizontal_bbox_centre_lon_lat_reference": [
+        105.82045646919615,
+        26.833729611337283
+      ],
+      "horizontal_centre_status": "geometric bounding-box centre, not an official facility marker"
+    },
+    {
+      "object_id": "B34",
+      "scene_id": "zhijin_pilot",
+      "glb_node_name": "B34",
+      "glb_node_index_in_v4": 3,
+      "glb_mesh_index_in_v4": 34,
+      "display_name": "B34",
+      "category": "unknown_facility_candidate",
+      "bounds_local_xyz_m": [
+        [
+          47.157630920410156,
+          313.0,
+          257.1588134765625
+        ],
+        [
+          49.93524932861328,
+          313.27789306640625,
+          260.126220703125
+        ]
+      ],
+      "focus_local_xyz_m": [
+        48.54644012451172,
+        313.1389465332031,
+        258.64251708984375
+      ],
+      "triangle_count": 8,
+      "identity_status": "unassigned",
+      "position_status": "source-reference coordinates; not independently registered to current imagery",
+      "fire_risk_level": null,
+      "platform_id": "P01",
+      "base_elevation_estimate_m": 1313.0,
+      "base_status": "estimated support-platform elevation, not measured",
+      "display_height_m": 0.27789306640625,
+      "source": {
+        "dataset": "GBA Part II",
+        "source": "ours2",
+        "id": "7MaYz",
+        "region": "CHN"
+      },
+      "original_GBA_height_prediction_m": 0.2778959572315216,
+      "height_status": "dataset prediction; not measured",
+      "footprint_status": "GBA candidate outline, not verified site boundary",
+      "identity_hypothesis": "未分配",
+      "horizontal_bbox_centre_lon_lat_reference": [
+        105.81797176965229,
+        26.832940181509915
+      ],
+      "horizontal_centre_status": "geometric bounding-box centre, not an official facility marker"
+    },
+    {
+      "object_id": "CH01",
+      "scene_id": "zhijin_pilot",
+      "glb_node_name": "CH01",
+      "glb_node_index_in_v4": 2,
+      "glb_mesh_index_in_v4": 35,
+      "display_name": "烟囱参考模型",
+      "category": "chimney",
+      "bounds_local_xyz_m": [
+        [
+          247.84988403320312,
+          313.0,
+          356.86456298828125
+        ],
+        [
+          271.8498840332031,
+          553.0,
+          380.86456298828125
+        ]
+      ],
+      "focus_local_xyz_m": [
+        259.8498840332031,
+        433.0,
+        368.86456298828125
+      ],
+      "triangle_count": 512,
+      "identity_status": "OSM landmark reference",
+      "position_status": "source-reference coordinates; not independently registered to current imagery",
+      "fire_risk_level": null,
+      "platform_id": "P01",
+      "base_elevation_estimate_m": 1313.0,
+      "base_status": "estimated support-platform elevation, not measured",
+      "display_height_m": 240.0,
+      "height_status": "240m documented in plant report, not newly surveyed",
+      "height_source_url": "https://sthj.guizhou.gov.cn/zwgk/zdlyxx/fsjg/fslxmspqgs/202406/P020241015404863681069.pdf",
+      "height_source_pdf_page": 30,
+      "shape_status": "outer radii and taper display assumptions",
+      "source": {
+        "dataset": "OSM",
+        "osm_type": "node",
+        "osm_id": 12160650736
+      },
+      "horizontal_bbox_centre_lon_lat_reference": [
+        105.82009100002175,
+        26.831932800090854
+      ],
+      "horizontal_centre_status": "geometric bounding-box centre, not an official facility marker"
+    },
+    {
+      "object_id": "CT-A",
+      "scene_id": "zhijin_pilot",
+      "glb_node_name": "CT-A",
+      "glb_node_index_in_v4": 1,
+      "glb_mesh_index_in_v4": 36,
+      "display_name": "CT-A 冷却塔参考模型",
+      "category": "cooling_tower",
+      "bounds_local_xyz_m": [
+        [
+          73.92333221435547,
+          324.0,
+          -41.77008056640625
+        ],
+        [
+          184.16107177734375,
+          474.0,
+          68.46766662597656
+        ]
+      ],
+      "focus_local_xyz_m": [
+        129.0422019958496,
+        399.0,
+        13.348793029785156
+      ],
+      "triangle_count": 9472,
+      "identity_status": "OSM landmark reference",
+      "position_status": "source-reference coordinates; not independently registered to current imagery",
+      "fire_risk_level": null,
+      "platform_id": "P02",
+      "base_elevation_estimate_m": 1324.0,
+      "base_status": "estimated support-platform elevation, not measured",
+      "display_height_m": 150.0,
+      "height_status": "150m display assumption, not verified",
+      "shape_status": "shell profile, wall thickness and supports display assumptions",
+      "source": {
+        "dataset": "OSM",
+        "osm_type": "way",
+        "osm_id": 588594543
+      },
+      "horizontal_bbox_centre_lon_lat_reference": [
+        105.81879774283594,
+        26.8351499786062
+      ],
+      "horizontal_centre_status": "geometric bounding-box centre, not an official facility marker"
+    },
+    {
+      "object_id": "CT-B",
+      "scene_id": "zhijin_pilot",
+      "glb_node_name": "CT-B",
+      "glb_node_index_in_v4": 0,
+      "glb_mesh_index_in_v4": 37,
+      "display_name": "CT-B 冷却塔参考模型",
+      "category": "cooling_tower",
+      "bounds_local_xyz_m": [
+        [
+          -36.47606658935547,
+          323.0,
+          89.57061767578125
+        ],
+        [
+          73.76353454589844,
+          473.0,
+          199.81021118164062
+        ]
+      ],
+      "focus_local_xyz_m": [
+        18.643733978271484,
+        398.0,
+        144.69041442871094
+      ],
+      "triangle_count": 9472,
+      "identity_status": "OSM landmark reference",
+      "position_status": "source-reference coordinates; not independently registered to current imagery",
+      "fire_risk_level": null,
+      "platform_id": "P03",
+      "base_elevation_estimate_m": 1323.0,
+      "base_status": "estimated support-platform elevation, not measured",
+      "display_height_m": 150.0,
+      "height_status": "150m display assumption, not verified",
+      "shape_status": "shell profile, wall thickness and supports display assumptions",
+      "source": {
+        "dataset": "OSM",
+        "osm_type": "way",
+        "osm_id": 588594544
+      },
+      "horizontal_bbox_centre_lon_lat_reference": [
+        105.81767823917608,
+        26.83397066746817
+      ],
+      "horizontal_centre_status": "geometric bounding-box centre, not an official facility marker"
+    },
+    {
+      "object_id": "terrain",
+      "scene_id": "zhijin_pilot",
+      "glb_node_name": "geometry_0",
+      "glb_node_index_in_v4": 37,
+      "glb_mesh_index_in_v4": 0,
+      "display_name": "周边基础地形与估计厂区平台",
+      "category": "terrain",
+      "bounds_local_xyz_m": [
+        [
+          -2000.0,
+          135.5548095703125,
+          -2000.0
+        ],
+        [
+          2000.0,
+          590.080078125,
+          2000.0
+        ]
+      ],
+      "focus_local_xyz_m": [
+        0.0,
+        362.81744384765625,
+        0.0
+      ],
+      "triangle_count": 320000,
+      "identity_status": "terrain_display_layer",
+      "position_status": "camera anchor CRS assumed; pending registration",
+      "fire_risk_level": null,
+      "height_status": "historical mixed-source elevation with synthetic platform edits",
+      "colour_status": "高程和估计平台显示色；不代表真实植被、卫星影像或风险",
+      "max_synthetic_height_edit_m": 37.269927978515625
+    }
+  ],
+  "id_policy": "IDs refer to this snapshot; preserve them on updates, do not regenerate by area sorting",
+  "node_index_policy": "indices bind only to this asset hash; exported node names verified unique for this file",
+  "selection_note": "a rendered hit node name maps to object_id; selecting a candidate does not confirm its facility identity"
+}

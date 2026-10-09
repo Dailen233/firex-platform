@@ -1,0 +1,52 @@
+{
+  "version": "v2_landmark_draft_20261007",
+  "plant": "国能织金发电有限公司；暂定试建对象",
+  "height_origin_note": "全部设施基础仍从旧版粗地形插值得到；尚未校准厂区平台高程",
+  "position_note": "OSM点位与轮廓，仅为社区参考；未与当前正射影像配准",
+  "chimney": {
+    "osm_id": 12160650736,
+    "height_m": 240.0,
+    "height_status": "本厂2024年报告记录；非本次实测",
+    "outlet_inner_diameter_m": 9.0,
+    "outlet_status": "本厂报告记录出口内径；模型仅以开口表达，未重建套筒内部结构",
+    "base_outer_radius_m": 12.0,
+    "top_outer_radius_m": 5.5,
+    "base_inner_radius_m": 10.5,
+    "body_shape_status": "三个半径及直线收分均为展示暂定；不是工程设计尺寸",
+    "source_url": "https://sthj.guizhou.gov.cn/zwgk/zdlyxx/fsjg/fslxmspqgs/202406/P020241015404863681069.pdf",
+    "source_pdf_page": 30
+  },
+  "cooling_towers": {
+    "osm_ids": [588594543, 588594544],
+    "height_m": 150.0,
+    "height_status": "纯展示暂定值，两塔共用可调参数；未查到本厂高度依据，不来自金元织金或其他电厂",
+    "footprint_radius_method": "sqrt(OSM_polygon_area/pi)，仅把社区轮廓换成等面积圆形展示基底，不视为实测塔底",
+    "shell_bottom_height_m": 10.0,
+    "shell_bottom_radius_fraction": 0.94,
+    "throat_height_fraction": 0.75,
+    "throat_radius_fraction": 0.48,
+    "top_radius_fraction": 0.55,
+    "display_shell_thickness_m": 0.8,
+    "display_support_pairs": 24,
+    "display_support_radius_m": 0.55,
+    "display_basin_height_m": 0.8,
+    "shape_status": "两段双曲线式旋转壳，开口、底部支杆和盆边仅表达照片中的主要外形；尺寸、壁厚、支杆数量均未核实",
+    "photo_source_url": "https://www.chnenergy.com.cn/gjnyjtww/chnjtyw/202106/44a7beb5674b486987d17440d6eadbb9.shtml",
+    "source_publication_date": "2021-06-28",
+    "photo_capture_date_status": "未注明"
+  },
+  "modelling": {
+    "angular_sections": 64,
+    "tower_vertical_samples": 25,
+    "support_cylinder_sections": 12,
+    "collision_status": "渲染几何；未构建或验证无人机规划碰撞体",
+    "color_status": "设施用简化材质；地形沿用旧版高程色彩，不代表影像、植被或火险"
+  },
+  "rejected_evidence": [
+    {
+      "finding": "冷却塔高145m、淋水面积8300平方米",
+      "status": "排除：资料针对贵州金元织金项目，位于珠藏镇，与本轮八步街道国能织金电厂不同",
+      "url": "https://power.in-en.com/html/power-2452719.shtml"
+    }
+  ]
+}

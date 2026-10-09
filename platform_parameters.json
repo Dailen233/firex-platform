@@ -1,0 +1,17 @@
+{
+  "version": "v3_estimated_support_platforms_20261007",
+  "platform_status": "几何接地占位方案；不是复原的真实厂区工程平台",
+  "facility_buffer_m": 20.0,
+  "buffer_status": "展示暂定的支撑范围，非实测平台边界",
+  "merge_rule": "对37个设施地面投影各外扩20米，合并重叠区域；每个连通支撑区独立取暂定高程",
+  "level_method": "取支撑区内、设施投影之外的原始粗地形插值样本中位数，四舍五入至整数米",
+  "level_status": "仅由历史粗地形派生；不能排除地物污染或场平前后变化，不是实测厂房底高程",
+  "transition_width_m": 80.0,
+  "transition_status": "可调的展示过渡带；不视为真实边坡、排水坡度或工程设计",
+  "terrain_mesh_spacing_m": 10.0,
+  "mesh_spacing_status": "仅加密显示网格；原始地形40米采样的信息量与精度没有提高",
+  "diagnostic_tolerance_m": 0.01,
+  "tolerance_status": "模型内部接地检查容差，不是本厂实际精度或项目验收要求",
+  "preservation": "保留v2和原始地形文件，输出另一个版本；过渡影响范围外保留原三角曲面",
+  "simulation_note": "后续坡度、植被和火势分析应区分原始参考地形与人为修改区域；目前没有验证真实坡度"
+}

@@ -1,0 +1,33 @@
+{
+  "geometry_included": false,
+  "status": "not_materialized; actual map rendering pending",
+  "provider": "GeoJSON.CN third-party distribution/conversion, citing Tianditu data",
+  "source_page": "https://geojson.cn/data/atlas/tiandi",
+  "raw_file_source_page": "https://geojson.cn/data/file/Tiandi_China",
+  "geojson_api": "https://geojson.cn/api/tiandi/100000.json",
+  "topojson_api": "https://geojson.cn/api/tiandi/100000.topo.json",
+  "versioned_candidate_api": "https://geojson.cn/api/tiandi/0.3.0/100000.json",
+  "metadata_api": "https://geojson.cn/api/tiandi/_meta.json",
+  "advertised_interface_version": "0.3.0",
+  "advertised_interface_changelog_date": "2025-12-16",
+  "advertised_original_source_update": "2025-09",
+  "source_crs": "CGCS2000 / EPSG:4490",
+  "join": {
+    "primary": "code: six-digit string",
+    "fallback": "gb only if exactly nine digits with China country prefix 156; use remaining six digits",
+    "example": {
+      "code": "520000",
+      "gb": "156520000"
+    },
+    "validate": "Do not join nine-digit gb directly to plant province_code."
+  },
+  "fetch_checked_at": "2026-10-09",
+  "fetch_results": {
+    "default_geojson": "HTTP 502",
+    "versioned_geojson": "timeout",
+    "default_topojson": "HTTP 502",
+    "metadata": "HTTP 502"
+  },
+  "fallback_ui": "province list + real sample details + real local GLB; label national map resource as pending",
+  "notice": "Source page metadata verified, geometry and actual API feature attributes not verified. Record actual version/CRS on retrieval."
+}

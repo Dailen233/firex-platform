@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-10-09",
+  "uri_base": "relative to public root",
+  "scenes": [
+    {
+      "plant_id": "GEM_COAL_ZHIJIN",
+      "project_plant_key": "fx_chnenergy_zhijin_babu_pilot",
+      "source_scene_id": "ZHIJIN_16KM2_TRIAL",
+      "scene_id": "zhijin_pilot",
+      "asset_version": "v4",
+      "manifest_uri": "models/zhijin-v4/scene_manifest.json",
+      "scene_link_status": "provisional_source_identity_match",
+      "asset_available": true,
+      "browser_loading_verified": false,
+      "geographic_accuracy_verified": false,
+      "notice": "ID adapter only. Original GLB, manifest and local coordinates unchanged."
+    }
+  ]
+}

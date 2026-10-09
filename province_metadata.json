@@ -1,0 +1,22 @@
+{
+  "status": "materialized",
+  "retrieved_at": "2026-10-09",
+  "request_url": "https://geojson.cn/api/tiandi/100000.json",
+  "http_status": 200,
+  "sha256_raw": "0f868c3c9c4466b61548512ce0a49b24b75b87ac3481c856400e6cb3f18c3ad2",
+  "polygon_features": 34,
+  "line_features": 8,
+  "response_meta": {
+    "date": "2025/12/16 00:08:02",
+    "copyright": "Copyright (c) 2025 GeoJSON.CN",
+    "copyrightShort": "GeoJSON.CN",
+    "copyrightUrl": "https://geojson.cn"
+  },
+  "source_crs": "EPSG:4490 / CGCS2000",
+  "point_crs": "EPSG:4326 / WGS84",
+  "coordinate_transform_applied": false,
+  "source_page": "https://geojson.cn/data/atlas/tiandi",
+  "source_reported_version": "0.3.0 (page changelog; request was unversioned)",
+  "source_attribution": "GeoJSON.CN（第三方分发与转换，来源页注明天地图）",
+  "notice": "Preserved raw geometries; polygon/line split only. Province-scale display is not metre-level registration."
+}

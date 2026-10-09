@@ -1,0 +1,54 @@
+{
+  "date": "2026-10-09",
+  "count": 12,
+  "checks": [
+    {
+      "id": "DATA-01-unique-plant-ids",
+      "result": "passed"
+    },
+    {
+      "id": "DATA-02-associated-province-counts",
+      "result": "passed"
+    },
+    {
+      "id": "DATA-03-primary-province-is-associated",
+      "result": "passed"
+    },
+    {
+      "id": "DATA-04-unknown-fire-stays-null",
+      "result": "passed"
+    },
+    {
+      "id": "DATA-05-province-geometry-and-join",
+      "result": "passed"
+    },
+    {
+      "id": "DATA-06-only-zhijin-has-model",
+      "result": "passed"
+    },
+    {
+      "id": "ASSET-01-original-byte-hash",
+      "result": "passed"
+    },
+    {
+      "id": "ASSET-02-glb-structure",
+      "result": "passed"
+    },
+    {
+      "id": "ASSET-03-registry-mesh-identity",
+      "result": "passed"
+    },
+    {
+      "id": "ASSET-04-triangle-count",
+      "result": "passed"
+    },
+    {
+      "id": "ASSET-05-display-assumptions-preserved",
+      "result": "passed"
+    },
+    {
+      "id": "DATA-07-official-capacity-conflict-preserved",
+      "result": "passed"
+    }
+  ]
+}
