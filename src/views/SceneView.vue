@@ -1,37 +1,49 @@
 <script setup lang="ts">
 import { computed,onMounted,ref,shallowRef } from 'vue'
 import { useRoute } from 'vue-router'
-import { ArrowLeft,Mountain,Focus,RotateCcw,MousePointer2,Info,ExternalLink,Box,ShieldQuestion } from 'lucide-vue-next'
+import { ArrowLeft,Mountain,Focus,RotateCcw,MousePointer2,Info,ExternalLink,Box,ShieldQuestion,Play,Pause,X,Flame } from 'lucide-vue-next'
 import SceneCanvas from '../components/SceneCanvas.vue'
 import { loadCatalog,dataReady,dataError,sceneFor,assetUrl,heightLabel,identityLabel } from '../lib/data'
+import { useFireDemo } from '../lib/fire-demo'
 import type { SceneManifest,SceneObject } from '../lib/types'
 const route=useRoute();const sceneCanvas=ref<InstanceType<typeof SceneCanvas>>();const manifest=shallowRef<SceneManifest|null>(null)
 const objects=shallowRef<SceneObject[]>([]),selected=shallowRef<SceneObject|null>(null),error=ref(''),attempt=ref(0)
 const renderMode=ref<'webgl'|'software'>('webgl')
+const {status,t_s,dataState,loadError,demo,activeFirePatches,isDemoOn,playing,play,pause,reset,close,load}=useFireDemo()
 const sceneLink=computed(()=>sceneFor('GEM_COAL_ZHIJIN'))
 const valid=computed(()=>route.params.sceneId==='zhijin_pilot'&&!!sceneLink.value)
 const backQuery=computed(()=>({...(typeof route.query.province==='string'?{province:route.query.province}:{province:'520000'}),plant:'GEM_COAL_ZHIJIN'}))
 function loaded(m:SceneManifest,o:SceneObject[]){manifest.value=m;objects.value=o;error.value=''}
 function retry(){manifest.value=null;objects.value=[];selected.value=null;error.value='';attempt.value++}
 function choose(event:Event){sceneCanvas.value?.select((event.target as HTMLSelectElement).value||null,true)}
-onMounted(loadCatalog)
+onMounted(()=>{loadCatalog();load()})
 </script>
 <template>
  <main class="scene-layout">
   <header class="scene-heading"><div><RouterLink class="back-link" :to="{path:'/atlas',query:backQuery}"><ArrowLeft :size="16"/>返回电厂详情</RouterLink><h1>织金电厂与周边山地<span class="tag">试建场景 · v4</span></h1><p>国能织金发电有限公司 · 贵州省织金县八步街道</p></div><div class="scene-size"><strong>16<span>km²</span></strong><small>4 × 4 km 试建研究区</small></div></header>
   <div class="scene-workspace">
    <section class="viewer-frame">
-    <SceneCanvas v-if="dataReady&&valid" :key="attempt" ref="sceneCanvas" :manifest-url="assetUrl(sceneLink!.manifest_uri)" @loaded="loaded" @selected="selected=$event" @error="error=$event" @mode="renderMode=$event"/>
+    <SceneCanvas v-if="dataReady&&valid" :key="attempt" ref="sceneCanvas" :manifest-url="assetUrl(sceneLink!.manifest_uri)" :fire-patches="activeFirePatches" @loaded="loaded" @selected="selected=$event" @error="error=$event" @mode="renderMode=$event"/>
     <div v-else class="loader-overlay" role="status"><h3>{{dataError|| (dataReady?'场景不存在':'正在读取场景索引')}}</h3><button v-if="dataError" @click="loadCatalog">重试目录</button></div>
     <div v-if="manifest" class="viewer-toolbar"><button @click="sceneCanvas?.frame('plant')"><Focus :size="17"/>厂区取景</button><button @click="sceneCanvas?.frame('whole_terrain')"><Mountain :size="17"/>全域地形</button><button @click="sceneCanvas?.frame('plant')" title="恢复初始取景"><RotateCcw :size="17"/>重置视角</button></div>
-    <div class="viewer-badges"><span class="tag neutral"><ShieldQuestion :size="13"/>尚未接入火情</span><span class="tag neutral">高程示意色 · 非植被或火险</span></div>
+    <div class="viewer-badges"><span v-if="!isDemoOn" class="tag neutral"><ShieldQuestion :size="13"/>尚未接入火情</span><span v-else-if="activeFirePatches.length" class="tag danger"><Flame :size="13"/>演示告警 · 合成</span><span v-else class="tag amber">演示中 · 当前无演示火区</span><span class="tag neutral">高程示意色 · 非植被或火险</span></div>
     <div class="viewer-bottom"><span><MousePointer2 :size="14"/>拖动旋转 · 滚轮缩放 · 右键平移 · 单击对象</span><span class="axis-label">X 东 · Y 上 · Z 南 / 米</span></div>
    </section>
    <aside class="scene-inspector">
     <div class="panel-eyebrow">场景检查<Box :size="16"/></div>
     <div v-if="manifest" class="loaded-status">原始 v4 GLB 已加载<span>38 个对象 · 340,572 个三角形</span></div>
-    <p v-if="renderMode==='software'" class="notice amber">当前浏览器不支持 WebGL，已使用兼容显示。地形为原始顶点粗采样，光照为近似效果；GPU 渲染与性能尚待验证。</p>
+    <p v-if="renderMode==='software'" class="notice amber">当前浏览器不支持 WebGL，已使用兼容显示。地形为原始顶点粗采样，光照为近似效果；GPU 渲染与性能尚待验证。<template v-if="isDemoOn&&activeFirePatches.length">兼容模式不支持火区覆盖层显示，演示告警仅同步至地图与详情。</template></p>
     <div v-if="!manifest" class="notice" :class="{error:!!error}">{{error?'模型暂不可用':'正在加载场景资源'}}<button v-if="error" class="secondary-button" @click="retry">重新加载</button></div>
+    <section class="demo-panel">
+     <div class="panel-eyebrow">演示火情<Flame :size="16"/></div>
+     <p v-if="dataState==='loading'" class="small muted">正在读取演示数据…</p>
+     <div v-else-if="dataState==='unavailable'" class="notice error">演示数据不可用<template v-if="loadError">：{{loadError}}</template></div>
+     <template v-else-if="dataState==='ready'">
+      <div class="demo-status"><span v-if="!isDemoOn" class="tag neutral"><ShieldQuestion :size="13"/>尚未接入火情</span><span v-else-if="activeFirePatches.length" class="tag danger"><Flame :size="13"/>演示告警 · 合成</span><span v-else class="tag amber">演示中 · 当前无演示火区</span><span class="demo-time">{{t_s.toFixed(1)}} / {{demo?.duration_s??0}} s</span></div>
+      <div class="demo-controls"><button v-if="!isDemoOn" @click="play"><Flame :size="14"/>开启演示</button><template v-else><button @click="play" :disabled="status==='ended'"><Play :size="14"/>播放</button><button @click="pause" :disabled="!playing"><Pause :size="14"/>暂停</button><button @click="reset"><RotateCcw :size="14"/>重置</button><button @click="close"><X :size="14"/>关闭</button></template></div>
+      <p class="small muted">合成示例，非真实火情、非算法识别、非经验证风险评估。</p>
+     </template>
+    </section>
     <label class="object-label" for="object-select">定位对象</label><select id="object-select" :value="selected?.object_id??''" :disabled="!manifest" @change="choose"><option value="">选择对象，或在模型上单击</option><option v-for="o in objects" :key="o.object_id" :value="o.object_id">{{o.object_id}} · {{o.display_name}}</option></select>
     <section v-if="selected" class="object-detail"><div class="object-code">{{selected.object_id}}</div><h2>{{selected.display_name}}</h2><div class="tags"><span class="tag amber">{{selected.object_id==='terrain'?'估计地形层':identityLabel(selected.identity_status)}}</span><span class="tag neutral">{{heightLabel(selected)}}</span></div>
      <dl class="facts"><div v-if="selected.display_height_m!==undefined"><dt>模型显示高度</dt><dd>{{selected.display_height_m.toFixed(2)}} m</dd></div><div v-if="selected.original_GBA_height_prediction_m!==undefined"><dt>原始 GBA 高度预测</dt><dd>{{selected.original_GBA_height_prediction_m.toFixed(2)}} m</dd></div><div><dt>火险评估</dt><dd>尚未接入</dd></div></dl>
@@ -48,3 +60,11 @@ onMounted(loadCatalog)
   </div>
  </main>
 </template>
+<style scoped>
+.demo-panel{border:1px solid var(--border);border-radius:8px;padding:14px;margin-top:16px;background:#122436}
+.demo-panel .panel-eyebrow{margin-bottom:10px}
+.demo-status{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.demo-time{font-variant-numeric:tabular-nums;font-size:.8125rem;color:#a9c0cf}
+.demo-controls{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
+.demo-controls button{display:inline-flex;align-items:center;gap:5px;font-size:.8125rem;padding:7px 10px}
+</style>

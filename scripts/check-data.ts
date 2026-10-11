@@ -2,6 +2,7 @@ import { readFileSync,writeFileSync,mkdirSync } from 'node:fs'
 import { createHash } from 'node:crypto'
 import assert from 'node:assert/strict'
 import type { Plant,SceneLink,SceneObject,SceneManifest,Boundaries } from '../src/lib/types.ts'
+import { validateFireStateDemo,resolveActivePatches,pointInRingXZ } from '../src/lib/fire-demo-schema.ts'
 const checks:{id:string;result:string}[]=[]
 function check(id:string,run:()=>void){run();checks.push({id,result:'passed'})}
 const read=<T>(path:string):T=>JSON.parse(readFileSync(path,'utf8')) as T
@@ -24,5 +25,35 @@ check('ASSET-03-registry-mesh-identity',()=>{const nodes=glb.nodes.filter(n=>n.m
 check('ASSET-04-triangle-count',()=>{assert.equal(glb.meshes.reduce((sum,m)=>sum+m.primitives.reduce((s,p)=>s+glb.accessors[p.indices]!.count/3,0),0),340572)})
 check('ASSET-05-display-assumptions-preserved',()=>{assert.equal(objects.find(o=>o.object_id==='B01')!.display_height_m,30);assert.equal(objects.find(o=>o.object_id==='CT-A')!.display_height_m,150);assert.equal(objects.find(o=>o.object_id==='CH01')!.display_height_m,240);assert.ok(objects.find(o=>o.object_id==='B01')!.original_GBA_height_prediction_m!<8)})
 check('DATA-07-official-capacity-conflict-preserved',()=>{const p=plants.find(p=>p.properties.plant_id==='GEM_HYDRO_XIANGJIABA')!;assert.equal(p.properties.capacity_mw,6400);assert.equal(p.properties.capacity_source_conflict!.gem_value_mw,7750)})
+const fireRaw=read<unknown>('public/data/fire_state_demo.json')
+const fireResult=validateFireStateDemo(fireRaw)
+check('FIRE-DEMO-01-contract-valid',()=>{assert.ok(fireResult.ok,fireResult.ok?'':`演示契约校验失败：${fireResult.errors.join('；')}`);if(fireResult.ok)assert.equal(fireResult.demo.patches.length,2)})
+check('FIRE-DEMO-02-keyframe-boundaries',()=>{
+ if(!fireResult.ok)throw new Error('演示契约无效')
+ const d=fireResult.demo
+ const active=(t:number)=>resolveActivePatches(d,t).map(p=>p.patch_id).sort()
+ assert.deepEqual(active(0),[])
+ assert.deepEqual(active(20),['DEMO-ZHIJIN-P01'])
+ assert.deepEqual(active(40),['DEMO-ZHIJIN-P01','DEMO-ZHIJIN-P02'])
+ assert.deepEqual(active(80),['DEMO-ZHIJIN-P02'])
+ assert.deepEqual(active(120),['DEMO-ZHIJIN-P02'])
+})
+check('FIRE-DEMO-03-ring-point-test',()=>{
+ if(!fireResult.ok)throw new Error('演示契约无效')
+ const ring=fireResult.demo.patches[0]!.rings[0]!.ring_xz
+ assert.ok(pointInRingXZ(1000,-1000,ring))
+ assert.ok(!pointInRingXZ(800,-1000,ring))
+ assert.ok(!pointInRingXZ(2000,-1000,ring))
+})
+check('FIRE-DEMO-04-rejects-invalid',()=>{
+ const base=()=>({schema:'Fire-X fire_state demo',schema_version:'1.0',is_mock:true,demo_origin:'synthetic_demo_rule',plant_id:'GEM_COAL_ZHIJIN',scene_id:'zhijin_pilot',duration_s:100,patches:[{patch_id:'P1',plant_id:'GEM_COAL_ZHIJIN',scene_id:'zhijin_pilot',is_mock:true,rings:[{ring_xz:[[0,0],[100,0],[100,100],[0,100]],ground_offset_m:0.5}],keyframes:[{t_s:0,active:true}]}],rules:{spread_note:'x',disclaimer:'y'}})
+ const a=base();a.schema_version='9.9';assert.equal(validateFireStateDemo(a).ok,false)
+ const b=base();b.patches[0]!.rings[0]!.ring_xz=[[0,0],[10,10],[0,10],[10,0]];assert.equal(validateFireStateDemo(b).ok,false)
+ const c=base();c.patches[0]!.rings[0]!.ring_xz=[[0,0],[3000,0],[3000,100],[0,100]];assert.equal(validateFireStateDemo(c).ok,false)
+ const d=base();d.patches.push({patch_id:'P1',plant_id:'GEM_COAL_ZHIJIN',scene_id:'zhijin_pilot',is_mock:true,rings:[{ring_xz:[[0,0],[10,0],[10,10],[0,10]],ground_offset_m:0.5}],keyframes:[]});assert.equal(validateFireStateDemo(d).ok,false)
+ const e=base();e.is_mock=false;assert.equal(validateFireStateDemo(e).ok,false)
+ const f=base();f.patches[0]!.rings[0]!.ground_offset_m=1.5;assert.equal(validateFireStateDemo(f).ok,false)
+ const g=base();g.patches[0]!.rings[0]!.ground_offset_m=1.0;assert.equal(validateFireStateDemo(g).ok,true)
+})
 mkdirSync('evidence',{recursive:true});writeFileSync('evidence/data-checks.json',JSON.stringify({date:'2026-10-09',count:checks.length,checks},null,2)+'\n')
 console.log(JSON.stringify({checks:checks.length,result:'passed',model_sha256:manifest.asset.sha256,province_count:34}))

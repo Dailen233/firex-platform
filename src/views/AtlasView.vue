@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import { computed,onMounted } from 'vue'
 import { useRoute,useRouter } from 'vue-router'
-import { MapPin,Box,Layers,Info,Compass,ChevronRight } from 'lucide-vue-next'
+import { MapPin,Box,Layers,Info,Compass,ChevronRight,Flame } from 'lucide-vue-next'
 import ProvinceMap from '../components/ProvinceMap.vue'
 import PlantDetail from '../components/PlantDetail.vue'
 import { plants,boundaries,boundaryLines,dataReady,dataError,boundaryError,loadCatalog,relatedPlants,sceneFor } from '../lib/data'
+import { useFireDemo } from '../lib/fire-demo'
 import { provinces,provinceName } from '../lib/provinces'
 const route=useRoute();const router=useRouter()
 const province=computed(()=>provinces.some(p=>p[0]===route.query.province)?String(route.query.province):'')
 const currentPlants=computed(()=>province.value?relatedPlants(province.value):plants.value)
 const selected=computed(()=>currentPlants.value.find(p=>p.properties.plant_id===route.query.plant))
+const {isDemoOn,activeFirePatches}=useFireDemo()
+const demoActive=computed(()=>isDemoOn.value&&activeFirePatches.value.length>0)
 function chooseProvince(code:string){router.push({path:'/atlas',query:code?{province:code}:{}})}
 function choosePlant(id:string){router.push({path:'/atlas',query:{...(province.value?{province:province.value}:{}),plant:id}})}
 function close(){router.push({path:'/atlas',query:province.value?{province:province.value}:{}})}
@@ -28,9 +31,9 @@ onMounted(loadCatalog)
    <div v-if="dataError" class="notice error" role="alert">{{dataError}}<button @click="loadCatalog">重新读取</button></div>
    <div class="map-section">
     <div class="map-topline"><span><Compass :size="16"/>中国省级地图</span><span class="small muted">点击省份或电厂点位 · 滚轮缩放</span></div>
-    <ProvinceMap v-if="boundaries && dataReady" :boundaries="boundaries" :lines="boundaryLines" :plants="plants" :province="province" :selected-plant="selected?.properties.plant_id??''" @province="chooseProvince" @plant="choosePlant"/>
+    <ProvinceMap v-if="boundaries && dataReady" :boundaries="boundaries" :lines="boundaryLines" :plants="plants" :province="province" :selected-plant="selected?.properties.plant_id??''" :demo-active="demoActive" @province="chooseProvince" @plant="choosePlant"/>
     <div v-else class="map-empty"><Layers :size="36"/><h3>{{boundaryError?'地图资源暂不可用':'正在读取省级地图'}}</h3><p>{{boundaryError?'可继续通过左侧省份列表浏览电厂与模型。':'加载本地边界文件与电厂样例。'}}</p><button v-if="boundaryError" @click="loadCatalog">重新读取地图</button></div>
-    <div class="map-bottomline"><span><span class="sample-dot"></span>点位仅表示电厂样例，不表示火情</span><span>火情监测尚未接入</span></div>
+    <div class="map-bottomline"><span><span class="sample-dot"></span>点位仅表示电厂样例，不表示火情</span><span v-if="demoActive" class="tag danger"><Flame :size="13"/>演示告警 · 合成</span><span v-else>火情监测尚未接入</span></div>
    </div>
    <section class="plant-list"><div class="section-heading"><h2>{{province?`${provinceName(province)}关联电厂`:'全国电厂样例'}}<span class="count-pill">{{currentPlants.length}}</span></h2><span class="small muted">按项目 ID 关联 · 全国数量去重</span></div>
     <div v-if="!dataReady&&!dataError" class="empty-state">正在读取电厂目录…</div>

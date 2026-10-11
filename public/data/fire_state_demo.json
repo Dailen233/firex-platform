@@ -1,0 +1,40 @@
+{
+  "schema": "Fire-X fire_state demo",
+  "schema_version": "1.0",
+  "is_mock": true,
+  "demo_origin": "synthetic_demo_rule",
+  "plant_id": "GEM_COAL_ZHIJIN",
+  "scene_id": "zhijin_pilot",
+  "duration_s": 120,
+  "patches": [
+    {
+      "patch_id": "DEMO-ZHIJIN-P01",
+      "plant_id": "GEM_COAL_ZHIJIN",
+      "scene_id": "zhijin_pilot",
+      "rings": [
+        { "ring_xz": [[900, -1050], [1150, -1050], [1150, -850], [900, -850]], "ground_offset_m": 0.5 }
+      ],
+      "keyframes": [
+        { "t_s": 20, "active": true, "intensity": 0.6, "level": "warning" },
+        { "t_s": 80, "active": false }
+      ],
+      "is_mock": true
+    },
+    {
+      "patch_id": "DEMO-ZHIJIN-P02",
+      "plant_id": "GEM_COAL_ZHIJIN",
+      "scene_id": "zhijin_pilot",
+      "rings": [
+        { "ring_xz": [[1150, -1050], [1400, -1050], [1400, -850], [1150, -850]] }
+      ],
+      "keyframes": [
+        { "t_s": 40, "active": true, "intensity": 1.0, "level": "critical" }
+      ],
+      "is_mock": true
+    }
+  ],
+  "rules": {
+    "spread_note": "人为规则：火区按关键帧在演示时间轴上出现/消失，非物理蔓延、非算法预测。相邻两区位于 NE 山地（局部 x≈900–1400、z≈-1050–-850，局部 Y 均值约 480–530，即源高程约 1480–1530 m），分阶段向东加入，形成连续面积扩展示意；已避开厂房平台（局部 Y≈309）附近。",
+    "disclaimer": "演示火区为合成示例，非真实火情、非算法识别、非经验证的风险评估。"
+  }
+}

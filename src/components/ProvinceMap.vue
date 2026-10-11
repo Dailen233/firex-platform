@@ -7,7 +7,7 @@ import { CanvasRenderer } from 'echarts/renderers'
 import type { Boundaries,Plant } from '../lib/types'
 import { RotateCcw } from 'lucide-vue-next'
 echarts.use([GeoComponent,TooltipComponent,ScatterChart,LinesChart,CanvasRenderer])
-const props=defineProps<{boundaries:Boundaries;lines:Boundaries|null;plants:Plant[];province:string;selectedPlant:string}>()
+const props=defineProps<{boundaries:Boundaries;lines:Boundaries|null;plants:Plant[];province:string;selectedPlant:string;demoActive:boolean}>()
 const emit=defineEmits<{province:[code:string];plant:[id:string]}>()
 const host=ref<HTMLDivElement>();let chart:echarts.ECharts|null=null;let observer:ResizeObserver|null=null
 function draw(){
@@ -20,7 +20,7 @@ function draw(){
   tooltip:{trigger:'item',backgroundColor:'#142538',borderColor:'#365163',textStyle:{color:'#e2ecf5'},formatter:(p:unknown)=>{
     const params=p as {seriesType?:string;data?:{plantId?:string};name:string}
     const plant=props.plants.find(x=>x.properties.plant_id===params.data?.plantId)
-    if(plant)return `${plant.properties.name}<br/>${plant.properties.capacity_mw?.toLocaleString()??'未知'} MW · 尚未接入火情`
+    if(plant)return `${plant.properties.name}<br/>${plant.properties.capacity_mw?.toLocaleString()??'未知'} MW · ${plant.properties.plant_id==='GEM_COAL_ZHIJIN'&&props.demoActive?'演示告警（合成）':'尚未接入火情'}`
     const code=props.boundaries.features.find(f=>f.properties.name===params.name)?.properties.code
     return `${params.name}<br/>${props.plants.filter(p=>p.properties.related_province_codes.includes(code??'')).length} 个关联样例`
   }},
@@ -44,7 +44,7 @@ onMounted(()=>{
  })
  observer=new ResizeObserver(()=>chart?.resize());observer.observe(host.value!);draw()
 })
-watch(()=>[props.province,props.selectedPlant,props.plants],draw)
+watch(()=>[props.province,props.selectedPlant,props.plants,props.demoActive],draw)
 onBeforeUnmount(()=>{observer?.disconnect();chart?.dispose();chart=null})
 </script>
 <template><div class="map-frame"><div ref="host" class="map-canvas" aria-label="中国省级地图，省份列表可提供键盘操作"></div><button class="map-reset icon-button" @click="draw" aria-label="重置地图取景" title="重置地图取景"><RotateCcw :size="17"/></button><div class="map-legend"><span class="sample-dot"></span>电厂样例<span class="legend-line"></span>省级边界</div></div></template>

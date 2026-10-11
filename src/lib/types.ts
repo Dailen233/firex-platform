@@ -28,3 +28,43 @@ export interface SceneObject {
   focus_local_xyz_m:[number,number,number];bounds_local_xyz_m:[[number,number,number],[number,number,number]];
   base_status?:string;shape_status?:string;fire_risk_level:string|null;
 }
+
+// ---- Fire demo (R2) contract — synthetic demo only, not real/algo fire prediction ----
+export type FireLevel = 'watch' | 'warning' | 'critical'
+export interface FireRing {
+  /** 局部 XZ 闭合环（X 东、Z 南，米），首版无孔洞、无自交；Y 由 viewer 贴地采样 */
+  ring_xz: [number, number][];
+  /** 地面之上显示偏移（米），取值 [0,1]，缺省 0.5；仅用于避免覆盖层与地形显示重叠，不代表火焰高度，不改变数据高度 */
+  ground_offset_m?: number;
+}
+export interface FireKeyframe {
+  /** 关键帧时刻（秒），0..duration_s，升序且不重复；关键帧间保持上一关键帧取值（无插值） */
+  t_s: number;
+  active: boolean;
+  intensity?: number; // 0..1，仅视觉；缺省沿用上一关键帧
+  level?: FireLevel;  // 演示告警等级；缺省沿用上一关键帧
+}
+export interface FirePatch {
+  patch_id: string; // 稳定、唯一，不按面积/排序重建
+  plant_id: string;
+  scene_id: string;
+  rings: FireRing[];
+  keyframes: FireKeyframe[]; // 空数组 => 永不显示（合法）
+  is_mock: true;
+}
+export interface FireStateDemo {
+  schema: 'Fire-X fire_state demo';
+  schema_version: '1.0';
+  is_mock: true;
+  demo_origin: 'synthetic_demo_rule';
+  plant_id: string;
+  scene_id: string;
+  duration_s: number; // >0，非循环
+  patches: FirePatch[];
+  rules: { spread_note: string; disclaimer: string };
+}
+export type DemoStatus = 'off' | 'playing' | 'paused' | 'ended'
+export interface DemoRuntimeState { status: DemoStatus; t_s: number }
+export interface FireViewState extends DemoRuntimeState { activePatchIds: string[] }
+export interface ResolvedPatchState { patch_id: string; active: boolean; intensity: number; level: FireLevel }
+export interface ActiveFirePatch { patch_id: string; level: FireLevel; intensity: number; rings: FireRing[] }

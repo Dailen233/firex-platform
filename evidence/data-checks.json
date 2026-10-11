@@ -1,6 +1,6 @@
 {
   "date": "2026-10-09",
-  "count": 12,
+  "count": 16,
   "checks": [
     {
       "id": "DATA-01-unique-plant-ids",
@@ -48,6 +48,22 @@
     },
     {
       "id": "DATA-07-official-capacity-conflict-preserved",
+      "result": "passed"
+    },
+    {
+      "id": "FIRE-DEMO-01-contract-valid",
+      "result": "passed"
+    },
+    {
+      "id": "FIRE-DEMO-02-keyframe-boundaries",
+      "result": "passed"
+    },
+    {
+      "id": "FIRE-DEMO-03-ring-point-test",
+      "result": "passed"
+    },
+    {
+      "id": "FIRE-DEMO-04-rejects-invalid",
       "result": "passed"
     }
   ]
