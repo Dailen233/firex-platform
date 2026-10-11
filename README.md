@@ -4,7 +4,7 @@ Fire-X 新阶段团队协作工程。首轮前端基线为0.1.0；旧Fire-X仓�
 
 ## 第一轮前端（0.1.0）
 
-已实现全国省级地图 / 省份列表 → 电厂详情 → 织金 v4 原始 GLB → 返回。7 个电厂是样例；只有织金具备三维场景。电网与应急资料暂缓，未接入火势、巡检算法或告警。
+已实现全国省级地图 / 省份列表 → 电厂详情 → 织金 v4 原始 GLB → 返回。8 个电厂是样例；织金具备正式三维场景（试建），双江口水电站正式模型待接入、可浏览公开 DSM 山地参考底座。场景名称、路径、相机、统计与能力开关统一由 `scene_profile.json` 配置读取。电网与应急资料暂缓，未接入火势、巡检算法或告警。
 
 ## Ubuntu + CodeBuddy 接手
 
@@ -44,7 +44,7 @@ python3 -m http.server 8080
 
 全国样例 → 贵州省 → 国能织金电厂 → 进入三维场景 → 厂区/全域切换 → 定位B01、CH01、CT-A → 拖动旋转、滚轮缩放 → 返回详情。
 
-四川6个关联样例，云南4个；全国去重7个。北京市等未收录地区显示“暂无样例数据”；其他六厂显示“尚无三维模型”。
+四川7个关联样例，云南4个；全国去重8个。北京市等未收录地区显示“暂无样例数据”；双江口显示“正式模型待接入 + 浏览山地参考底座”，其他无模型电厂显示“尚无三维模型”。
 
 ## 验收限制
 
@@ -57,6 +57,8 @@ python3 -m http.server 8080
 - docs/03-acceptance.md：验收与未验证清单。
 - docs/04-codebuddy-prompt.md：首次接手提示词。
 - docs/05-development-plan.md：迭代路线。
+- docs/06-model-delivery-requirements.md：正式模型交付要求（双江口）。
+- docs/07-performance-check-method.md：场景加载与交互检查方法。
 - evidence/：实际浏览器截图与资源检查。
 - public/data/province_metadata.json：底图下载来源、哈希与CRS。
 - public/models/zhijin-v4/：原始模型交接资源，manifest/registry原字段保留。

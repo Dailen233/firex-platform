@@ -1,0 +1,56 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "GEM_HYDRO_SHUANGJIANGKOU",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          101.92361870372959,
+          31.792757792141334
+        ]
+      },
+      "properties": {
+        "plant_id": "GEM_HYDRO_SHUANGJIANGKOU",
+        "id_namespace": "Fire-X internal project ID; not a GEM database identifier",
+        "name_zh": "双江口水电站",
+        "name_en": "Shuangjiangkou Hydropower Station",
+        "plant_type": "hydro",
+        "province_code": "510000",
+        "province_name": "四川省",
+        "prefecture_name": "阿坝藏族羌族自治州",
+        "county_location_note": "马尔康市与金川县交界",
+        "river": "大渡河",
+        "owner_group": "国家能源集团",
+        "design_capacity_mw": 2000,
+        "capacity_scope": "design_total; not current operational capacity",
+        "commissioning_evidence": {
+          "event_date": "2026-08-31",
+          "commissioned_units_reported": 3,
+          "unit_capacity_mw": 500,
+          "reported_commissioned_capacity_mw": 1500,
+          "capacity_derivation": "3 × 500 MW; based on dated official report, not a live operating measurement",
+          "remaining_unit_current_status": "not independently confirmed",
+          "source_url": "https://wap.sasac.gov.cn/n2588025/n2588124/c35848100/content.html"
+        },
+        "dam_design_height_m": 315,
+        "scene_ready": false,
+        "scene_id": null,
+        "reference_preview_candidate_scene_id": "shuangjiangkou_reference_terrain",
+        "formal_model_status": "awaiting_file",
+        "fire_monitoring_status": "not_connected",
+        "current_alert_level": null,
+        "coordinate_status": "public_map_reference",
+        "coordinate_note": "UTM47N centroid of OSM dam polygon converted to WGS84; suitable for catalogue display, not survey-grade or underground powerhouse centre",
+        "coordinate_source_url": "https://www.openstreetmap.org/way/860492359",
+        "reference_accuracy_m": null,
+        "official_fact_sources": [
+          "https://www.nea.gov.cn/20260710/fd2ccc7252694cf9b0fd225a3db32a3e/c.html",
+          "https://wap.sasac.gov.cn/n2588025/n2588124/c35848100/content.html"
+        ],
+        "attribution": "© OpenStreetMap contributors; ODbL 1.0; https://www.openstreetmap.org/copyright"
+      }
+    }
+  ]
+}

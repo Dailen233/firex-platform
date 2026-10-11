@@ -280,6 +280,81 @@
           26.832824
         ]
       }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "plant_id": "GEM_HYDRO_SHUANGJIANGKOU",
+        "name": "双江口水电站",
+        "aliases": "Shuangjiangkou Hydroelectric Plant",
+        "source_province": "四川省阿坝州马尔康市与金川县交界",
+        "display_province": "四川省",
+        "province_code": "510000",
+        "related_province_codes": [
+          "510000"
+        ],
+        "technology": "Hydropower",
+        "operating_status": "Operating",
+        "capacity_mw": 2000,
+        "design_capacity_mw": 2000,
+        "capacity_scope": "设计装机 2000 MW（4×500 MW）；非实时出力",
+        "commissioning_note": "截至 2026-08-31 官方报道一期三台投运（3×500 MW）；第四台当前状态未独立核实",
+        "dam_design_height_m": 315,
+        "coordinate_crs": "WGS84 / EPSG:4326",
+        "coordinate_accuracy": "OSM 坝体多边形质心（UTM47N → WGS84）；公开地图参考，非测绘级",
+        "source_id": "OpenStreetMap + 官方公开资料",
+        "source_version": "国家能源局 2026-07 转人民日报（设计装机/坝高）；国资委 2026-09-02 转国家能源集团（2026-08-31 三台投运）",
+        "source_url": "https://www.openstreetmap.org/way/860492359",
+        "official_case_source": "https://wap.sasac.gov.cn/n2588025/n2588124/c35848100/content.html",
+        "scene_id": null,
+        "scene_ready": false,
+        "formal_model_status": "awaiting_file",
+        "reference_preview_scene_id": "shuangjiangkou_reference_terrain",
+        "plant_id_namespace": "Fire-X project-defined sample IDs; not GEM native IDs",
+        "coordinate_verification_status": "public_map_reference",
+        "fire_monitoring_status": "not_connected",
+        "current_alert_level": null,
+        "research_area_scope_note": "研究区域约 100 km²（电站、山地、一段电力线路）为研究口径，非已渲染模型面积；正式模型待接入",
+        "research_area_markers": [
+          {
+            "id": "OSM-WAY-860492359-CENTROID",
+            "label": "坝体轮廓代表点",
+            "lon": 101.92361870372959,
+            "lat": 31.792757792141334,
+            "verification_status": "public_map_reference",
+            "source": "OpenStreetMap",
+            "source_url": "https://www.openstreetmap.org/way/860492359",
+            "note": "OSM 坝体多边形质心；非测量控制点、非地下厂房中心"
+          },
+          {
+            "id": "OSM-WAY-1566903019-CENTROID",
+            "label": "开关站轮廓代表点",
+            "lon": 101.92545573655306,
+            "lat": 31.79571759985312,
+            "verification_status": "public_map_reference",
+            "source": "OpenStreetMap",
+            "source_url": "https://www.openstreetmap.org/way/1566903019",
+            "note": "OSM 开关站轮廓质心；非测量控制点"
+          },
+          {
+            "id": "OSM-NODE-13248564235",
+            "label": "周边线路参考塔位（线路归属待核）",
+            "lon": 101.9264694,
+            "lat": 31.8003532,
+            "verification_status": "public_map_reference",
+            "source": "OpenStreetMap",
+            "source_url": "https://www.openstreetmap.org/node/13248564235",
+            "note": "OSM 塔位节点；无实测高度，送出工程归属待核"
+          }
+        ]
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          101.92361870372959,
+          31.792757792141334
+        ]
+      }
     }
   ]
 }

@@ -1,0 +1,48 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "SJK-STUDY-PROPOSAL-v1",
+      "properties": {
+        "name": "双江口研究区建议边界（可调整）",
+        "is_proposed": true,
+        "is_model_coverage": false,
+        "design_method": "10 km × 10 km UTM47N square centred on OSM dam polygon centroid",
+        "projected_area_km2": 100,
+        "ellipsoidal_area_km2": 99.891045,
+        "coordinate_frame_id": "SJK_REFERENCE_UTM47N_EGM2008_v1",
+        "source": "Fire-X project proposal derived from OSM representative point",
+        "attribution": "© OpenStreetMap contributors; ODbL 1.0; https://www.openstreetmap.org/copyright",
+        "created_at": "2026-10-11"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              101.86947729890191,
+              31.748905183331402
+            ],
+            [
+              101.97492155457294,
+              31.746485011262088
+            ],
+            [
+              101.97781114361028,
+              31.83658398031414
+            ],
+            [
+              101.87226481781904,
+              31.839012620688667
+            ],
+            [
+              101.86947729890191,
+              31.748905183331402
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

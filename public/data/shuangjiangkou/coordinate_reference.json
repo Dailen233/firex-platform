@@ -1,0 +1,44 @@
+{
+  "coordinate_frame_id": "SJK_REFERENCE_UTM47N_EGM2008_v1",
+  "role": "known generated reference terrain frame; not formal-model registration",
+  "horizontal_crs": "EPSG:32647",
+  "geojson_crs": "EPSG:4326",
+  "geojson_axis_order": "longitude, latitude",
+  "axes": {
+    "X": "UTM grid easting",
+    "Y": "up",
+    "Z": "negative UTM grid northing"
+  },
+  "unit": "metre",
+  "handedness": "right",
+  "origin_lon_lat_wgs84": [
+    101.92361870372959,
+    31.792757792141334
+  ],
+  "origin_easting_northing_m": [
+    776824.5849004028,
+    3521187.817650134
+  ],
+  "vertical_crs": "EPSG:3855",
+  "height_origin_m": 2000,
+  "height_formula": "Y=H_EGM2008-2000",
+  "vertical_origin_role": "explicit display-coordinate offset, not local terrain elevation",
+  "map_to_reference_formula": "[E-E0, H_EGM2008-2000, N0-N]",
+  "reference_to_map_formula": "E=X+E0, N=N0-Z; inverse EPSG:32647 → EPSG:4326; H_EGM2008=Y+2000",
+  "map_crs_warning": "WGS84 input; do not feed GCJ-02/BD-09 coordinates into the adapter",
+  "formal_model_registration": {
+    "status": "pending_file",
+    "horizontal_crs": null,
+    "axis_orientation": null,
+    "unit": null,
+    "origin": null,
+    "vertical_datum": null,
+    "transform_to_reference_frame": null
+  },
+  "proposed_study_area": {
+    "projected_area_km2": 100,
+    "ellipsoidal_area_km2": 99.89104476408863,
+    "is_actual_model_delivery_extent": false
+  },
+  "accuracy_note": "Coordinate arithmetic is validated; source geometry/DSM accuracy and real-world model registration are not survey-verified."
+}

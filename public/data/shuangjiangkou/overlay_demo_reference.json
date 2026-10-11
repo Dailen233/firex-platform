@@ -1,0 +1,78 @@
+{
+  "scene_id": "shuangjiangkou_reference_terrain",
+  "asset_version": "reference-v1",
+  "coordinate_frame_id": "SJK_REFERENCE_UTM47N_EGM2008_v1",
+  "is_mock": true,
+  "disclaimer": "参考点叠加测试，非测量控制点、非真实火情、非无人机轨迹；高度为公开 DSM 参考表面 +1m 显示偏移。",
+  "markers": [
+    {
+      "marker_id": "OSM-WAY-860492359-CENTROID",
+      "label": "坝体轮廓代表点",
+      "scene_id": "shuangjiangkou_reference_terrain",
+      "asset_version": "reference-v1",
+      "coordinate_frame_id": "SJK_REFERENCE_UTM47N_EGM2008_v1",
+      "lon_lat_wgs84": [
+        101.92361870372959,
+        31.792757792141334
+      ],
+      "local_xyz_m": [
+        0.0,
+        277.952637,
+        0.0
+      ],
+      "surface_y_m": 276.952637,
+      "display_offset_m": 1,
+      "height_source": "sampled exported DSM triangle surface + 1 m display offset; not surveyed facility/tower height",
+      "source_url": "https://www.openstreetmap.org/way/860492359",
+      "usage": "reference-registration smoke test only; not a GCP",
+      "is_mock": true,
+      "mock_scope": "3D display height and marker demo only; map feature reference comes from OSM"
+    },
+    {
+      "marker_id": "OSM-WAY-1566903019-CENTROID",
+      "label": "开关站轮廓代表点",
+      "scene_id": "shuangjiangkou_reference_terrain",
+      "asset_version": "reference-v1",
+      "coordinate_frame_id": "SJK_REFERENCE_UTM47N_EGM2008_v1",
+      "lon_lat_wgs84": [
+        101.92545573655306,
+        31.79571759985312
+      ],
+      "local_xyz_m": [
+        165.170021,
+        519.351354,
+        -332.936859
+      ],
+      "surface_y_m": 518.351354,
+      "display_offset_m": 1,
+      "height_source": "sampled exported DSM triangle surface + 1 m display offset; not surveyed facility/tower height",
+      "source_url": "https://www.openstreetmap.org/way/1566903019",
+      "usage": "reference-registration smoke test only; not a GCP",
+      "is_mock": true,
+      "mock_scope": "3D display height and marker demo only; map feature reference comes from OSM"
+    },
+    {
+      "marker_id": "OSM-NODE-13248564235",
+      "label": "周边线路参考塔位（线路归属待核）",
+      "scene_id": "shuangjiangkou_reference_terrain",
+      "asset_version": "reference-v1",
+      "coordinate_frame_id": "SJK_REFERENCE_UTM47N_EGM2008_v1",
+      "lon_lat_wgs84": [
+        101.9264694,
+        31.8003532
+      ],
+      "local_xyz_m": [
+        247.335106,
+        1028.245041,
+        -849.627796
+      ],
+      "surface_y_m": 1027.245041,
+      "display_offset_m": 1,
+      "height_source": "sampled exported DSM triangle surface + 1 m display offset; not surveyed facility/tower height",
+      "source_url": "https://www.openstreetmap.org/node/13248564235",
+      "usage": "reference-registration smoke test only; not a GCP",
+      "is_mock": true,
+      "mock_scope": "3D display height and marker demo only; map feature reference comes from OSM"
+    }
+  ]
+}

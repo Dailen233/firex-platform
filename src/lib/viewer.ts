@@ -1,12 +1,13 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
-import type { ActiveFirePatch, FireLevel, SceneManifest, SceneObject } from './types'
-import { readJson,resolveResource } from './data'
+import type { ActiveFirePatch, FireLevel, ReferenceMarker, SceneObject, SceneProfile } from './types'
+import { assetUrl, readJson, resolveResource } from './data'
 import { pointInRingXZ } from './fire-demo-schema'
 import { SoftwareRenderer } from './software-renderer'
 
-export interface ViewerCallbacks {progress:(percent:number,message:string)=>void;loaded:(manifest:SceneManifest,objects:SceneObject[])=>void;selected:(object:SceneObject|null)=>void;mode:(mode:'webgl'|'software')=>void}
+export type FrameKind = 'default' | 'plant' | 'whole_terrain' | 'panorama'
+export interface ViewerCallbacks {progress:(percent:number,message:string)=>void;loaded:(profile:SceneProfile,objects:SceneObject[],markers:ReferenceMarker[])=>void;selected:(object:SceneObject|null)=>void;mode:(mode:'webgl'|'software')=>void}
 function releaseModel(root:THREE.Object3D){
  const geometries=new Set<THREE.BufferGeometry>(),materials=new Set<THREE.Material>(),textures=new Set<THREE.Texture>()
  root.traverse(o=>{if(o instanceof THREE.Mesh){geometries.add(o.geometry);for(const m of Array.isArray(o.material)?o.material:[o.material])materials.add(m)}})
@@ -20,9 +21,10 @@ function fireColor(level:FireLevel,intensity:number){
 export class ModelViewer {
  private renderer:THREE.WebGLRenderer|SoftwareRenderer;private scene=new THREE.Scene();private camera=new THREE.PerspectiveCamera(45,1,1,20000)
  private controls:OrbitControls;private resizeObserver:ResizeObserver;private abort=new AbortController()
- private frame=0;private disposed=false;private root:THREE.Group|null=null;private objects:SceneObject[]=[]
- private meshes:THREE.Mesh[]=[];private selectedBox:THREE.BoxHelper|null=null;private manifest:SceneManifest|null=null
- private fireOverlay:THREE.Group|null=null;private terrainMesh:THREE.Mesh|null=null;private pendingFirePatches:ActiveFirePatch[]|null=null
+ private rafId=0;private disposed=false;private root:THREE.Group|null=null;private objects:SceneObject[]=[]
+ private meshes:THREE.Mesh[]=[];private selectedBox:THREE.BoxHelper|null=null;private profile:SceneProfile|null=null
+ private fireOverlay:THREE.Group|null=null;private referenceMarkers:THREE.Group|null=null
+ private terrainMesh:THREE.Mesh|null=null;private pendingFirePatches:ActiveFirePatch[]|null=null
  private pointerStart={x:0,y:0};private pointer=new THREE.Vector2();private raycaster=new THREE.Raycaster()
  constructor(private host:HTMLElement,private callback:ViewerCallbacks){
   // A disabled cloud GPU must remain visible as a limitation, not a false GLB failure.
@@ -31,7 +33,7 @@ export class ModelViewer {
   else{this.renderer=new SoftwareRenderer();callback.mode('software')}
   this.renderer.setPixelRatio(Math.min(window.devicePixelRatio,1.5));this.renderer.setClearColor('#0c1927')
   this.renderer.outputColorSpace=THREE.SRGBColorSpace;this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1.15
-  this.renderer.domElement.setAttribute('aria-label','织金三维模型：拖动旋转、滚轮缩放；设施列表支持键盘选择')
+  this.renderer.domElement.setAttribute('aria-label','三维模型：拖动旋转、滚轮缩放、右键平移')
   this.host.appendChild(this.renderer.domElement)
   this.scene.add(new THREE.HemisphereLight(0xe0efff,0x9a9981,2.5))
   const sun=new THREE.DirectionalLight(0xfff4df,2.6);sun.position.set(2000,4000,2500);this.scene.add(sun)
@@ -48,11 +50,12 @@ export class ModelViewer {
   const w=this.host.clientWidth,h=this.host.clientHeight;if(!w||!h)return
   this.camera.aspect=w/h;this.camera.updateProjectionMatrix();this.renderer.setSize(w,h,false);this.requestRender()
  }
- private requestRender=()=>{if(!this.disposed&&!this.frame)this.frame=requestAnimationFrame(this.render)}
- private render=()=>{this.frame=0;if(this.disposed)return;this.controls.update();this.renderer.render(this.scene,this.camera)}
+ private requestRender=()=>{if(!this.disposed&&!this.rafId)this.rafId=requestAnimationFrame(this.render)}
+ private render=()=>{this.rafId=0;if(this.disposed)return;this.controls.update();this.renderer.render(this.scene,this.camera)}
  private onPointerDown=(event:PointerEvent)=>{this.pointerStart={x:event.clientX,y:event.clientY}}
  private onPointerUp=(event:PointerEvent)=>{
   if(this.disposed||event.button!==0||Math.hypot(event.clientX-this.pointerStart.x,event.clientY-this.pointerStart.y)>5)return
+  if(!this.profile?.capabilities.object_selection){this.select(null);return}
   const rect=this.renderer.domElement.getBoundingClientRect();this.pointer.set((event.clientX-rect.left)/rect.width*2-1,-(event.clientY-rect.top)/rect.height*2+1)
   this.raycaster.setFromCamera(this.pointer,this.camera)
   const hit=this.raycaster.intersectObjects(this.meshes,false)[0]
@@ -61,57 +64,105 @@ export class ModelViewer {
   const record=this.objects.find(o=>o.glb_node_name===hit.object.name)
   this.select(record?.object_id??null)
  }
- async load(manifestUrl:string){
+ async load(profileUrl:string){
   const signal=this.abort.signal
-  this.callback.progress(0,'读取场景配置与对象表')
-  const manifest=await readJson<SceneManifest>(manifestUrl,signal)
-  if(manifest.scene_id!=='zhijin_pilot'||manifest.asset_version!=='v4')throw new Error('场景编号或模型版本不匹配')
-  const registry=await readJson<{objects:SceneObject[]}>(resolveResource(manifest.object_registry_uri,manifestUrl),signal)
-  this.callback.progress(5,'下载织金 v4 模型')
-  const response=await fetch(resolveResource(manifest.model_uri,manifestUrl),{signal:AbortSignal.any([signal,AbortSignal.timeout(45000)])})
+  this.callback.progress(0,'读取场景配置')
+  const profile=await readJson<SceneProfile>(profileUrl,signal)
+  if(!profile.scene_id||!profile.model_uri)throw new Error('场景配置缺少 scene_id 或 model_uri')
+  // 对象表：必需对象表却缺失 → 加载失败；未声明对象表 → 可浏览但无对象选择。
+  let registryObjects:SceneObject[]=[]
+  if(profile.object_registry_required){
+   if(!profile.object_registry_uri)throw new Error('场景声明必需对象表，但未提供对象表路径')
+   const registry=await readJson<{objects:SceneObject[]}>(resolveResource(profile.object_registry_uri,profileUrl),signal)
+   registryObjects=registry.objects
+  }else if(profile.object_registry_uri){
+   try{registryObjects=(await readJson<{objects:SceneObject[]}>(resolveResource(profile.object_registry_uri,profileUrl),signal)).objects}catch{registryObjects=[]}
+  }
+  // 参考标记（仅当能力开关开启且绑定本场景）。
+  let markers:ReferenceMarker[]=[]
+  if(profile.capabilities.reference_markers&&profile.overlay_markers_uri){
+   try{
+    const data=await readJson<{markers:ReferenceMarker[]}>(assetUrl(profile.overlay_markers_uri),signal)
+    markers=data.markers.filter(m=>m.scene_id===profile.scene_id&&m.asset_version===profile.asset_version)
+   }catch{markers=[]}
+  }
+  const modelLabel=profile.display_name??profile.scene_id
+  this.callback.progress(5,`下载模型（${modelLabel}）`)
+  const response=await fetch(resolveResource(profile.model_uri,profileUrl),{signal:AbortSignal.any([signal,AbortSignal.timeout(45000)])})
   if(!response.ok)throw new Error(`模型读取失败（HTTP ${response.status}）`)
   const parts:Uint8Array[]=[];let size=0
-  if(response.body){const reader=response.body.getReader();while(true){const part=await reader.read();if(part.done)break;parts.push(part.value);size+=part.value.length;this.callback.progress(5+Math.min(75,size/manifest.asset.bytes*75),'下载织金 v4 模型')}}
+  const totalBytes=profile.asset?.bytes
+  if(response.body){const reader=response.body.getReader();while(true){const part=await reader.read();if(part.done)break;parts.push(part.value);size+=part.value.length;if(totalBytes)this.callback.progress(5+Math.min(75,size/totalBytes*75),`下载模型（${modelLabel}）`);else this.callback.progress(5,`下载模型 ${(size/1048576).toFixed(1)} MB`)}}
   else{const bytes=new Uint8Array(await response.arrayBuffer());parts.push(bytes);size=bytes.length}
   const buffer=new Uint8Array(size);let offset=0;for(const part of parts){buffer.set(part,offset);offset+=part.length}
-  if(size!==manifest.asset.bytes)throw new Error('模型文件大小与交接记录不一致')
+  if(totalBytes&&size!==totalBytes)throw new Error('模型文件大小与交接记录不一致')
   // crypto.subtle is available on HTTPS and localhost. Byte/node checks still apply on plain HTTP LAN previews.
-  if(globalThis.crypto?.subtle){
+  if(profile.asset?.sha256&&globalThis.crypto?.subtle){
    const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',buffer))).map(b=>b.toString(16).padStart(2,'0')).join('')
-   if(hash!==manifest.asset.sha256)throw new Error('模型文件哈希与交接记录不一致')
+   if(hash!==profile.asset.sha256)throw new Error('模型文件哈希与交接记录不一致')
   }
   if(this.disposed)return
   this.callback.progress(85,'解析几何并核对对象')
-  const gltf=await new GLTFLoader().parseAsync(buffer.buffer,new URL('.',manifestUrl).href)
+  const gltf=await new GLTFLoader().parseAsync(buffer.buffer,new URL('.',profileUrl).href)
   if(this.disposed){releaseModel(gltf.scene);return}
-  this.root=gltf.scene;this.objects=registry.objects;this.manifest=manifest
-  this.root.traverse(o=>{if(o instanceof THREE.Mesh)this.meshes.push(o)})
-  this.terrainMesh=this.meshes.find(o=>o.name==='geometry_0')??null
-  const names=this.meshes.map(o=>o.name)
-  if(this.meshes.length!==manifest.asset.object_meshes||new Set(names).size!==names.length||registry.objects.length!==38||registry.objects.some(o=>!names.includes(o.glb_node_name)))throw new Error('对象表与 GLB 节点未能完整对应')
+  this.root=gltf.scene;this.objects=registryObjects;this.profile=profile
+  this.meshes=[];this.root.traverse(o=>{if(o instanceof THREE.Mesh)this.meshes.push(o)})
+  this.terrainMesh=profile.terrain_mesh_name?this.meshes.find(o=>o.name===profile.terrain_mesh_name)??null:null
+  // 对象表一致性仅在声明必需对象表时校验，不强制其他场景有织金对象表。
+  if(profile.object_registry_required){
+   const names=this.meshes.map(o=>o.name)
+   const objectMeshes=profile.asset?.object_meshes??null
+   if(objectMeshes!=null&&(this.meshes.length!==objectMeshes||new Set(names).size!==names.length||registryObjects.length!==objectMeshes||registryObjects.some(o=>!names.includes(o.glb_node_name))))throw new Error('对象表与 GLB 节点未能完整对应')
+  }
   // Preserve the handed-off local coordinate frame. Fit the camera, never the model.
   if(!this.root.position.equals(new THREE.Vector3())||!this.root.scale.equals(new THREE.Vector3(1,1,1))||!this.root.quaternion.equals(new THREE.Quaternion()))throw new Error('模型根变换不符合局部坐标约定')
-  this.scene.add(this.root);this.framePreset('plant')
-  this.callback.progress(100,'模型已加载');this.callback.loaded(manifest,registry.objects)
+  this.scene.add(this.root)
+  this.applyCameraLimits(profile)
+  this.frame('default')
+  this.renderer.domElement.setAttribute('aria-label',`${modelLabel}：拖动旋转、滚轮缩放、右键平移`)
+  this.callback.progress(100,'模型已加载');this.callback.loaded(profile,registryObjects,markers)
+  this.setReferenceMarkers(markers)
   if(this.pendingFirePatches){const p=this.pendingFirePatches;this.pendingFirePatches=null;this.setFirePatches(p)}
   this.requestRender()
  }
- framePreset(kind:'plant'|'whole_terrain'){
-  if(!this.manifest)return
-  const p=this.manifest.camera_presets[kind],target=new THREE.Vector3(...p.target_local_xyz_m)
-  this.camera.fov=p.vertical_fov_degrees;this.camera.near=p.near_m;this.camera.far=p.far_m
-  let position=new THREE.Vector3(...p.position_local_xyz_m)
+ private applyCameraLimits(p:SceneProfile){
+  this.camera.fov=p.cameras.vertical_fov_degrees;this.camera.near=p.camera_limits.near;this.camera.far=p.camera_limits.far
+  this.controls.minDistance=p.camera_limits.min_distance;this.controls.maxDistance=p.camera_limits.max_distance
+  this.camera.updateProjectionMatrix()
+ }
+ private applyCamera(cam:{position:[number,number,number];target:[number,number,number]}){
+  const target=new THREE.Vector3(...cam.target);let position=new THREE.Vector3(...cam.position)
   // Adapt preset to the viewport's limiting FOV, including a narrow portrait canvas.
   const ratio=Math.max(1,1/this.camera.aspect)
   position=target.clone().add(position.sub(target).multiplyScalar(ratio))
   this.camera.position.copy(position);this.controls.target.copy(target);this.camera.updateProjectionMatrix();this.controls.update();this.requestRender()
+ }
+ frame(kind:FrameKind){
+  if(!this.profile)return
+  const c=this.profile.cameras
+  if(kind==='panorama'){this.frameBounds(c.panorama.padding_factor);return}
+  const cam=kind==='plant'?c.plant:kind==='whole_terrain'?c.whole_terrain:c.default
+  if(cam)this.applyCamera(cam)
+ }
+ private frameBounds(padding:number){
+  const box=new THREE.Box3()
+  if(this.profile?.bounds_local_m){box.set(new THREE.Vector3(...this.profile.bounds_local_m.min),new THREE.Vector3(...this.profile.bounds_local_m.max))}
+  else{for(const m of this.meshes)box.expandByObject(m)}
+  if(box.isEmpty())return
+  const center=box.getCenter(new THREE.Vector3())
+  const radius=box.getBoundingSphere(new THREE.Sphere()).radius
+  const fov=this.camera.fov*Math.PI/180
+  const dist=(radius/Math.sin(fov/2))*padding*Math.max(1,1/this.camera.aspect)
+  const dir=new THREE.Vector3(1,0.65,1).normalize()
+  this.camera.position.copy(center.clone().addScaledVector(dir,dist))
+  this.controls.target.copy(center);this.camera.updateProjectionMatrix();this.controls.update();this.requestRender()
  }
  select(id:string|null,focus=false){
   if(this.selectedBox){this.scene.remove(this.selectedBox);this.selectedBox.geometry.dispose();(this.selectedBox.material as THREE.Material).dispose();this.selectedBox=null}
   const object=this.objects.find(o=>o.object_id===id)??null
   if(object){const mesh=this.meshes.find(o=>o.name===object.glb_node_name)
    if(mesh&&object.object_id!=='terrain'){this.selectedBox=new THREE.BoxHelper(mesh,0x6affd2);this.scene.add(this.selectedBox)}
-   if(focus){if(object.object_id==='terrain')this.framePreset('whole_terrain');else{
+   if(focus){if(object.object_id==='terrain')this.frame('whole_terrain');else{
     const target=new THREE.Vector3(...object.focus_local_xyz_m),bounds=new THREE.Box3(new THREE.Vector3(...object.bounds_local_xyz_m[0]),new THREE.Vector3(...object.bounds_local_xyz_m[1]))
     const length=Math.max(bounds.getSize(new THREE.Vector3()).length()*1.8,180)*Math.max(1,1/this.camera.aspect)
     this.camera.position.copy(target.clone().add(new THREE.Vector3(1,0.7,1).normalize().multiplyScalar(length)));this.controls.target.copy(target);this.controls.update()
@@ -119,16 +170,40 @@ export class ModelViewer {
   }
   this.callback.selected(object);this.requestRender()
  }
+ setReferenceMarkers(markers:ReferenceMarker[]){
+  this.disposeReferenceMarkers()
+  if(!markers.length||!this.profile?.capabilities.reference_markers)return
+  this.referenceMarkers=new THREE.Group();this.referenceMarkers.name='reference-markers'
+  const color=0x6affd2
+  for(const m of markers){
+   const [x,y,z]=m.local_xyz_m
+   const sphere=new THREE.Mesh(new THREE.SphereGeometry(22,16,16),new THREE.MeshBasicMaterial({color}))
+   sphere.position.set(x,y,z);this.referenceMarkers.add(sphere)
+   const lineGeo=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x,m.surface_y_m,z),new THREE.Vector3(x,y,z)])
+   const line=new THREE.Line(lineGeo,new THREE.LineBasicMaterial({color,transparent:true,opacity:0.6}))
+   this.referenceMarkers.add(line)
+  }
+  this.scene.add(this.referenceMarkers);this.requestRender()
+ }
+ private disposeReferenceMarkers(){
+  if(this.referenceMarkers){
+   this.referenceMarkers.traverse(o=>{if(o instanceof THREE.Mesh||o instanceof THREE.Line){o.geometry.dispose();for(const m of Array.isArray(o.material)?o.material:[o.material])m.dispose()}})
+   this.scene.remove(this.referenceMarkers);this.referenceMarkers=null
+  }
+ }
  /** 贴地火区覆盖层：复用 geometry_0 原三角网格（401×401，顶点序 z*401+x），
-  * 以三角质心是否落入火区环判定纳入，绝不改写原几何/根变换。 */
+  * 以三角质心是否落入火区环判定纳入，绝不改写原几何/根变换。仅对开启 fire_patch_overlay 的场景生效。 */
  setFirePatches(patches:ActiveFirePatch[]){
   if(this.disposed)return
+  if(!this.profile?.capabilities.fire_patch_overlay){this.pendingFirePatches=null;return}
   if(!this.terrainMesh){this.pendingFirePatches=patches.length?patches:null;return}
   this.pendingFirePatches=null;this.disposeFireOverlay()
   if(patches.length===0)return
   const pos=this.terrainMesh.geometry.getAttribute('position') as THREE.BufferAttribute
-  if(pos.count!==160801)return // 仅支持交接的 v4 地形网格；未来资产不假设
-  const n=401
+  const grid=this.profile.terrain_grid
+  if(!grid)return
+  const n=grid.nx
+  if(pos.count!==n*grid.nz)return // 仅支持配置声明的规则地形网格；未来资产不假设
   const targets=patches.flatMap(p=>p.rings.map(ring=>{
    let minX=Infinity,maxX=-Infinity,minZ=Infinity,maxZ=-Infinity
    for(const [x,z] of ring.ring_xz){if(x<minX)minX=x;if(x>maxX)maxX=x;if(z<minZ)minZ=z;if(z>maxZ)maxZ=z}
@@ -178,12 +253,12 @@ export class ModelViewer {
   }
  }
  dispose(){
-  if(this.disposed)return;this.disposed=true;this.abort.abort();cancelAnimationFrame(this.frame)
+  if(this.disposed)return;this.disposed=true;this.abort.abort();cancelAnimationFrame(this.rafId)
   this.resizeObserver.disconnect();this.controls.removeEventListener('change',this.requestRender);this.controls.dispose()
   this.renderer.domElement.removeEventListener('pointerdown',this.onPointerDown);this.renderer.domElement.removeEventListener('pointerup',this.onPointerUp)
   if(this.selectedBox){this.selectedBox.geometry.dispose();(this.selectedBox.material as THREE.Material).dispose()}
   if(this.root)releaseModel(this.root)
-  this.disposeFireOverlay();this.terrainMesh=null;this.pendingFirePatches=null
-  this.renderer.dispose();this.renderer.forceContextLoss();this.renderer.domElement.remove();this.meshes=[];this.objects=[];this.root=null
+  this.disposeFireOverlay();this.disposeReferenceMarkers();this.terrainMesh=null;this.pendingFirePatches=null
+  this.renderer.dispose();this.renderer.forceContextLoss();this.renderer.domElement.remove();this.meshes=[];this.objects=[];this.root=null;this.profile=null
  }
 }

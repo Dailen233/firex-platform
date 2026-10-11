@@ -1,0 +1,18 @@
+{
+  "name": "阿坝双江口水电站500千伏送出工程",
+  "reference_voltage_kv": 500,
+  "circuit_count_in_approval": 2,
+  "route_length_per_circuit_approx_km": 106,
+  "from": "双江口水电站500kV开关站",
+  "to": "阿坝1000kV变电站的500kV间隔",
+  "note": "106 km is the entire outgoing route in published project documentation; the Fire-X study area contains only a local section. OSM reference lines have not been matched to the official circuits.",
+  "geometry": null,
+  "official_geometry_status": "not_obtained",
+  "official_tower_coordinate_table_status": "not_obtained",
+  "source_urls": [
+    "https://epaper.ceic.com/pad/content/202502/12/content_11215.html",
+    "https://sthjt.sc.gov.cn/sthjt/c103939/2025/6/5/281ff75ffe3646d782ebd807ed52b387.shtml"
+  ],
+  "report_observation": "Downloaded public report body has 343 PDF pages; it refers to route Appendix Figure 2, but this downloaded copy does not contain that appendix map or a recoverable tower coordinate table.",
+  "checked_at": "2026-10-11"
+}

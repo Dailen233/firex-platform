@@ -8,6 +8,11 @@ import { assetUrl, readJson } from './data'
 
 export type DemoDataState = 'unloaded' | 'loading' | 'ready' | 'unavailable'
 
+// R3 收尾：合成火情演示覆盖层回归未通过（用户实测播放超 50 秒仍未出现火区，原因未定位）。
+// 本轮暂停演示入口（play 为 no-op，时钟不启动、覆盖层与派生演示告警保持清空），
+// 不修复其渲染、不扩展火势算法；保留契约、校验与叠加能力供未来复用，不改写电厂真实监测字段。
+export const FIRE_DEMO_DISABLED = true
+
 function signatureOf(patches: ActiveFirePatch[]): string {
   return patches.map(p => `${p.patch_id}:${p.level}:${p.intensity.toFixed(3)}`).sort().join(';')
 }
@@ -72,6 +77,7 @@ function createStore() {
 
   // ---- 动作 ----
   function play() {
+    if (FIRE_DEMO_DISABLED) return // 演示入口已暂停（见顶部注释）
     if (dataState.value !== 'ready' || !demo.value) return
     if (status.value === 'ended') return // ended 后播放无效，需先 reset
     if (status.value === 'off') t_s.value = 0
@@ -136,6 +142,7 @@ function createStore() {
     isDemoOn,
     playing,
     demoOnNoFire,
+    demoDisabled: FIRE_DEMO_DISABLED,
     play,
     pause,
     reset,

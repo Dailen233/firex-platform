@@ -1,0 +1,103 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "OSM-WAY-860492359",
+      "properties": {
+        "name": "双江口大坝",
+        "coordinate_status": "public_map_reference",
+        "source_url": "https://www.openstreetmap.org/way/860492359",
+        "osm_version": 4,
+        "osm_timestamp": "2026-05-11T23:42:22Z",
+        "attribution": "© OpenStreetMap contributors; ODbL 1.0; https://www.openstreetmap.org/copyright"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              101.9239679,
+              31.7958752
+            ],
+            [
+              101.9244141,
+              31.795736
+            ],
+            [
+              101.9280538,
+              31.7923804
+            ],
+            [
+              101.9277153,
+              31.7910726
+            ],
+            [
+              101.9269687,
+              31.7906095
+            ],
+            [
+              101.9218066,
+              31.7904112
+            ],
+            [
+              101.9214441,
+              31.7905241
+            ],
+            [
+              101.9191626,
+              31.7919986
+            ],
+            [
+              101.9207586,
+              31.7947568
+            ],
+            [
+              101.9239679,
+              31.7958752
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "OSM-WAY-1566903019",
+      "properties": {
+        "name": "双江口水电站500千伏开关站",
+        "coordinate_status": "public_map_reference",
+        "source_url": "https://www.openstreetmap.org/way/1566903019",
+        "osm_version": 1,
+        "osm_timestamp": "2026-10-09T20:03:20Z",
+        "attribution": "© OpenStreetMap contributors; ODbL 1.0; https://www.openstreetmap.org/copyright"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              101.9260907,
+              31.7954377
+            ],
+            [
+              101.9261637,
+              31.7956523
+            ],
+            [
+              101.9248318,
+              31.7959993
+            ],
+            [
+              101.9247539,
+              31.7957768
+            ],
+            [
+              101.9260907,
+              31.7954377
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

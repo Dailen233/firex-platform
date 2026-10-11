@@ -1,0 +1,54 @@
+{
+  "scene_id": "zhijin_pilot",
+  "plant_id": "GEM_COAL_ZHIJIN",
+  "asset_version": "v4",
+  "asset_role": "formal_model",
+  "formal_model_ready": true,
+  "display_name": "国能织金电厂与周边山地（试建场景）",
+  "scene_badge": "试建场景 · v4",
+  "coordinate_frame_id": null,
+  "model_uri": "assets/zhijin_scene_v4.glb",
+  "object_registry_uri": "object_registry.json",
+  "object_registry_required": true,
+  "overlay_markers_uri": null,
+  "terrain_mesh_name": "geometry_0",
+  "terrain_grid": { "nx": 401, "nz": 401 },
+  "asset": {
+    "bytes": 6717876,
+    "sha256": "ee33bc331332d7345bb73e3a1363f9ce49234da7ec3424996ec5670f07a3aa37",
+    "object_meshes": 38,
+    "triangles": 340572,
+    "vertex_count": null,
+    "mesh_count": 38,
+    "textures_present": false
+  },
+  "bounds_local_m": null,
+  "cameras": {
+    "vertical_fov_degrees": 45,
+    "default": { "position": [1519.3712362469853, 1390.0, 1626.2133430274757], "target": [219.37123624698535, 390.0, 326.21334302747573] },
+    "plant": { "position": [1519.3712362469853, 1390.0, 1626.2133430274757], "target": [219.37123624698535, 390.0, 326.21334302747573] },
+    "whole_terrain": { "position": [4700, 3400, 4700], "target": [0, 360, 0] },
+    "panorama": { "strategy": "fit_world_bounding_box", "padding_factor": 1.15 }
+  },
+  "camera_limits": { "near": 1, "far": 20000, "min_distance": 20, "max_distance": 14000 },
+  "capabilities": { "object_selection": true, "reference_markers": false, "fire_patch_overlay": true },
+  "ui_notice": null,
+  "study_area_note": "16 km² 为试建研究区，不是电厂本体面积。无卫星纹理，未验收真实场景精度。",
+  "study_area_stat": "16 km² · 4×4 km 试建研究区",
+  "coordinate_note": "局部米制坐标。Y 为源高程减 1000 m，不是离地高度。模型根变换保持原样。",
+  "sources_and_attribution": [
+    { "name": "GBA PartII", "url": "https://github.com/zhu-xlab/GlobalBuildingAtlas", "licence": "CC BY-NC4.0 for corresponding dataset" },
+    { "name": "OSM reference", "url": "https://www.openstreetmap.org/way/560730385", "attribution": "© OpenStreetMap contributors", "licence": "ODbL" },
+    { "name": "Mapzen Terrain Tiles", "url": "https://s3.amazonaws.com/elevation-tiles-prod/skadi/N26/N26E105.hgt.gz", "notice": "Mapzen; SRTM and GMTED2010 terrain data courtesy of the U.S. Geological Survey (regional per-cell lineage pending)." },
+    { "name": "plant report", "url": "https://sthj.guizhou.gov.cn/zwgk/zdlyxx/fsjg/fslxmspqgs/202406/P020241015404863681069.pdf" },
+    { "name": "official photo", "url": "https://www.chnenergy.com.cn/gjnyjtww/chnjtyw/202106/44a7beb5674b486987d17440d6eadbb9.shtml" }
+  ],
+  "limitations": [
+    "34个建筑候选不是34栋已验证建筑，可能拆分、合并或遗漏",
+    "B01拱顶最高30m与冷却塔150m是展示假设；烟囱240m为报告记载",
+    "平台和基础高程是粗地形派生估计，最大人工地形改动约37.27m",
+    "地形颜色不是卫星贴图、植被类别或火灾风险",
+    "开放钢架为独立未定位组件，未包含在这个厂区GLB",
+    "anchor camera CRS, terrain lineage/epoch/vertical datum and current registration not validated"
+  ]
+}

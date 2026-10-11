@@ -1,0 +1,271 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "OSM-LINE-1155671924-CLIPPED",
+      "properties": {
+        "name": "周边电力线路参考（归属待核）",
+        "osm_id": 1155671924,
+        "source_url": "https://www.openstreetmap.org/way/1155671924",
+        "source_tags": {
+          "power": "line",
+          "voltage": "500000"
+        },
+        "osm_version": 5,
+        "osm_timestamp": "2025-11-03T10:23:05Z",
+        "coordinate_status": "public_map_reference",
+        "circuit_identity_status": "unverified",
+        "is_verified_shuangjiangkou_outgoing_line": false,
+        "height_status": "unknown",
+        "length_in_proposed_area_m": 3159.603,
+        "attribution": "© OpenStreetMap contributors; ODbL 1.0; https://www.openstreetmap.org/copyright"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            101.87201705718468,
+            31.83102005439723
+          ],
+          [
+            101.8720463,
+            31.831020800000008
+          ],
+          [
+            101.8805556,
+            31.831237699999996
+          ],
+          [
+            101.8847396,
+            31.831344300000012
+          ],
+          [
+            101.8915622,
+            31.831518200000005
+          ],
+          [
+            101.893022,
+            31.8315554
+          ],
+          [
+            101.8947357,
+            31.832777099999998
+          ],
+          [
+            101.8991589,
+            31.83593059999999
+          ],
+          [
+            101.90248241285401,
+            31.83832626683931
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "OSM-LINE-1443780937-CLIPPED",
+      "properties": {
+        "name": "周边电力线路参考（归属待核）",
+        "osm_id": 1443780937,
+        "source_url": "https://www.openstreetmap.org/way/1443780937",
+        "source_tags": {
+          "cables": "6",
+          "circuits": "2",
+          "power": "line",
+          "voltage": "500000"
+        },
+        "osm_version": 4,
+        "osm_timestamp": "2026-08-31T14:47:39Z",
+        "coordinate_status": "public_map_reference",
+        "circuit_identity_status": "unverified",
+        "is_verified_shuangjiangkou_outgoing_line": false,
+        "height_status": "unknown",
+        "length_in_proposed_area_m": 4016.587,
+        "attribution": "© OpenStreetMap contributors; ODbL 1.0; https://www.openstreetmap.org/copyright"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            101.90135621960958,
+            31.83835197581238
+          ],
+          [
+            101.9000292,
+            31.837503199999986
+          ],
+          [
+            101.8979117,
+            31.836241899999994
+          ],
+          [
+            101.8936453,
+            31.833546699999996
+          ],
+          [
+            101.8914653,
+            31.832159299999994
+          ],
+          [
+            101.8918482,
+            31.829132099999992
+          ],
+          [
+            101.8892696,
+            31.825752899999994
+          ],
+          [
+            101.8883164,
+            31.8245844
+          ],
+          [
+            101.8842219,
+            31.819286199999997
+          ],
+          [
+            101.8762519,
+            31.818330200000002
+          ],
+          [
+            101.8735405,
+            31.817984899999992
+          ],
+          [
+            101.87160562990078,
+            31.81774068790618
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "OSM-LINE-1443783963-CLIPPED",
+      "properties": {
+        "name": "周边电力线路参考（归属待核）",
+        "osm_id": 1443783963,
+        "source_url": "https://www.openstreetmap.org/way/1443783963",
+        "source_tags": {
+          "cables": "6",
+          "circuits": "2",
+          "power": "line",
+          "voltage": "500000"
+        },
+        "osm_version": 3,
+        "osm_timestamp": "2026-08-31T14:47:39Z",
+        "coordinate_status": "public_map_reference",
+        "circuit_identity_status": "unverified",
+        "is_verified_shuangjiangkou_outgoing_line": false,
+        "height_status": "unknown",
+        "length_in_proposed_area_m": 11239.341,
+        "attribution": "© OpenStreetMap contributors; ODbL 1.0; https://www.openstreetmap.org/copyright"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            101.9400031143607,
+            31.83746402954385
+          ],
+          [
+            101.9302699,
+            31.835180499999993
+          ],
+          [
+            101.9276778,
+            31.834509499999992
+          ],
+          [
+            101.9263665,
+            31.832346299999994
+          ],
+          [
+            101.92471,
+            31.829375199999998
+          ],
+          [
+            101.921328,
+            31.8238367
+          ],
+          [
+            101.9173,
+            31.818447499999998
+          ],
+          [
+            101.9161485,
+            31.816943600000005
+          ],
+          [
+            101.9132271,
+            31.813011500000005
+          ],
+          [
+            101.9134839,
+            31.80970480000001
+          ],
+          [
+            101.9140481,
+            31.8081459
+          ],
+          [
+            101.9181423,
+            31.8053007
+          ],
+          [
+            101.921277,
+            31.804313100000005
+          ],
+          [
+            101.9240918,
+            31.8014678
+          ],
+          [
+            101.9264694,
+            31.800353199999993
+          ],
+          [
+            101.9311075,
+            31.798839900000008
+          ],
+          [
+            101.9410446,
+            31.79566829999999
+          ],
+          [
+            101.9526983,
+            31.79186209999999
+          ],
+          [
+            101.9583065,
+            31.7895693
+          ],
+          [
+            101.960439,
+            31.7880286
+          ],
+          [
+            101.9612706,
+            31.7874305
+          ],
+          [
+            101.963403,
+            31.786243199999994
+          ],
+          [
+            101.964224,
+            31.786143499999987
+          ],
+          [
+            101.9711864,
+            31.786080100000007
+          ],
+          [
+            101.97606043766443,
+            31.782044367492144
+          ]
+        ]
+      }
+    }
+  ]
+}

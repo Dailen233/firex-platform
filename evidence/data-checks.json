@@ -1,6 +1,6 @@
 {
-  "date": "2026-10-09",
-  "count": 16,
+  "date": "2026-10-11",
+  "count": 21,
   "checks": [
     {
       "id": "DATA-01-unique-plant-ids",
@@ -23,7 +23,7 @@
       "result": "passed"
     },
     {
-      "id": "DATA-06-only-zhijin-has-model",
+      "id": "DATA-06-scene-links-and-formal-ready",
       "result": "passed"
     },
     {
@@ -48,6 +48,26 @@
     },
     {
       "id": "DATA-07-official-capacity-conflict-preserved",
+      "result": "passed"
+    },
+    {
+      "id": "SJK-01-reference-profile-asset",
+      "result": "passed"
+    },
+    {
+      "id": "SJK-02-reference-glb-structure",
+      "result": "passed"
+    },
+    {
+      "id": "SJK-03-markers-frame-consistent",
+      "result": "passed"
+    },
+    {
+      "id": "SJK-04-study-area-proposed",
+      "result": "passed"
+    },
+    {
+      "id": "SJK-05-formal-model-not-ready-and-points-sourced",
       "result": "passed"
     },
     {

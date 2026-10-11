@@ -1,0 +1,74 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "OSM-WAY-860492359-CENTROID",
+      "properties": {
+        "name": "坝体轮廓代表点",
+        "coordinate_status": "public_map_reference",
+        "model_registration_status": "pending_formal_model",
+        "survey_accuracy_m": null,
+        "source": "OpenStreetMap",
+        "source_url": "https://www.openstreetmap.org/way/860492359",
+        "attribution": "© OpenStreetMap contributors; ODbL 1.0; https://www.openstreetmap.org/copyright",
+        "osm_type": "way",
+        "osm_id": 860492359,
+        "derivation": "centroid in EPSG:32647; not a surveyed control point"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          101.92361870372959,
+          31.792757792141334
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "OSM-WAY-1566903019-CENTROID",
+      "properties": {
+        "name": "开关站轮廓代表点",
+        "coordinate_status": "public_map_reference",
+        "model_registration_status": "pending_formal_model",
+        "survey_accuracy_m": null,
+        "source": "OpenStreetMap",
+        "source_url": "https://www.openstreetmap.org/way/1566903019",
+        "attribution": "© OpenStreetMap contributors; ODbL 1.0; https://www.openstreetmap.org/copyright",
+        "osm_type": "way",
+        "osm_id": 1566903019,
+        "derivation": "centroid in EPSG:32647; not a surveyed control point"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          101.92545573655306,
+          31.79571759985312
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "OSM-NODE-13248564235",
+      "properties": {
+        "name": "周边线路参考塔位（线路归属待核）",
+        "coordinate_status": "public_map_reference",
+        "model_registration_status": "pending_formal_model",
+        "survey_accuracy_m": null,
+        "source": "OpenStreetMap",
+        "source_url": "https://www.openstreetmap.org/node/13248564235",
+        "attribution": "© OpenStreetMap contributors; ODbL 1.0; https://www.openstreetmap.org/copyright",
+        "osm_type": "node",
+        "osm_id": 13248564235,
+        "derivation": "OSM tower node; no surveyed height or verified outgoing-circuit identity"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          101.9264694,
+          31.8003532
+        ]
+      }
+    }
+  ]
+}

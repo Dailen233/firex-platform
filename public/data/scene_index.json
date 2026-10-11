@@ -1,20 +1,27 @@
 {
-  "schema_version": "1.0",
-  "generated_at": "2026-10-09",
+  "schema_version": "2.0",
+  "generated_at": "2026-10-11",
   "uri_base": "relative to public root",
   "scenes": [
     {
       "plant_id": "GEM_COAL_ZHIJIN",
-      "project_plant_key": "fx_chnenergy_zhijin_babu_pilot",
-      "source_scene_id": "ZHIJIN_16KM2_TRIAL",
       "scene_id": "zhijin_pilot",
       "asset_version": "v4",
-      "manifest_uri": "models/zhijin-v4/scene_manifest.json",
-      "scene_link_status": "provisional_source_identity_match",
-      "asset_available": true,
-      "browser_loading_verified": false,
-      "geographic_accuracy_verified": false,
-      "notice": "ID adapter only. Original GLB, manifest and local coordinates unchanged."
+      "asset_role": "formal_model",
+      "formal_model_ready": true,
+      "display_name": "国能织金电厂与周边山地（试建场景）",
+      "profile_uri": "models/zhijin-v4/scene_profile.json",
+      "notice": "Original GLB, manifest and local coordinates unchanged."
+    },
+    {
+      "plant_id": "GEM_HYDRO_SHUANGJIANGKOU",
+      "scene_id": "shuangjiangkou_reference_terrain",
+      "asset_version": "reference-v1",
+      "asset_role": "public_reference_terrain",
+      "formal_model_ready": false,
+      "display_name": "双江口公开 DSM 山地参考底座",
+      "profile_uri": "models/shuangjiangkou-reference-v1/scene_profile.json",
+      "notice": "Public DSM reference terrain only; formal model still awaiting."
     }
   ]
 }

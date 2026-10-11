@@ -1,3 +1,13 @@
+export interface ResearchAreaMarker {
+  id: string;
+  label: string;
+  lon: number;
+  lat: number;
+  verification_status: string;
+  source: string;
+  source_url: string;
+  note: string;
+}
 export interface PlantProperties {
   plant_id: string; name: string; aliases: string; source_province: string;
   display_province: string; province_code: string; related_province_codes: string[];
@@ -8,12 +18,15 @@ export interface PlantProperties {
   official_case_source_scope?: string; scene_id: string | null; scene_ready: boolean;
   fire_monitoring_status: string; current_alert_level: string | null;
   capacity_source_conflict?: { gem_value_mw: number; official_value_mw: number; status: string; note: string };
+  research_area_scope_note?: string;
+  research_area_markers?: ResearchAreaMarker[];
   [key: string]: unknown;
 }
 export interface Plant { type: 'Feature'; properties: PlantProperties; geometry: {type:'Point';coordinates:[number,number]} }
 export interface BoundaryFeature {type:'Feature';properties:{name:string;code?:string;gb?:string};geometry:{type:string;coordinates: unknown}}
 export interface Boundaries {type:'FeatureCollection';features:BoundaryFeature[]}
-export interface SceneLink {plant_id:string;scene_id:string;asset_version:string;manifest_uri:string}
+export type SceneAssetRole = 'formal_model' | 'public_reference_terrain'
+export interface SceneLink {plant_id:string;scene_id:string;asset_version:string;asset_role:SceneAssetRole;formal_model_ready:boolean;display_name:string;profile_uri:string}
 export interface CameraPreset {position_local_xyz_m: [number,number,number];target_local_xyz_m:[number,number,number];vertical_fov_degrees:number;near_m:number;far_m:number}
 export interface SceneManifest {
   scene_id:string;asset_version:string;display_name:string;model_uri:string;object_registry_uri:string;
@@ -27,6 +40,70 @@ export interface SceneObject {
   display_height_m?:number;original_GBA_height_prediction_m?:number;category:string;position_status:string;
   focus_local_xyz_m:[number,number,number];bounds_local_xyz_m:[[number,number,number],[number,number,number]];
   base_status?:string;shape_status?:string;fire_risk_level:string|null;
+}
+
+// ---- Unified frontend scene profile (config decoupling) ----
+export interface SceneProfileCamera { position: [number, number, number]; target: [number, number, number] }
+export interface SceneProfile {
+  scene_id: string;
+  plant_id: string;
+  asset_version: string;
+  asset_role: SceneAssetRole;
+  formal_model_ready: boolean;
+  display_name: string;
+  scene_badge: string;
+  coordinate_frame_id: string | null;
+  model_uri: string;
+  object_registry_uri: string | null;
+  object_registry_required: boolean;
+  overlay_markers_uri: string | null;
+  terrain_mesh_name: string | null;
+  terrain_grid: { nx: number; nz: number } | null;
+  asset: {
+    bytes: number;
+    sha256: string;
+    object_meshes: number | null;
+    triangles: number | null;
+    vertex_count: number | null;
+    mesh_count: number | null;
+    textures_present: boolean;
+  };
+  bounds_local_m: { min: [number, number, number]; max: [number, number, number] } | null;
+  cameras: {
+    vertical_fov_degrees: number;
+    default: SceneProfileCamera;
+    plant: SceneProfileCamera | null;
+    whole_terrain: SceneProfileCamera | null;
+    panorama: { strategy: 'fit_world_bounding_box'; padding_factor: number };
+  };
+  camera_limits: { near: number; far: number; min_distance: number; max_distance: number };
+  capabilities: {
+    object_selection: boolean;
+    reference_markers: boolean;
+    fire_patch_overlay: boolean;
+  };
+  ui_notice: string | null;
+  study_area_note: string | null;
+  study_area_stat: string | null;
+  coordinate_note: string | null;
+  sources_and_attribution: { name: string; url?: string; licence?: string; attribution?: string; notice?: string }[];
+  limitations: string[];
+}
+export interface ReferenceMarker {
+  marker_id: string;
+  label: string;
+  scene_id: string;
+  asset_version: string;
+  coordinate_frame_id: string;
+  lon_lat_wgs84: [number, number];
+  local_xyz_m: [number, number, number];
+  surface_y_m: number;
+  display_offset_m: number;
+  height_source: string;
+  source_url: string;
+  usage: string;
+  is_mock: boolean;
+  mock_scope: string;
 }
 
 // ---- Fire demo (R2) contract — synthetic demo only, not real/algo fire prediction ----
