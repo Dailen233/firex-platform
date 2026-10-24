@@ -36,7 +36,15 @@ R3 场景管线已完成配置解耦与双江口公开 DSM 参考底座接入：
 
 ## 工程整理（2026-10-24）
 
-前端从仓库根迁入 `frontend/`，建立 `backend/`、`contracts/` 骨架与 `runtime-data/` 运行产物位置（均尚未实现后端）。前端统一入口改为 `npm --prefix frontend ci / run test:data / run build / run dev`；数据校验脚本 `frontend/scripts/check-data.ts` 已与 cwd 解耦，evidence 仍写回仓库根。资源 SHA 与坐标校验保持一致，未改模型字节与场景约定。
+前端从仓库根迁入 `frontend/`，建立 `backend/`、`contracts/` 骨架与 `runtime-data/` 运行产物位置。前端统一入口改为 `npm --prefix frontend ci / run test:data / run build / run dev`；数据校验脚本 `frontend/scripts/check-data.ts` 已与 cwd 解耦，evidence 仍写回仓库根。资源 SHA 与坐标校验保持一致，未改模型字节与场景约定。
+
+## 后端 B1（2026-10-24）
+
+实现最小后端：`GET /health`、`POST /api/v1/runs`、`GET /api/v1/runs/{run_id}`、`GET /api/v1/runs/{run_id}/state`。Python 3.12 + FastAPI + Pydantic v2 + SQLite，独立 `backend/.venv`（uv 管理，`pyproject.toml` + `uv.lock`）。运行数据默认 `runtime-data/backend/`，支持 `FIREX_BACKEND_DATA_DIR` 覆盖，路径与启动 cwd 无关。
+
+时间契约已明确并持久化：`time_basis` 用机器可读值 `simulation_relative` / `utc_anchored`；仿真运行保存 `simulation_time_origin_s`（模拟器全局时钟起点），真实运行保存带时区的 `time_origin_utc`（UTC 起点），观测时间换算公式见 `backend/app/time_contract.py` 与 `contracts/README.md`。`created_at` 仅表示服务端创建记录时间，不充当观测或拍摄起点。
+
+统一入口 `uv --directory backend sync --locked / run --locked uvicorn app.main:app / run --locked python -m pytest -q` 已在仓库根原样验证。9 个 pytest 通过，真实 HTTP 创建两类运行并重启后时间配置仍可查询（详见 `backend/README.md`）。上传接收、原图保存、任务工作器、fixture 火区、图像算法及前端 API 接入留待后续；`algorithm_mode` 保持 `unconfigured`。
 
 ## 本轮变更与修复
 

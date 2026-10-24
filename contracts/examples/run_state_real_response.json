@@ -1,0 +1,19 @@
+{
+  "run_id": "e1254d2e-645f-4277-8887-ccda1a1ed708",
+  "plant_id": "GEM_HYDRO_SHUANGJIANGKOU",
+  "scene_id": "shuangjiangkou_reference_terrain",
+  "asset_version": "reference-v1",
+  "coordinate_frame_id": "SJK_REFERENCE_UTM47N_EGM2008_v1",
+  "input_source": "real",
+  "schema_version": "1.0",
+  "state_status": "no_observation",
+  "revision": 0,
+  "observation_time_s": null,
+  "result_origin": null,
+  "evidence_capture_ids": [],
+  "patches": [],
+  "produced_at": "2026-10-24T04:17:44.456380Z",
+  "time_basis": "utc_anchored",
+  "simulation_time_origin_s": null,
+  "time_origin_utc": "2026-10-24T00:00:00Z"
+}

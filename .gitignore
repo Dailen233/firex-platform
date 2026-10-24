@@ -7,3 +7,7 @@ dist/
 *.log
 runtime-data/*
 !runtime-data/.gitkeep
+backend/.venv/
+__pycache__/
+*.pyc
+.pytest_cache/

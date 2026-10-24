@@ -9,8 +9,8 @@ Fire-X 新阶段团队协作工程。首轮前端基线为0.1.0；旧Fire-X仓�
 ## 目录结构
 
 - `frontend/`：现有 Vue3 前端（src、public、index.html、package.json、锁文件、Vite/TS 配置、`scripts/check-data.ts`）。所有前端命令从此目录运行。
-- `backend/`：预留，尚未实现（见 `backend/README.md`）。
-- `contracts/`：预留接口约定与 OpenAPI 快照（见 `contracts/README.md`）。
+- `backend/`：Fire-X 后端（B1 最小运行创建与持久化查询），FastAPI + SQLite（见 `backend/README.md`）。
+- `contracts/`：接口约定、OpenAPI 快照与样例（由后端生成，见 `contracts/README.md`）。
 - `runtime-data/`：本机运行产物，已忽略，不提交。
 - 根目录：README、AGENTS、CONTRIBUTING、docs、evidence、.github 与 Git 配置。
 - `evidence/` 仍输出到仓库根，不会生成 `frontend/evidence`。
@@ -42,6 +42,27 @@ npm --prefix frontend run dev
 
 ```bash
 npm --prefix frontend run dev:polling
+```
+
+## 后端（B1，最小运行创建与持久化查询）
+
+后端基础已实现；**图像处理、上传、火势算法未接入**（`GET /health` 返回 `algorithm_mode=unconfigured`）。需 Python 3.12 与 uv：
+
+```bash
+uv --directory backend sync --locked                                        # 首次：创建 backend/.venv 并安装锁定依赖
+uv --directory backend run --locked uvicorn app.main:app --host 127.0.0.1 --port 8001
+uv --directory backend run --locked python -m pytest -q                     # 后端测试
+uv --directory backend run --locked python scripts/export_openapi.py        # 导出 contracts/openapi.json
+```
+
+服务默认 `127.0.0.1:8001`；运行数据默认落在 `runtime-data/backend/runs.sqlite3`（已忽略，可用 `FIREX_BACKEND_DATA_DIR` 覆盖）。创建与查询运行示例（仿真需带 `simulation_time_origin_s`，真实需带带时区的 `time_origin_utc`）：
+
+```bash
+curl -s http://127.0.0.1:8001/health
+curl -s -X POST http://127.0.0.1:8001/api/v1/runs -H "Content-Type: application/json" \
+  -d '{"plant_id":"GEM_HYDRO_SHUANGJIANGKOU","scene_id":"shuangjiangkou_reference_terrain","asset_version":"reference-v1","coordinate_frame_id":"SJK_REFERENCE_UTM47N_EGM2008_v1","input_source":"simulation","simulation_time_origin_s":10.0}'
+curl -s http://127.0.0.1:8001/api/v1/runs/{run_id}
+curl -s http://127.0.0.1:8001/api/v1/runs/{run_id}/state
 ```
 
 ### 构建后运行静态演示
@@ -79,7 +100,7 @@ python3 -m http.server 8080
 - frontend/public/models/zhijin-v4/：原始模型交接资源，manifest/registry原字段保留。
 - frontend/scripts/check-data.ts：数据与资源校验，路径与 cwd 无关，产物写回仓库根 `evidence/`。
 
-hash路由支持静态服务器，无rewrite要求。模型资源按scene_index及manifest相对路径解析。源码无后端、数据库、账号或凭据；backend 与 contracts 仅预留说明。
+hash路由支持静态服务器，无rewrite要求。模型资源按scene_index及manifest相对路径解析。前端无后端、数据库、账号或凭据；后端 B1 已实现（FastAPI + SQLite，见 `backend/README.md`），图像处理尚未接入。
 
 ## 技术与署名
 

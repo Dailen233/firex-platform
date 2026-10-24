@@ -1,0 +1,15 @@
+{
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "invalid request body or parameters",
+    "details": [
+      {
+        "type": "value_error",
+        "loc": ["body", "time_origin_utc"],
+        "msg": "Value error, time_origin_utc must be timezone-aware (UTC offset required)",
+        "input": "2026-10-24T00:00:00",
+        "ctx": { "error": {} }
+      }
+    ]
+  }
+}
