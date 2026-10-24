@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { Box, ExternalLink, MapPin, X, ShieldQuestion, Zap, Flame } from 'lucide-vue-next'
+import { Box, ExternalLink, MapPin, X, ShieldQuestion, Zap, Flame, FlaskConical } from 'lucide-vue-next'
 import type { Plant } from '../lib/types'
 import { capacityScope,sceneFor,referenceSceneFor,assetUrl } from '../lib/data'
 import { useFireDemo } from '../lib/fire-demo'
+import { useRunConnection } from '../lib/run-connection'
 const props=defineProps<{plant:Plant;province:string}>()
 const emit=defineEmits<{close:[]}>()
 const scene=computed(()=>sceneFor(props.plant.properties.plant_id))
 const referenceScene=computed(()=>referenceSceneFor(props.plant.properties.plant_id))
 const {isDemoOn,activeFirePatches}=useFireDemo()
 const demoActive=computed(()=>props.plant.properties.plant_id==='GEM_COAL_ZHIJIN'&&isDemoOn.value&&activeFirePatches.value.length>0)
+const {isConnected,run,snapshot,observationTimeLabel}=useRunConnection()
+const bound=computed(()=>isConnected.value&&run.value?.plant_id===props.plant.properties.plant_id)
 </script>
 <template>
  <aside class="plant-detail" aria-label="电厂详情">
@@ -21,6 +24,14 @@ const demoActive=computed(()=>props.plant.properties.plant_id==='GEM_COAL_ZHIJIN
   <div v-if="plant.properties.capacity_source_conflict" class="notice amber">来源差异待核查：官方报道 6,400 MW，GEM 7,750 MW。两者的统计口径尚未确认。</div>
   <dl class="facts"><div><dt>运行状态（来源记录）</dt><dd>{{plant.properties.operating_status==='Operating'?'运行中':plant.properties.operating_status}}</dd></div><div><dt>火情状态</dt><dd class="unknown"><ShieldQuestion v-if="!demoActive" :size="14"/><Flame v-else :size="14"/>{{demoActive?'演示告警（合成）':'尚未接入'}}</dd></div><div><dt>代表点坐标</dt><dd>{{plant.geometry.coordinates[0]}}, {{plant.geometry.coordinates[1]}}</dd></div><div><dt>坐标基准</dt><dd>WGS84 / EPSG:4326</dd></div></dl>
   <p class="small muted">点位来自资料页面，独立影像核验待完成；非测绘级坐标。</p>
+  <section v-if="bound" class="run-bind-panel">
+   <div class="panel-eyebrow">接口测试运行<FlaskConical :size="16"/></div>
+   <template v-if="snapshot?.state_status==='observation'">
+    <p class="small amber"><strong>接口测试数据，不代表图像重建</strong>（来源 {{snapshot.result_origin}}，提供者 {{snapshot.provider_version}}）</p>
+    <dl class="facts"><div><dt>revision</dt><dd>{{snapshot.revision}}</dd></div><div><dt>观测时间</dt><dd>{{observationTimeLabel}}</dd></div><div><dt>火区</dt><dd>{{snapshot.patches.length}} 个</dd></div></dl>
+   </template>
+   <p v-else class="small muted">尚无观测，不能解释为确认无火。</p>
+  </section>
   <section class="scene-card" v-if="scene">
    <img :src="assetUrl('models/zhijin-v4/assets/scene_preview.png')" alt="织金 v4 模型预览"/>
    <div><span class="tag">试建场景 · v4</span><h3>电厂与周边山地</h3><p>4 × 4 km · 16 km² 研究区</p><p class="small muted">无卫星纹理，几何与地理精度待验证。</p>

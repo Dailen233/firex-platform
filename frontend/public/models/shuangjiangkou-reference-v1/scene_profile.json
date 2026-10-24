@@ -31,7 +31,7 @@
     "panorama": { "strategy": "fit_world_bounding_box", "padding_factor": 1.15 }
   },
   "camera_limits": { "near": 1, "far": 60000, "min_distance": 50, "max_distance": 40000 },
-  "capabilities": { "object_selection": false, "reference_markers": true, "fire_patch_overlay": false },
+  "capabilities": { "object_selection": false, "reference_markers": true, "fire_patch_overlay": true },
   "ui_notice": "公开 DSM 山地参考底座；非当前大坝/厂区精细模型；主要数据采集于 2011–2015 年，正式模型待接入。",
   "study_area_note": "约 100 km² 为建议研究区（可调整），非已渲染模型面积，也不表示队友模型已覆盖该范围。",
   "study_area_stat": "约 100 km² · 建议研究区（可调整）",

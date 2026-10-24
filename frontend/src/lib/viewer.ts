@@ -1,13 +1,13 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
-import type { ActiveFirePatch, FireLevel, ReferenceMarker, SceneObject, SceneProfile } from './types'
+import type { ActiveFirePatch, FireLevel, FireRing, ReferenceMarker, SceneObject, SceneProfile } from './types'
 import { assetUrl, readJson, resolveResource } from './data'
-import { pointInRingXZ } from './fire-demo-schema'
+import { sampleHeightOnTerrain } from './terrain-sampling'
 import { SoftwareRenderer } from './software-renderer'
 
 export type FrameKind = 'default' | 'plant' | 'whole_terrain' | 'panorama'
-export interface ViewerCallbacks {progress:(percent:number,message:string)=>void;loaded:(profile:SceneProfile,objects:SceneObject[],markers:ReferenceMarker[])=>void;selected:(object:SceneObject|null)=>void;mode:(mode:'webgl'|'software')=>void}
+export interface ViewerCallbacks {progress:(percent:number,message:string)=>void;loaded:(profile:SceneProfile,objects:SceneObject[],markers:ReferenceMarker[])=>void;selected:(object:SceneObject|null)=>void;mode:(mode:'webgl'|'software')=>void;overlayIssue?:(message:string|null)=>void}
 function releaseModel(root:THREE.Object3D){
  const geometries=new Set<THREE.BufferGeometry>(),materials=new Set<THREE.Material>(),textures=new Set<THREE.Texture>()
  root.traverse(o=>{if(o instanceof THREE.Mesh){geometries.add(o.geometry);for(const m of Array.isArray(o.material)?o.material:[o.material])materials.add(m)}})
@@ -157,6 +157,21 @@ export class ModelViewer {
   this.camera.position.copy(center.clone().addScaledVector(dir,dist))
   this.controls.target.copy(center);this.camera.updateProjectionMatrix();this.controls.update();this.requestRender()
  }
+ /** 相机对准当前火区覆盖层（不改动几何坐标，仅取景）。 */
+ frameFire(){
+  if(!this.fireOverlay)return
+  const box=new THREE.Box3().setFromObject(this.fireOverlay)
+  if(box.isEmpty())return
+  const size=box.getSize(new THREE.Vector3())
+  box.expandByScalar(Math.max(size.length()*0.2,40))
+  const center=box.getCenter(new THREE.Vector3())
+  const radius=box.getBoundingSphere(new THREE.Sphere()).radius
+  const fov=this.camera.fov*Math.PI/180
+  const dist=(radius/Math.sin(fov/2))*1.25*Math.max(1,1/this.camera.aspect)
+  const dir=new THREE.Vector3(0.5,0.85,1).normalize()
+  this.camera.position.copy(center.clone().addScaledVector(dir,dist))
+  this.controls.target.copy(center);this.camera.updateProjectionMatrix();this.controls.update();this.requestRender()
+ }
  select(id:string|null,focus=false){
   if(this.selectedBox){this.scene.remove(this.selectedBox);this.selectedBox.geometry.dispose();(this.selectedBox.material as THREE.Material).dispose();this.selectedBox=null}
   const object=this.objects.find(o=>o.object_id===id)??null
@@ -191,64 +206,67 @@ export class ModelViewer {
    this.scene.remove(this.referenceMarkers);this.referenceMarkers=null
   }
  }
- /** 贴地火区覆盖层：复用 geometry_0 原三角网格（401×401，顶点序 z*401+x），
-  * 以三角质心是否落入火区环判定纳入，绝不改写原几何/根变换。仅对开启 fire_patch_overlay 的场景生效。 */
+ /** 实际三角面高度采样：按地形网格真实索引/三角面做重心插值，而非角点双线性。
+  * 采样失败或超出地形范围返回 null，绝不静默用 y=0 代替。 */
+ private sampleTerrainHeight(x:number,z:number):number|null{
+  const mesh=this.terrainMesh
+  if(!mesh)return null
+  const pos=mesh.geometry.getAttribute('position') as THREE.BufferAttribute
+  const positions=pos.array as ArrayLike<number>
+  const indices=mesh.geometry.index?mesh.geometry.index.array as ArrayLike<number>:null
+  return sampleHeightOnTerrain(x,z,positions,indices)
+ }
+ /** 沿地形采样的闭合轮廓（线环）。任一点采样失败则整环返回 null，交由上层提示。 */
+ private buildFireOutline(ring:FireRing,offset:number,color:THREE.Color):THREE.Line|null{
+  const pts=ring.ring_xz,points:THREE.Vector3[]=[]
+  const MAX_SEG=25
+  for(let i=0;i<pts.length-1;i++){
+   const [x1,z1]=pts[i]!,[x2,z2]=pts[i+1]!
+   const steps=Math.max(1,Math.ceil(Math.hypot(x2-x1,z2-z1)/MAX_SEG))
+   for(let s=0;s<steps;s++){
+    const t=s/steps,x=x1+(x2-x1)*t,z=z1+(z2-z1)*t
+    const y=this.sampleTerrainHeight(x,z)
+    if(y===null)return null
+    points.push(new THREE.Vector3(x,y+offset,z))
+   }
+  }
+  const [fx,fz]=pts[0]!,fy=this.sampleTerrainHeight(fx,fz)
+  if(fy===null)return null
+  points.push(new THREE.Vector3(fx,fy+offset,fz))
+  const geo=new THREE.BufferGeometry().setFromPoints(points)
+  return new THREE.Line(geo,new THREE.LineBasicMaterial({color,transparent:true,opacity:0.95}))
+ }
+ /** 贴地火区覆盖层：闭合轮廓沿实际地形三角面采样（本轮停用不准确的质心透明填充）。
+   * 绝不改写原几何/根变换；清空/替换/失败均安排重绘，成功或清空后清除失效的 overlayIssue。 */
  setFirePatches(patches:ActiveFirePatch[]){
   if(this.disposed)return
   if(!this.profile?.capabilities.fire_patch_overlay){this.pendingFirePatches=null;return}
   if(!this.terrainMesh){this.pendingFirePatches=patches.length?patches:null;return}
-  this.pendingFirePatches=null;this.disposeFireOverlay()
-  if(patches.length===0)return
-  const pos=this.terrainMesh.geometry.getAttribute('position') as THREE.BufferAttribute
-  const grid=this.profile.terrain_grid
-  if(!grid)return
-  const n=grid.nx
-  if(pos.count!==n*grid.nz)return // 仅支持配置声明的规则地形网格；未来资产不假设
-  const targets=patches.flatMap(p=>p.rings.map(ring=>{
-   let minX=Infinity,maxX=-Infinity,minZ=Infinity,maxZ=-Infinity
-   for(const [x,z] of ring.ring_xz){if(x<minX)minX=x;if(x>maxX)maxX=x;if(z<minZ)minZ=z;if(z>maxZ)maxZ=z}
-   return {pts:ring.ring_xz,offset:ring.ground_offset_m??0.5,color:fireColor(p.level,p.intensity),minX,maxX,minZ,maxZ}
-  }))
-  const included=new Map<string,{i0:number;i1:number;i2:number;offset:number;color:THREE.Color}>()
-  const a=new THREE.Vector3(),b=new THREE.Vector3(),c=new THREE.Vector3()
-  const addTri=(i0:number,i1:number,i2:number)=>{
-   a.fromBufferAttribute(pos,i0);b.fromBufferAttribute(pos,i1);c.fromBufferAttribute(pos,i2)
-   const cx=(a.x+b.x+c.x)/3,cz=(a.z+b.z+c.z)/3
-   for(const t of targets){
-    if(cx<t.minX||cx>t.maxX||cz<t.minZ||cz>t.maxZ)continue
-    if(pointInRingXZ(cx,cz,t.pts)){
-     const key=[i0,i1,i2].sort((p,q)=>p-q).join(',')
-     if(!included.has(key))included.set(key,{i0,i1,i2,offset:t.offset,color:t.color})
-     return
-    }
+  this.pendingFirePatches=null
+  this.disposeFireOverlay()
+  this.requestRender() // 场景内容已变（覆盖层被移除），立即重绘
+  if(patches.length===0){this.callback.overlayIssue?.(null);return}
+  const group=new THREE.Group();group.name='fire-overlay'
+  const issues:string[]=[]
+  for(const p of patches){
+   const color=fireColor(p.level,p.intensity)
+   for(const ring of p.rings){
+    const line=this.buildFireOutline(ring,ring.ground_offset_m??0.5,color)
+    if(line)group.add(line);else issues.push(`patch ${p.patch_id} 轮廓采样失败或超出地形范围`)
    }
   }
-  for(let z=0;z<n-1;z++)for(let x=0;x<n-1;x++){
-   const x2=x+1,z2=z+1
-   const i00=z*n+x,i10=z*n+x2,i01=z2*n+x,i11=z2*n+x2
-   addTri(i00,i10,i01);addTri(i10,i11,i01)
+  if(group.children.length===0){
+   this.callback.overlayIssue?.(issues.length?issues.join('；'):'火区覆盖层无可显示轮廓')
+   return
   }
-  if(included.size===0)return
-  const positions=new Float32Array(included.size*9),colors=new Float32Array(included.size*9)
-  let w=0
-  for(const t of included.values()){
-   for(const vi of [t.i0,t.i1,t.i2]){
-    positions[w*3]=pos.getX(vi);positions[w*3+1]=pos.getY(vi)+t.offset;positions[w*3+2]=pos.getZ(vi)
-    colors[w*3]=t.color.r;colors[w*3+1]=t.color.g;colors[w*3+2]=t.color.b;w++
-   }
-  }
-  const geo=new THREE.BufferGeometry()
-  geo.setAttribute('position',new THREE.BufferAttribute(positions,3))
-  geo.setAttribute('color',new THREE.BufferAttribute(colors,3))
-  geo.computeBoundingBox();geo.computeBoundingSphere()
-  const mat=new THREE.MeshBasicMaterial({vertexColors:true,transparent:true,opacity:0.55,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1,side:THREE.DoubleSide})
-  const mesh=new THREE.Mesh(geo,mat);mesh.renderOrder=10
-  this.fireOverlay=new THREE.Group();this.fireOverlay.name='fire-demo-overlay';this.fireOverlay.add(mesh)
-  this.scene.add(this.fireOverlay);this.requestRender()
+  this.fireOverlay=group
+  this.scene.add(this.fireOverlay)
+  this.callback.overlayIssue?.(issues.length?issues.join('；'):null)
+  this.requestRender()
  }
  private disposeFireOverlay(){
   if(this.fireOverlay){
-   this.fireOverlay.traverse(o=>{if(o instanceof THREE.Mesh){o.geometry.dispose();for(const m of Array.isArray(o.material)?o.material:[o.material])m.dispose()}})
+   this.fireOverlay.traverse(o=>{if(o instanceof THREE.Mesh||o instanceof THREE.Line){o.geometry.dispose();const m=o.material;if(Array.isArray(m))m.forEach(x=>x.dispose());else m.dispose()}})
    this.scene.remove(this.fireOverlay);this.fireOverlay=null
   }
  }

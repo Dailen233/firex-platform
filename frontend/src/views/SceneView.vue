@@ -3,18 +3,30 @@ import { computed,onMounted,ref,shallowRef } from 'vue'
 import { useRoute } from 'vue-router'
 import { ArrowLeft,Mountain,Focus,RotateCcw,MousePointer2,Info,ExternalLink,Box,ShieldQuestion,Play,Pause,X,Flame } from 'lucide-vue-next'
 import SceneCanvas from '../components/SceneCanvas.vue'
+import RunConnectionPanel from '../components/RunConnectionPanel.vue'
 import { loadCatalog,dataReady,dataError,sceneBySceneId,assetUrl,plants,heightLabel,identityLabel } from '../lib/data'
 import { useFireDemo } from '../lib/fire-demo'
-import type { ReferenceMarker,SceneProfile,SceneObject } from '../lib/types'
+import { useRunConnection } from '../lib/run-connection'
+import { snapshotToActiveFirePatches } from '../lib/backend'
+import type { ActiveFirePatch,ReferenceMarker,SceneProfile,SceneObject } from '../lib/types'
 const route=useRoute();const sceneCanvas=ref<InstanceType<typeof SceneCanvas>>();const profile=shallowRef<SceneProfile|null>(null)
 const objects=shallowRef<SceneObject[]>([]),markers=shallowRef<ReferenceMarker[]>([]),selected=shallowRef<SceneObject|null>(null),error=ref(''),attempt=ref(0)
-const renderMode=ref<'webgl'|'software'>('webgl')
+const renderMode=ref<'webgl'|'software'>('webgl'),overlayIssue=ref<string|null>('')
 const {status,t_s,dataState,loadError,demo,activeFirePatches,isDemoOn,playing,demoDisabled,play,pause,reset,close,load}=useFireDemo()
+const conn=useRunConnection()
 const sceneLink=computed(()=>sceneBySceneId(String(route.params.sceneId)))
 const plant=computed(()=>sceneLink.value?plants.value.find(p=>p.properties.plant_id===sceneLink.value!.plant_id):undefined)
 const valid=computed(()=>!!sceneLink.value)
 const isZhijinDemo=computed(()=>sceneLink.value?.scene_id==='zhijin_pilot')
-const firePatches=computed(()=>isZhijinDemo.value?activeFirePatches.value:[])
+// Backend snapshot -> overlay patches, only when the run binds to the current scene.
+const runPatches=computed(()=>{
+ const snap=conn.snapshot.value
+ if(!snap||!profile.value)return {patches:[] as ActiveFirePatch[],bindingError:null as string|null}
+ return snapshotToActiveFirePatches(snap,{plant_id:profile.value.plant_id,scene_id:profile.value.scene_id,asset_version:profile.value.asset_version,coordinate_frame_id:profile.value.coordinate_frame_id})
+})
+const bindingError=computed(()=>runPatches.value.bindingError)
+const firePatches=computed(()=>isZhijinDemo.value?activeFirePatches.value:runPatches.value.patches)
+function focusFire(){sceneCanvas.value?.focusFire()}
 const backQuery=computed(()=>({...(plant.value?{province:plant.value.properties.province_code}:{}),plant:sceneLink.value?.plant_id??''}))
 const statsText=computed(()=>{
  const a=profile.value?.asset;if(!a)return ''
@@ -34,13 +46,16 @@ onMounted(()=>{loadCatalog();load()})
   <header class="scene-heading"><div><RouterLink class="back-link" :to="{path:'/atlas',query:backQuery}"><ArrowLeft :size="16"/>返回电厂详情</RouterLink><h1>{{profile?.display_name??'正在读取场景'}}<span v-if="profile" class="tag">{{profile.scene_badge}}</span></h1><p v-if="plant">{{plant.properties.name}} · {{plant.properties.source_province}}</p></div><div v-if="profile?.study_area_stat" class="scene-size"><strong>{{profile.study_area_stat}}</strong></div></header>
   <div class="scene-workspace">
    <section class="viewer-frame">
-    <SceneCanvas v-if="dataReady&&valid&&sceneLink" :key="attempt" ref="sceneCanvas" :profile-url="assetUrl(sceneLink.profile_uri)" :fire-patches="firePatches" @loaded="loaded" @selected="selected=$event" @error="error=$event" @mode="renderMode=$event"/>
+    <SceneCanvas v-if="dataReady&&valid&&sceneLink" :key="attempt" ref="sceneCanvas" :profile-url="assetUrl(sceneLink.profile_uri)" :fire-patches="firePatches" @loaded="loaded" @selected="selected=$event" @error="error=$event" @mode="renderMode=$event" @overlay-issue="overlayIssue=$event"/>
     <div v-else class="loader-overlay" role="status"><h3>{{dataError||(dataReady?'场景不存在':'正在读取场景索引')}}</h3><button v-if="dataError" @click="loadCatalog">重试目录</button></div>
-    <div v-if="profile" class="viewer-toolbar"><button v-if="profile.cameras.plant" @click="sceneCanvas?.frame('plant')"><Focus :size="17"/>厂区取景</button><button v-if="profile.cameras.whole_terrain" @click="sceneCanvas?.frame('whole_terrain')"><Mountain :size="17"/>全域地形</button><button v-if="!profile.cameras.whole_terrain" @click="sceneCanvas?.frame('panorama')"><Mountain :size="17"/>全景</button><button @click="sceneCanvas?.frame('default')" title="恢复初始取景"><RotateCcw :size="17"/>恢复默认视角</button></div>
+    <div v-if="profile" class="viewer-toolbar"><button v-if="!isZhijinDemo&&firePatches.length" @click="focusFire"><Flame :size="17"/>聚焦火区</button><button v-if="profile.cameras.plant" @click="sceneCanvas?.frame('plant')"><Focus :size="17"/>厂区取景</button><button v-if="profile.cameras.whole_terrain" @click="sceneCanvas?.frame('whole_terrain')"><Mountain :size="17"/>全域地形</button><button v-if="!profile.cameras.whole_terrain" @click="sceneCanvas?.frame('panorama')"><Mountain :size="17"/>全景</button><button @click="sceneCanvas?.frame('default')" title="恢复初始取景"><RotateCcw :size="17"/>恢复默认视角</button></div>
     <div class="viewer-badges"><template v-if="isZhijinDemo"><span v-if="!isDemoOn" class="tag neutral"><ShieldQuestion :size="13"/>尚未接入火情</span><span v-else-if="activeFirePatches.length" class="tag danger"><Flame :size="13"/>演示告警 · 合成</span><span v-else class="tag amber">演示中 · 当前无演示火区</span></template><span v-else class="tag amber">正式模型待接入</span><span class="tag neutral">高程示意色 · 非植被或火险</span></div>
     <div class="viewer-bottom"><span><MousePointer2 :size="14"/>拖动旋转 · 滚轮缩放 · 右键平移</span><span class="axis-label">X 东 · Y 上 · Z 南 / 米</span></div>
    </section>
    <aside class="scene-inspector">
+    <RunConnectionPanel/>
+    <div v-if="bindingError" class="notice error" role="alert">{{bindingError}}</div>
+    <div v-if="overlayIssue" class="notice amber" role="status">{{overlayIssue}}</div>
     <div class="panel-eyebrow">场景检查<Box :size="16"/></div>
     <div v-if="profile" class="loaded-status">{{profile.display_name}}已加载<span>{{statsText}}</span></div>
     <p v-if="profile?.ui_notice" class="notice amber">{{profile.ui_notice}}</p>

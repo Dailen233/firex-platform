@@ -6,6 +6,8 @@ import assert from 'node:assert/strict'
 import type { Plant,SceneLink,SceneObject,SceneManifest,Boundaries,SceneProfile,ReferenceMarker } from '../src/lib/types.ts'
 import { validateFireStateDemo,resolveActivePatches,pointInRingXZ } from '../src/lib/fire-demo-schema.ts'
 import { EXPECTED_SAMPLE_PLANTS } from '../src/lib/catalog-config.ts'
+import { sampleHeightOnTerrain } from '../src/lib/terrain-sampling.ts'
+import { validateRunState,snapshotToActiveFirePatches,revisionDecision,validateSnapshotAgainstRun,type BackendRunState,type BackendRunRecord,type SceneBinding } from '../src/lib/backend-contract.ts'
 // 脚本位于 frontend/scripts/，路径解析与 cwd 无关：
 // - public/* 资源相对于 frontend/ 解析；
 // - evidence/* 产物写回仓库根，避免生成 frontend/evidence 重复目录。
@@ -105,6 +107,50 @@ check('FIRE-DEMO-04-rejects-invalid',()=>{
  const e=base();e.is_mock=false;assert.equal(validateFireStateDemo(e).ok,false)
  const f=base();f.patches[0]!.rings[0]!.ground_offset_m=1.5;assert.equal(validateFireStateDemo(f).ok,false)
  const g=base();g.patches[0]!.rings[0]!.ground_offset_m=1.0;assert.equal(validateFireStateDemo(g).ok,true)
+})
+check('SAMPLE-01-noncoplanar-triangle-height',()=>{
+ // 2x2 非共面合成地形：顶点 (0,0,0)(50,0,0)(0,0,50)(50,100,50)，索引 [0,1,2, 1,3,2]。
+ const positions=[0,0,0, 50,0,0, 0,0,50, 50,100,50]
+ const indices=[0,1,2, 1,3,2]
+ // XZ=(25,25) 在三角(0,1,2)面上，实际高度 0（双线性会给 25）。
+ assert.equal(sampleHeightOnTerrain(25,25,positions,indices),0)
+ // XZ=(37.5,37.5) 在三角(1,3,2)斜面上，实际高度 50。
+ assert.equal(sampleHeightOnTerrain(37.5,37.5,positions,indices),50)
+ // 范围外 -> null。
+ assert.equal(sampleHeightOnTerrain(60,60,positions,indices),null)
+})
+check('BACKEND-01-state-validation-rejects-invalid',()=>{
+ const base={run_id:'r1',plant_id:'P',scene_id:'S',asset_version:'v1',coordinate_frame_id:'F',input_source:'simulation',schema_version:'1.0',state_status:'observation',revision:1,observation_time_s:5.0,result_origin:'fixture',provider_version:'1.0',evidence_capture_ids:['c1'],patches:[{patch_id:'p1',geometry:[[0,0],[1,0],[1,1],[0,0]]}],produced_at:'2026-01-01T00:00:00Z',time_basis:'simulation_relative',simulation_time_origin_s:10.0,time_origin_utc:null}
+ assert.equal(validateRunState(base).ok,true)
+ assert.equal(validateRunState({...base,revision:-1.5}).ok,false) // 负小数 revision
+ assert.equal(validateRunState({...base,revision:1.5}).ok,false) // 非整数 revision
+ assert.equal(validateRunState({...base,input_source:'weird'}).ok,false) // 未知 input_source
+ assert.equal(validateRunState({...base,result_origin:null}).ok,false) // 缺失来源
+ assert.equal(validateRunState({...base,evidence_capture_ids:[123]}).ok,false) // 非字符串证据 ID
+ assert.equal(validateRunState({...base,patches:[{patch_id:'p1',geometry:[[0,0],[1,0],[1,1],[0,1]]}]}).ok,false) // 未闭合
+})
+check('BACKEND-02-mapping-requires-frame-and-binding',()=>{
+ const snap:BackendRunState={run_id:'r1',plant_id:'P',scene_id:'S',asset_version:'v1',coordinate_frame_id:null,input_source:'simulation',schema_version:'1.0',state_status:'observation',revision:1,observation_time_s:5.0,result_origin:'fixture',provider_version:'1.0',evidence_capture_ids:['c1'],patches:[{patch_id:'p1',geometry:[[0,0],[1,0],[1,1],[0,0]]}],produced_at:'x',time_basis:'simulation_relative',simulation_time_origin_s:10.0,time_origin_utc:null}
+ const binding:SceneBinding={plant_id:'P',scene_id:'S',asset_version:'v1',coordinate_frame_id:'F'}
+ const r1=snapshotToActiveFirePatches(snap,binding) // 观测缺失坐标系 -> 拒绝
+ assert.equal(r1.patches.length,0);assert.ok(r1.bindingError)
+ const r2=snapshotToActiveFirePatches({...snap,coordinate_frame_id:'F'},{...binding,plant_id:'OTHER'}) // plant 不符
+ assert.equal(r2.patches.length,0);assert.ok(r2.bindingError)
+ const r3=snapshotToActiveFirePatches({...snap,coordinate_frame_id:'F'},binding) // 匹配
+ assert.equal(r3.patches.length,1);assert.equal(r3.bindingError,null);assert.equal(r3.patches[0]!.patch_id,'p1')
+})
+check('BACKEND-03-revision-decision',()=>{
+ assert.equal(revisionDecision(2,3),'accept')
+ assert.equal(revisionDecision(2,2),'duplicate')
+ assert.equal(revisionDecision(2,1),'regression')
+})
+check('BACKEND-04-binding-mismatch',()=>{
+ const run:BackendRunRecord={run_id:'r1',plant_id:'P',scene_id:'S',asset_version:'v1',coordinate_frame_id:'F',input_source:'simulation',schema_version:'1.0',created_at:'x',simulation_time_origin_s:10.0,time_origin_utc:null}
+ const snap:BackendRunState={run_id:'r1',plant_id:'P',scene_id:'S',asset_version:'v1',coordinate_frame_id:'F',input_source:'simulation',schema_version:'1.0',state_status:'observation',revision:1,observation_time_s:5.0,result_origin:'fixture',provider_version:'1.0',evidence_capture_ids:['c1'],patches:[{patch_id:'p1',geometry:[[0,0],[1,0],[1,1],[0,0]]}],produced_at:'x',time_basis:'simulation_relative',simulation_time_origin_s:10.0,time_origin_utc:null}
+ assert.equal(validateSnapshotAgainstRun(run,snap),null)
+ assert.ok(validateSnapshotAgainstRun({...run,run_id:'r2'},snap))
+ assert.ok(validateSnapshotAgainstRun({...run,plant_id:'Q'},snap))
+ assert.ok(validateSnapshotAgainstRun(run,{...snap,coordinate_frame_id:'G'}))
 })
 mkdirSync(join(repoRoot,'evidence'),{recursive:true});writeFileSync(join(repoRoot,'evidence/data-checks.json'),JSON.stringify({date:'2026-10-11',count:checks.length,checks},null,2)+'\n')
 console.log(JSON.stringify({checks:checks.length,result:'passed',model_sha256:manifest.asset.sha256,province_count:34}))

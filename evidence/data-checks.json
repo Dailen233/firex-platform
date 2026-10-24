@@ -1,6 +1,6 @@
 {
   "date": "2026-10-11",
-  "count": 21,
+  "count": 26,
   "checks": [
     {
       "id": "DATA-01-unique-plant-ids",
@@ -84,6 +84,26 @@
     },
     {
       "id": "FIRE-DEMO-04-rejects-invalid",
+      "result": "passed"
+    },
+    {
+      "id": "SAMPLE-01-noncoplanar-triangle-height",
+      "result": "passed"
+    },
+    {
+      "id": "BACKEND-01-state-validation-rejects-invalid",
+      "result": "passed"
+    },
+    {
+      "id": "BACKEND-02-mapping-requires-frame-and-binding",
+      "result": "passed"
+    },
+    {
+      "id": "BACKEND-03-revision-decision",
+      "result": "passed"
+    },
+    {
+      "id": "BACKEND-04-binding-mismatch",
       "result": "passed"
     }
   ]

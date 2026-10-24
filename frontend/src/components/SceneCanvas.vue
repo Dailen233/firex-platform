@@ -4,18 +4,18 @@ import { ModelViewer } from '../lib/viewer'
 import type { FrameKind } from '../lib/viewer'
 import type { ActiveFirePatch, ReferenceMarker, SceneObject, SceneProfile } from '../lib/types'
 const props=defineProps<{profileUrl:string;firePatches:ActiveFirePatch[]}>()
-const emit=defineEmits<{loaded:[profile:SceneProfile,objects:SceneObject[],markers:ReferenceMarker[]];selected:[object:SceneObject|null];error:[message:string];mode:[mode:'webgl'|'software']}>()
+const emit=defineEmits<{loaded:[profile:SceneProfile,objects:SceneObject[],markers:ReferenceMarker[]];selected:[object:SceneObject|null];error:[message:string];mode:[mode:'webgl'|'software'];overlayIssue:[message:string|null]}>()
 const host=ref<HTMLDivElement>(),percent=ref(0),message=ref('准备三维查看器'),ready=ref(false),error=ref('')
 let viewer:ModelViewer|null=null;let destroyed=false
 watch(()=>props.firePatches,p=>viewer?.setFirePatches(p))
 onMounted(async()=>{
  try{
-  viewer=new ModelViewer(host.value!,{mode:m=>emit('mode',m),progress:(p,m)=>{if(!destroyed){percent.value=Math.round(p);message.value=m}},loaded:(p,o,mk)=>{if(!destroyed){ready.value=true;emit('loaded',p,o,mk)}},selected:o=>emit('selected',o)})
+  viewer=new ModelViewer(host.value!,{mode:m=>emit('mode',m),progress:(p,m)=>{if(!destroyed){percent.value=Math.round(p);message.value=m}},loaded:(p,o,mk)=>{if(!destroyed){ready.value=true;emit('loaded',p,o,mk)}},selected:o=>emit('selected',o),overlayIssue:m=>emit('overlayIssue',m)})
   viewer.setFirePatches(props.firePatches)
   await viewer.load(props.profileUrl)
  }catch(e){if(destroyed)return;error.value=e instanceof Error?e.message:'模型加载失败';viewer?.dispose();viewer=null;emit('error',error.value)}
 })
 onBeforeUnmount(()=>{destroyed=true;viewer?.dispose();viewer=null})
-defineExpose({frame:(kind:FrameKind)=>viewer?.frame(kind),select:(id:string|null,focus=false)=>viewer?.select(id,focus)})
+defineExpose({frame:(kind:FrameKind)=>viewer?.frame(kind),select:(id:string|null,focus=false)=>viewer?.select(id,focus),focusFire:()=>viewer?.frameFire()})
 </script>
 <template><div ref="host" class="scene-canvas"><div v-if="!ready&&!error" class="loader-overlay" role="status"><div class="loader-mark"></div><h3>{{message}}</h3><div class="progress-track"><div :style="{width:`${percent}%`}"></div></div><p>{{percent}}%</p></div><div v-if="error" class="loader-overlay error-state" role="alert"><h3>三维模型加载失败</h3><p>{{error}}</p><p class="muted">可在右侧重试，或返回电厂详情。</p></div></div></template>

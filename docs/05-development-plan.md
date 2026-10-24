@@ -73,6 +73,29 @@ R3 场景管线已完成配置解耦与双江口公开 DSM 参考底座接入：
 
 源码审查曾发现 `app.main` 在模块级 `app = create_app()` 导入时即初始化默认数据库；本轮已随生命周期调整一并解决（见上）。
 
+## 前端 B4：fixture 前后端显示链路（2026-10-24）
+
+1. **连接与轮询**：新增 `lib/backend.ts`（后端 OpenAPI 薄适配 + 运行时响应校验：patch_id、顶点有限值、最少顶点、首尾闭合）与 `lib/run-connection.ts`（共享连接状态 + 单轮询器，约 1s、串行、超时、会话/run 身份核对防串扰；重复 revision 不替换快照、不刷新“新观测”时间）。连接入口 `RunConnectionPanel.vue`，地图/详情/场景共用同一连接会话。
+2. **显示语义**：`no_observation` 显示“尚无观测”（不解释为确认无火）；fixture 持续标注“接口测试数据，不代表图像重建”并展示 revision/观测时间（相对仿真原点）/提供者版本；`algorithm_mode=unconfigured` 与 `processing_mode=fixture` 分开显示；最近成功查询与最近新 revision 分开记录。
+3. **三维覆盖层**：`viewer.ts` 覆盖层为“闭合轮廓沿实际地形三角面重心插值采样”（透明三角填充本轮因质心越界问题停用），采样失败/超范围明确提示、不静默用 y=0；同一 patch_id 新 revision 实际更新顶点（无 ID/等级/强度签名去重）；覆盖层替换正确 dispose、不重载静态 GLB；新增“聚焦火区”取景（不动几何坐标）。双江口 `scene_profile.json` 开启 `fire_patch_overlay`。
+4. **坐标映射依据**：后端 `FirePatch.geometry [x,z]` 与前端 `FireRing.ring_xz [x,z]` 同属 `SJK_REFERENCE_UTM47N_EGM2008_v1` 局部帧（X=E−E0 东、Z=N0−N 南、米，Y=H_EGM2008−2000 由地形采样），恒等映射，不换轴/缩放/平移；参考点：大坝代表点局部 (0,0)、fixture 方形中心 (100,200) 恰为 50m 网格顶点（i=102,j=104）。
+5. **验证**：前端 `vue-tsc` + `vite build` 通过、`test:data` 26 项通过；后端 52 pytest 通过。真实后端 fixture + 系统 Chrome（临时 Playwright 方案）冒烟 16/16：连接、快照（revision 2 / obs 19 / fixture）、覆盖层映射、地图→详情→场景往返、断开清画布（像素级 72→0）、轮询不重载 GLB（fetches=1）、无控制台错误/失败请求；固定相机下同 patch 轮廓由 28 增至 126 像素（obs 1→19，约 4.5×），证明顶点实际更新。
+
+## 前端 B4 定点修复（2026-10-24，审查反例）
+
+1. **严格校验身份/状态/版本**：`backend.ts` 拆出纯契约层 `backend-contract.ts`（可被 `check-data.ts` 单测）。`validateRunState` 校验非负整数 revision、`input_source`/`state_status`/`time_basis` 枚举及其一致性、observation 必填 `observation_time_s`/`result_origin`/`provider_version`/非空 patches、证据 ID 为字符串、几何闭合有限；`fetchRun`/`fetchRunState` 核对返回 `run_id` 与请求一致；`validateSnapshotAgainstRun` 核对 plant/scene/asset/frame/input_source/时间配置等不可变绑定；`revisionDecision` 只接受更新 revision（回退/重复不覆盖、不刷新新观测时间）；`snapshotToActiveFirePatches` 增加 plant_id 校验，observation 要求明确且匹配的坐标系（缺失即拒绝）。`run-connection` 连接阶段用独立 AbortController 取消、时间标签按 `time_basis`（utc_anchored 不显示“相对仿真原点”）。
+2. **清空覆盖层刷新画布**：`setFirePatches([])` 删除覆盖层后 `requestRender()`；成功/清空后清除失效 `overlayIssue`（回调改为 `string|null`）。
+3. **采样贴地 + 停用填充**：新增 `terrain-sampling.ts` 纯函数，按实际地形三角面重心插值取高（替代角点双线性），并停用不准确的质心透明填充，保留闭合轮廓。非共面 2×2 合成地形反例已单测（(25,25) 双线性 25 → 实际三角面 0）。
+4. **浏览器验证真实失败**：重写 `e2e-*.mjs` 共享 harness，任意未预期异常/断言失败/控制台错误/页面错误/非预期失败请求均非零退出（graceful abort 除外）；revision/观测时间/来源用精确 `dd` 断言；等待带截止时间并输出诊断；写请求前核对服务身份；快照按 run 保存；`analyze_fire_pixels.py` 做像素级断言。
+5. **验证**：前端 build 通过、`test:data` 26 项、后端 52 pytest；真实 fixture 正常链路 16/16、像素级断开清画布（72→0）、同 patch 轮廓 28→126 且停止上传后稳定、异常拦截 7/7（身份/绑定/回退/迟到响应）、坏 run 非零退出（exit 1）。
+
+## 前端 B4 同视角断开补证（2026-10-24）
+
+- 原 `e2e-fixture-link.mjs` 顺序为“聚焦截图 → 地图往返 → 场景重挂载 → 断开截图”，断开前后截图来自两次场景挂载、不同相机，不能证明固定画面清空。
+- 已重排：先完成地图/详情往返 → 返回场景确认同一 run（revision=2）与覆盖层 → 聚焦火区等待相机稳定 → 同一挂载内断开（相机/画布尺寸/视角不变）→ 等待清空重绘 → 截图。
+- 像素断言（`analyze_fire_pixels.py`，新增 `assert-terrain`）：断开前轮廓 72 像素、地形 280610 像素；断开后轮廓 0 像素、地形 283607 像素——火区消失而地形仍正常显示。
+- 真实 fixture run `f52f38bb-ab59-4129-a7fe-618d8f520acf`：17/17 检查通过、exit 0；快照 `snapshot.json`、截图 `disconnect-before/after.png` 已存。旧截图（不同相机视角）标为历史证据。
+
 ## 本轮变更与修复
 
 - CR-01：GPU禁用，新增明确兼容显示，保留GPU验收缺口。

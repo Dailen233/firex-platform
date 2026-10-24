@@ -44,14 +44,14 @@ npm --prefix frontend run dev
 npm --prefix frontend run dev:polling
 ```
 
-## 后端（B1+B2：运行、时间契约、图片上传与接收记录）
+## 后端（B1+B2+B3：运行、时间契约、上传与串行后台处理）
 
-后端已实现运行创建/查询、时间契约、图片上传与同帧 metadata 保存；**图像算法与火势估计未接入**（`GET /health` 返回 `algorithm_mode=unconfigured`，接收记录为 `queued`）。需 Python 3.12 与 uv：
+后端已实现运行创建/查询、时间契约、图片上传与同帧 metadata 保存，以及串行后台处理（fixture 提供者）与持久化状态快照；**图像算法与火势估计未接入**（`GET /health` 返回 `algorithm_mode=unconfigured`）。需 Python 3.12 与 uv：
 
 ```bash
 uv --directory backend sync --locked                                        # 首次：创建 backend/.venv 并安装锁定依赖
 uv --directory backend run --locked uvicorn app.main:app --host 127.0.0.1 --port 8002
-uv --directory backend run --locked python -m pytest -q                     # 后端测试（48 项）
+uv --directory backend run --locked python -m pytest -q                     # 后端测试（52 项）
 uv --directory backend run --locked python scripts/export_openapi.py        # 导出 contracts/openapi.json
 ```
 
@@ -72,6 +72,27 @@ curl -s http://127.0.0.1:8002/api/v1/captures/{capture_id}
 显式开启 fixture 后台处理（`unconfigured` 为默认，不产生结果）：`FIREX_PROCESSING_MODE=fixture uv --directory backend run --locked uvicorn app.main:app --host 127.0.0.1 --port 8002`，随后上传多帧并查询 `/api/v1/runs/{run_id}/state`。fixture 结果仅为接口测试数据，不代表图像重建。
 
 详见 `backend/README.md` 与 `contracts/`。
+
+## 前端连接已有运行（B4：fixture 前后端显示链路）
+
+前端可连接后端已有 run，轮询快照并在三维场景显示火区覆盖层（fixture 接口测试数据）。`algorithm_mode=unconfigured`（未接图像算法）与 `processing_mode=fixture`（接口测试提供者）分别展示。坐标映射为同一局部 XZ 帧（X 东、Z 南，米；Y 由地形采样），不换轴/缩放/平移。
+
+启动顺序（本机 8002 后端 + 4173 前端，Vite 代理 `/api`、`/health` 到后端）：
+
+```bash
+# 1. 后端（fixture）
+FIREX_PROCESSING_MODE=fixture uv --directory backend run --locked uvicorn app.main:app --host 127.0.0.1 --port 8002
+# 2. 前端（inotify 受限时改用 dev:polling）
+npm --prefix frontend run dev
+# 3. 创建运行
+curl -s -X POST http://127.0.0.1:8002/api/v1/runs -H "Content-Type: application/json" \
+  -d '{"plant_id":"GEM_HYDRO_SHUANGJIANGKOU","scene_id":"shuangjiangkou_reference_terrain","asset_version":"reference-v1","coordinate_frame_id":"SJK_REFERENCE_UTM47N_EGM2008_v1","input_source":"simulation","simulation_time_origin_s":10.0}'
+# 4. 上传两帧（不同观测时间 -> 同一 patch_id 不同几何）
+uv --directory backend run --locked python scripts/upload_test_capture.py --base-url http://127.0.0.1:8002 --frame 1 --simulation-time 11.0 <run_id>
+uv --directory backend run --locked python scripts/upload_test_capture.py --base-url http://127.0.0.1:8002 --frame 2 --simulation-time 29.0 <run_id>
+```
+
+浏览器打开 `http://127.0.0.1:4173/#/scene/shuangjiangkou_reference_terrain`，在“连接已有运行”输入 `run_id` 并连接；fixture 快照显示“接口测试数据，不代表图像重建”与 revision/观测时间/提供者版本，三维场景沿地形显示闭合火区轮廓（“聚焦火区”对准）。地图与详情同步显示接口测试状态。
 
 ### 构建后运行静态演示
 
