@@ -7,5 +7,9 @@
   "byte_size": 95,
   "status": "queued",
   "schema_version": "1.0",
-  "storage_key": "test-cap-20261024"
+  "storage_key": "test-cap-20261024",
+  "processing_started_at": null,
+  "processing_finished_at": null,
+  "processing_error": null,
+  "provider_version": null
 }

@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Fire-X Backend",
-    "description": "Minimal run creation and persistent query, plus image upload with same-frame metadata. algorithm_mode is unconfigured; image processing is not yet integrated.",
+    "description": "Minimal run creation and persistent query, image upload with same-frame metadata, and serial background processing. algorithm_mode is unconfigured; image processing runs only when an explicit provider (e.g. fixture) is enabled.",
     "version": "0.1.0"
   },
   "paths": {
@@ -376,6 +376,52 @@
           "storage_key": {
             "type": "string",
             "title": "Storage Key"
+          },
+          "processing_started_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Processing Started At"
+          },
+          "processing_finished_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Processing Finished At"
+          },
+          "processing_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Processing Error"
+          },
+          "provider_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Version"
           }
         },
         "type": "object",
@@ -391,7 +437,7 @@
           "storage_key"
         ],
         "title": "CaptureRecord",
-        "description": "A received capture (stored original + queued record)."
+        "description": "A received capture and its processing status (queued/processing/completed/failed)."
       },
       "ErrorDetail": {
         "properties": {
@@ -442,6 +488,31 @@
         ],
         "title": "ErrorResponse"
       },
+      "FirePatch": {
+        "properties": {
+          "patch_id": {
+            "type": "string",
+            "title": "Patch Id"
+          },
+          "geometry": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Geometry"
+          }
+        },
+        "type": "object",
+        "required": [
+          "patch_id",
+          "geometry"
+        ],
+        "title": "FirePatch",
+        "description": "A fire polygon in minimal local XZ coordinates.\n\n``geometry`` is an ordered ring of ``[x, z]`` pairs that closes on itself\n(first vertex == last vertex). All values must be finite. This is the local\nsurface frame; world meaning comes from ``coordinate_frame_id``."
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -469,6 +540,11 @@
             "type": "string",
             "title": "Service",
             "default": "firex-backend"
+          },
+          "processing_mode": {
+            "type": "string",
+            "title": "Processing Mode",
+            "default": "unconfigured"
           }
         },
         "type": "object",
@@ -703,6 +779,17 @@
             ],
             "title": "Result Origin"
           },
+          "provider_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Version"
+          },
           "evidence_capture_ids": {
             "items": {
               "type": "string"
@@ -712,8 +799,7 @@
           },
           "patches": {
             "items": {
-              "additionalProperties": true,
-              "type": "object"
+              "$ref": "#/components/schemas/FirePatch"
             },
             "type": "array",
             "title": "Patches"
@@ -764,6 +850,7 @@
           "revision",
           "observation_time_s",
           "result_origin",
+          "provider_version",
           "evidence_capture_ids",
           "patches",
           "produced_at",

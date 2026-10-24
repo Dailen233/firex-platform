@@ -342,6 +342,19 @@ def get_capture(db_path: Path, capture_id: str) -> CaptureRecord | None:
     return _row_to_record(row)
 
 
+def read_stored_capture(captures_dir: Path, storage_key: str) -> tuple[bytes, str, str]:
+    """Read (original_bytes, raw_metadata_text, normalized_metadata_text)."""
+    base = captures_dir / storage_key
+    original = (base / _ORIGINAL_FILENAME).read_bytes()
+    raw = (base / _RAW_METADATA_FILENAME).read_text(encoding="utf-8")
+    normalized = (base / _NORMALIZED_METADATA_FILENAME).read_text(encoding="utf-8")
+    return original, raw, normalized
+
+
+def _maybe_dt(value: str | None) -> datetime | None:
+    return None if value is None else datetime.fromisoformat(value)
+
+
 def _row_to_record(row: sqlite3.Row) -> CaptureRecord:
     return CaptureRecord(
         capture_id=row["capture_id"],
@@ -353,4 +366,8 @@ def _row_to_record(row: sqlite3.Row) -> CaptureRecord:
         status=row["status"],
         schema_version=row["schema_version"],
         storage_key=row["storage_key"],
+        processing_started_at=_maybe_dt(row["processing_started_at"]),
+        processing_finished_at=_maybe_dt(row["processing_finished_at"]),
+        processing_error=row["processing_error"],
+        provider_version=row["provider_version"],
     )

@@ -21,6 +21,13 @@ DEFAULT_MAX_CAPTURE_BYTES = 50 * 1024 * 1024  # 50 MiB per image
 DEFAULT_MAX_METADATA_BYTES = 1 * 1024 * 1024  # 1 MiB metadata JSON
 DEFAULT_MAX_CAPTURE_PIXELS = 100_000_000  # width * height
 
+# Background processing. Default is "unconfigured": captures stay queued and no
+# result is produced. "fixture" must be explicitly enabled to run the fixture
+# provider. Unknown values fall back to "unconfigured" (fail-safe: no processing).
+PROCESSING_MODES = ("unconfigured", "fixture")
+DEFAULT_PROCESSING_MODE = "unconfigured"
+WORKER_POLL_INTERVAL_S = 0.1
+
 
 def data_dir() -> Path:
     return Path(os.environ.get("FIREX_BACKEND_DATA_DIR", str(DEFAULT_DATA_DIR)))
@@ -44,3 +51,8 @@ def max_metadata_bytes() -> int:
 
 def max_capture_pixels() -> int:
     return int(os.environ.get("FIREX_CAPTURE_MAX_PIXELS", str(DEFAULT_MAX_CAPTURE_PIXELS)))
+
+
+def processing_mode() -> str:
+    mode = os.environ.get("FIREX_PROCESSING_MODE", DEFAULT_PROCESSING_MODE).strip().lower()
+    return mode if mode in PROCESSING_MODES else DEFAULT_PROCESSING_MODE

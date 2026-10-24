@@ -15,8 +15,9 @@ OUT = REPO_ROOT / "contracts" / "openapi.json"
 
 
 def main() -> None:
-    # Use a throwaway db so the export has no side effects on runtime-data.
-    app = create_app(db_path_override=Path("/tmp/firex-openapi-export.sqlite3"))
+    # create_app no longer initializes a database; OpenAPI generation touches no
+    # filesystem state (no default db, no /tmp db, no worker).
+    app = create_app()
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(
         json.dumps(app.openapi(), indent=2, ensure_ascii=False) + "\n",

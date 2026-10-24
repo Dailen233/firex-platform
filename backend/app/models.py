@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 from .time_contract import TIME_BASIS
 
 InputSource = Literal["simulation", "real"]
+ProcessingMode = Literal["unconfigured", "fixture"]
 
 SCHEMA_VERSION = "1.0"
 
@@ -72,6 +73,37 @@ class RunRecord(BaseModel):
     time_origin_utc: datetime | None
 
 
+class FirePatch(BaseModel):
+    """A fire polygon in minimal local XZ coordinates.
+
+    ``geometry`` is an ordered ring of ``[x, z]`` pairs that closes on itself
+    (first vertex == last vertex). All values must be finite. This is the local
+    surface frame; world meaning comes from ``coordinate_frame_id``.
+    """
+
+    patch_id: str
+    geometry: list[list[float]]
+
+    @field_validator("patch_id")
+    @classmethod
+    def _validate_patch_id(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError("patch_id must be non-empty")
+        return v
+
+    @field_validator("geometry")
+    @classmethod
+    def _validate_geometry(cls, v: list[list[float]]) -> list[list[float]]:
+        if len(v) < 4:
+            raise ValueError("patch geometry must be a closed ring with at least 3 vertices")
+        for p in v:
+            if len(p) != 2 or not all(math.isfinite(x) for x in p):
+                raise ValueError("patch geometry vertices must be finite [x, z] pairs")
+        if v[0] != v[-1]:
+            raise ValueError("patch geometry must be closed (first vertex == last vertex)")
+        return v
+
+
 class RunState(BaseModel):
     run_id: str
     plant_id: str
@@ -84,8 +116,9 @@ class RunState(BaseModel):
     revision: int
     observation_time_s: float | None
     result_origin: str | None
+    provider_version: str | None
     evidence_capture_ids: list[str]
-    patches: list[dict]
+    patches: list[FirePatch]
     produced_at: datetime
     time_basis: str
     simulation_time_origin_s: float | None
@@ -93,7 +126,7 @@ class RunState(BaseModel):
 
 
 class CaptureRecord(BaseModel):
-    """A received capture (stored original + queued record)."""
+    """A received capture and its processing status (queued/processing/completed/failed)."""
 
     capture_id: str
     run_id: str
@@ -104,12 +137,17 @@ class CaptureRecord(BaseModel):
     status: str
     schema_version: str
     storage_key: str
+    processing_started_at: datetime | None = None
+    processing_finished_at: datetime | None = None
+    processing_error: str | None = None
+    provider_version: str | None = None
 
 
 class HealthResponse(BaseModel):
     status: str
     algorithm_mode: str
     service: str = "firex-backend"
+    processing_mode: str = "unconfigured"
 
 
 class ErrorDetail(BaseModel):

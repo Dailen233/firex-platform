@@ -61,9 +61,17 @@ R3 场景管线已完成配置解耦与双江口公开 DSM 参考底座接入：
 
 新增子进程中断恢复、隔离模拟响应服务识别、截断 JPEG、镜像矩阵等回归用例，**39 个 pytest 通过**。`algorithm_mode` 仍 `unconfigured`，capture 仍 `queued`，run/state 仍 `no_observation`。
 
-## B3 前置项（记录）
+## 后端 B3：串行后台处理与持久化状态快照（2026-10-24）
 
-源码审查发现 `app.main` 在模块级 `app = create_app()` 导入时即初始化默认数据库（`db.init_db`）。本轮测试均以显式临时 `FIREX_BACKEND_DATA_DIR` 隔离；生命周期初始化调整记录为 B3 前置项，随后与工作器生命周期一起处理。
+1. **初始化时机**：`create_app` 不再初始化数据库；`import app.main`、构造应用、导出 OpenAPI 均无数据库/工作器副作用（OpenAPI 导出不再依赖 `/tmp` 库）。数据库初始化与工作器启停移入 FastAPI `lifespan`（已登记的 B3 前置项随之解决）；测试通过 `with TestClient(...)` 进入/退出生命周期并使用临时数据目录。
+2. **串行工作器**：单服务进程、单工作器线程；上传接口只保存原件与待处理记录。计算在独立线程运行，不阻塞事件循环；关闭时停止领取新任务并等待当前任务结束。
+3. **提供者与来源**：`ProcessingProvider` 接口 + `fixture` 提供者；`FIREX_PROCESSING_MODE` 区分 `unconfigured`（默认，不处理）与 `fixture`（显式开启）。fixture 结果固定 `result_origin=fixture`、提供者 `fixture@1.0`，附“接口测试数据，不代表图像重建”说明；客户端不能通过上传字段指定来源。
+4. **任务与快照持久化**：任务 `queued→processing→completed/failed`，持久化处理时间、错误、提供者版本；短事务领取任务。结果含 `observation_time_s`（时间契约）、`produced_at`、`result_origin`、`provider_version`、`evidence_capture_ids`、稳定 `patch_id` 与局部 XZ 多边形（首尾闭合、有限值）。`/runs/{run_id}/state` 从持久化结果读取：新运行 `no_observation`/`revision=0`，较新观测递增 revision，较旧观测只入历史；重复上传/完成不重复发布；失败保留最近有效快照；重启把遗留 `processing` 重置为 `queued`。
+5. **验证**：**48 个 pytest 通过**（39 既有 + 9 后台处理），真实 HTTP fixture 链路（两帧同 patch 不同几何、revision 递增、重复 GET 稳定）已验证。
+
+## B3 前置项（已解决）
+
+源码审查曾发现 `app.main` 在模块级 `app = create_app()` 导入时即初始化默认数据库；本轮已随生命周期调整一并解决（见上）。
 
 ## 本轮变更与修复
 

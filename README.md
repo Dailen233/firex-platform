@@ -51,7 +51,7 @@ npm --prefix frontend run dev:polling
 ```bash
 uv --directory backend sync --locked                                        # 首次：创建 backend/.venv 并安装锁定依赖
 uv --directory backend run --locked uvicorn app.main:app --host 127.0.0.1 --port 8002
-uv --directory backend run --locked python -m pytest -q                     # 后端测试（31 项）
+uv --directory backend run --locked python -m pytest -q                     # 后端测试（48 项）
 uv --directory backend run --locked python scripts/export_openapi.py        # 导出 contracts/openapi.json
 ```
 
@@ -67,7 +67,9 @@ curl -s http://127.0.0.1:8002/api/v1/runs/{run_id}/state
 curl -s http://127.0.0.1:8002/api/v1/captures/{capture_id}
 ```
 
-离线上传脚本：`uv --directory backend run --locked python scripts/upload_test_capture.py --base-url http://127.0.0.1:8002 <run_id>`。
+离线上传脚本：`uv --directory backend run --locked python scripts/upload_test_capture.py --base-url http://127.0.0.1:8002 <run_id>`（不同帧用 `--frame N`，重试复用同 ID）。
+
+显式开启 fixture 后台处理（`unconfigured` 为默认，不产生结果）：`FIREX_PROCESSING_MODE=fixture uv --directory backend run --locked uvicorn app.main:app --host 127.0.0.1 --port 8002`，随后上传多帧并查询 `/api/v1/runs/{run_id}/state`。fixture 结果仅为接口测试数据，不代表图像重建。
 
 详见 `backend/README.md` 与 `contracts/`。
 

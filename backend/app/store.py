@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from . import db
+from . import db, results
 from .models import SCHEMA_VERSION, RunCreate, RunRecord, RunState
 from .time_contract import TIME_BASIS
 
@@ -70,6 +70,28 @@ def get_run_state(path: Path, run_id: str) -> RunState | None:
     run = get_run(path, run_id)
     if run is None:
         return None
+    snap = results.get_snapshot(path, run_id)
+    if snap is None:
+        return RunState(
+            run_id=run.run_id,
+            plant_id=run.plant_id,
+            scene_id=run.scene_id,
+            asset_version=run.asset_version,
+            coordinate_frame_id=run.coordinate_frame_id,
+            input_source=run.input_source,
+            schema_version=run.schema_version,
+            state_status="no_observation",
+            revision=0,
+            observation_time_s=None,
+            result_origin=None,
+            provider_version=None,
+            evidence_capture_ids=[],
+            patches=[],
+            produced_at=run.created_at,
+            time_basis=TIME_BASIS[run.input_source],
+            simulation_time_origin_s=run.simulation_time_origin_s,
+            time_origin_utc=run.time_origin_utc,
+        )
     return RunState(
         run_id=run.run_id,
         plant_id=run.plant_id,
@@ -78,13 +100,14 @@ def get_run_state(path: Path, run_id: str) -> RunState | None:
         coordinate_frame_id=run.coordinate_frame_id,
         input_source=run.input_source,
         schema_version=run.schema_version,
-        state_status="no_observation",
-        revision=0,
-        observation_time_s=None,
-        result_origin=None,
-        evidence_capture_ids=[],
-        patches=[],
-        produced_at=run.created_at,
+        state_status="observation",
+        revision=snap.revision,
+        observation_time_s=snap.observation_time_s,
+        result_origin=snap.result_origin,
+        provider_version=snap.provider_version,
+        evidence_capture_ids=snap.evidence_capture_ids,
+        patches=snap.patches,
+        produced_at=snap.produced_at,
         time_basis=TIME_BASIS[run.input_source],
         simulation_time_origin_s=run.simulation_time_origin_s,
         time_origin_utc=run.time_origin_utc,
