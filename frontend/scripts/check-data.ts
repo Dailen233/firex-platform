@@ -1,19 +1,26 @@
 import { readFileSync,writeFileSync,mkdirSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { createHash } from 'node:crypto'
 import assert from 'node:assert/strict'
 import type { Plant,SceneLink,SceneObject,SceneManifest,Boundaries,SceneProfile,ReferenceMarker } from '../src/lib/types.ts'
 import { validateFireStateDemo,resolveActivePatches,pointInRingXZ } from '../src/lib/fire-demo-schema.ts'
 import { EXPECTED_SAMPLE_PLANTS } from '../src/lib/catalog-config.ts'
+// 脚本位于 frontend/scripts/，路径解析与 cwd 无关：
+// - public/* 资源相对于 frontend/ 解析；
+// - evidence/* 产物写回仓库根，避免生成 frontend/evidence 重复目录。
+const frontendDir = join(dirname(fileURLToPath(import.meta.url)), '..')
+const repoRoot = join(frontendDir, '..')
 const checks:{id:string;result:string}[]=[]
 function check(id:string,run:()=>void){run();checks.push({id,result:'passed'})}
-const read=<T>(path:string):T=>JSON.parse(readFileSync(path,'utf8')) as T
+const read=<T>(path:string):T=>JSON.parse(readFileSync(join(frontendDir,path),'utf8')) as T
 const plants=read<{features:Plant[]}>('public/data/plants_frontend.geojson').features
 const links=read<{scenes:SceneLink[]}>('public/data/scene_index.json').scenes
 const manifest=read<SceneManifest>('public/models/zhijin-v4/scene_manifest.json')
 const objects=read<{objects:SceneObject[]}>('public/models/zhijin-v4/object_registry.json').objects
 const boundaries=read<Boundaries>('public/data/provinces.geojson')
-const model=readFileSync('public/models/zhijin-v4/assets/zhijin_scene_v4.glb')
-const sjkModel=readFileSync('public/models/shuangjiangkou-reference-v1/terrain_reference.glb')
+const model=readFileSync(join(frontendDir,'public/models/zhijin-v4/assets/zhijin_scene_v4.glb'))
+const sjkModel=readFileSync(join(frontendDir,'public/models/shuangjiangkou-reference-v1/terrain_reference.glb'))
 const sjkProfile=read<SceneProfile>('public/models/shuangjiangkou-reference-v1/scene_profile.json')
 const sjkCoord=read<{coordinate_frame_id:string;proposed_study_area:{projected_area_km2:number;is_actual_model_delivery_extent:boolean}}>('public/data/shuangjiangkou/coordinate_reference.json')
 const sjkOverlay=read<{markers:ReferenceMarker[]}>('public/data/shuangjiangkou/overlay_demo_reference.json')
@@ -99,5 +106,5 @@ check('FIRE-DEMO-04-rejects-invalid',()=>{
  const f=base();f.patches[0]!.rings[0]!.ground_offset_m=1.5;assert.equal(validateFireStateDemo(f).ok,false)
  const g=base();g.patches[0]!.rings[0]!.ground_offset_m=1.0;assert.equal(validateFireStateDemo(g).ok,true)
 })
-mkdirSync('evidence',{recursive:true});writeFileSync('evidence/data-checks.json',JSON.stringify({date:'2026-10-11',count:checks.length,checks},null,2)+'\n')
+mkdirSync(join(repoRoot,'evidence'),{recursive:true});writeFileSync(join(repoRoot,'evidence/data-checks.json'),JSON.stringify({date:'2026-10-11',count:checks.length,checks},null,2)+'\n')
 console.log(JSON.stringify({checks:checks.length,result:'passed',model_sha256:manifest.asset.sha256,province_count:34}))

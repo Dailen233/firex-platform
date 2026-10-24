@@ -16,7 +16,7 @@
 1. 更新基线：git switch main，然后git pull --ff-only。
 2. 从main新建自己的分支：git switch -c fix/local-webgl-check。
 3. 将需求编号、输入资源、事实边界和验收条件交给CodeBuddy。一次做一个目标。
-4. 完成后检查git diff；运行npm run test:data、npm run build、git diff --check，附浏览器证据。
+4. 完成后检查git diff；运行npm --prefix frontend run test:data、npm --prefix frontend run build、git diff --check，附浏览器证据。
 5. 只提交相关源码和文档；不提交node_modules/dist、密钥、个人环境文件。
 6. 推送自己的分支，创建Pull Request，说明问题、变更、验收结果和未验证项。
 7. 至少由另一位成员检查；本对话可辅助验收。通过后由负责人合并到main。

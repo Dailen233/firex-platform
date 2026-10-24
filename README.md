@@ -6,6 +6,15 @@ Fire-X 新阶段团队协作工程。首轮前端基线为0.1.0；旧Fire-X仓�
 
 已实现全国省级地图 / 省份列表 → 电厂详情 → 织金 v4 原始 GLB → 返回。8 个电厂是样例；织金具备正式三维场景（试建），双江口水电站正式模型待接入、可浏览公开 DSM 山地参考底座。场景名称、路径、相机、统计与能力开关统一由 `scene_profile.json` 配置读取。电网与应急资料暂缓，未接入火势、巡检算法或告警。
 
+## 目录结构
+
+- `frontend/`：现有 Vue3 前端（src、public、index.html、package.json、锁文件、Vite/TS 配置、`scripts/check-data.ts`）。所有前端命令从此目录运行。
+- `backend/`：预留，尚未实现（见 `backend/README.md`）。
+- `contracts/`：预留接口约定与 OpenAPI 快照（见 `contracts/README.md`）。
+- `runtime-data/`：本机运行产物，已忽略，不提交。
+- 根目录：README、AGENTS、CONTRIBUTING、docs、evidence、.github 与 Git 配置。
+- `evidence/` 仍输出到仓库根，不会生成 `frontend/evidence`。
+
 ## Ubuntu + CodeBuddy 接手
 
 先克隆新仓库，在 VS Code/CodeBuddy 打开目录：
@@ -21,20 +30,26 @@ code .
 建议 Node.js 22.12+ 或24；先查看 `node -v`，不要影响已有 Python/VGGT 环境。
 
 ```bash
-npm ci
-npm run test:data
-npm run build
-npm run dev
+npm --prefix frontend ci
+npm --prefix frontend run test:data
+npm --prefix frontend run build
+npm --prefix frontend run dev
 ```
 
 打开终端显示的地址，默认 `http://localhost:4173/`。关闭服务按 Ctrl+C。无需Unity、Python算法端、API Key或联网地图接口。运行时地图、模型与库均为本地资源；首次npm安装需要网络，主动点击来源链接才访问外网。
 
-### 构建后运行静态演示
-
-新克隆的仓库不跟踪dist，请先运行上面的npm ci与npm run build。
+本机若因 inotify 实例上限（`fs.inotify.max_user_instances`）导致 `dev` 报 `EMFILE: too many open files`，改用轮询开发模式（默认关闭、代价略高 CPU）：
 
 ```bash
-cd dist
+npm --prefix frontend run dev:polling
+```
+
+### 构建后运行静态演示
+
+新克隆的仓库不跟踪dist，请先运行上面的 `npm --prefix frontend ci` 与 `npm --prefix frontend run build`。
+
+```bash
+cd frontend/dist
 python3 -m http.server 8080
 ```
 
@@ -60,10 +75,11 @@ python3 -m http.server 8080
 - docs/06-model-delivery-requirements.md：正式模型交付要求（双江口）。
 - docs/07-performance-check-method.md：场景加载与交互检查方法。
 - evidence/：实际浏览器截图与资源检查。
-- public/data/province_metadata.json：底图下载来源、哈希与CRS。
-- public/models/zhijin-v4/：原始模型交接资源，manifest/registry原字段保留。
+- frontend/public/data/province_metadata.json：底图下载来源、哈希与CRS。
+- frontend/public/models/zhijin-v4/：原始模型交接资源，manifest/registry原字段保留。
+- frontend/scripts/check-data.ts：数据与资源校验，路径与 cwd 无关，产物写回仓库根 `evidence/`。
 
-hash路由支持静态服务器，无rewrite要求。模型资源按scene_index及manifest相对路径解析。源码无后端、数据库、账号或凭据。
+hash路由支持静态服务器，无rewrite要求。模型资源按scene_index及manifest相对路径解析。源码无后端、数据库、账号或凭据；backend 与 contracts 仅预留说明。
 
 ## 技术与署名
 

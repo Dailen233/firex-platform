@@ -71,6 +71,36 @@ Node v22.23.2、npm 10.9.8。`npm ci`（63 包、0 漏洞）、`npm run test:dat
 
 **正式模型待接入**；真实配准精度、动态重建、量化性能、真实移动设备仍未验证。约 100 km² 继续保留建议研究区口径。
 
+## 目录迁移 + 开发服务器与浏览器回归（R4，2026-10-24）
+
+分支 `feat/frontend-backend-layout`，HEAD `2de630b`，本轮未提交。前端迁入 `frontend/`，建立 `backend/`、`contracts/`、`runtime-data/` 骨架；本记录为 CodeBuddy 本机实际执行（含 Playwright 自动化），非用户手动操作。
+
+### 工程检查（通过）
+
+- `npm --prefix frontend run test:data`：21 项通过，模型 SHA `ee33bc33…7aa37` 保持、34 省份；证据输出到仓库根 `evidence/`，无 `frontend/evidence`。
+- `npm --prefix frontend run build`：退出 0（3.27s）。
+- `git diff --check` / `git diff --cached --check`：均退出 0。
+- 迁移前后 `public/`（现 `frontend/public/`）42 个静态资源 SHA256 完全一致（见 `evidence/2026-10-24-dev-browser/`）。
+
+### 开发模式（默认受限，polling 可用）
+
+- 默认 `npm --prefix frontend run dev` 本机报 `EMFILE: too many open files, watch …/frontend/vite.config.ts`（`errno -24`）。根因已确认：`fs.inotify.max_user_instances=128` 被占满（用户 `dailen` 实持 147–150 实例），`inotify_init1` 返回 EMFILE；非 watch 数（65536 未满）、非 FD 上限（1048576）、非配置路径错误。
+- 处理：`vite.config.ts` 增加显式 `server.watch.usePolling`（仅 `VITE_USE_POLLING=true` 开启，默认保持 inotify），新增 `dev:polling` 脚本；`dev:polling` 启动成功（ready ~170ms）且源文件更新被轮询监听接收（已验证并恢复）。
+
+### 三维交互（Playwright + 系统 Chrome，软件 WebGL，通过）
+
+Playwright 1.64.1 + 系统 Chrome 147（headless + SwiftShader 软件 WebGL，非硬件 GPU）实测：
+
+- 地图/省份入口 → 电厂详情 → 织金三维场景 → 返回：8 厂列表；织金详情“进入三维场景”→ 场景 WebGL 上下文 OK（canvas 889×638），旋转+缩放后仍正常；返回正常。
+- 双江口详情 → “浏览山地参考底座” → 返回：场景 WebGL OK，标题“双江口公开 DSM 山地参考底座”，旋转+缩放后正常，返回正常。
+- 控制台错误：无；失败请求 / HTTP≥400：无。
+- 截图：`evidence/2026-10-24-dev-browser/{01-atlas,02-zhijin-detail,03-zhijin-scene,05-shuangjiangkou-detail,06-shuangjiangkou-scene}.png`。
+
+### 剩余缺项
+
+- 本轮为软件 WebGL（headless SwiftShader）回归，硬件 GPU 视觉质量仍需用户本机确认（R1.1 已确认硬件 WebGL2，本轮不重复硬件渲染判定）。
+- 长期 GPU/内存、真实移动设备、实地/米级精度仍待验证；正式模型待接入。
+
 ## 云端验收历史（原记录，保留）
 
 ### 实际运行环境

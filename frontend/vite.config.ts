@@ -1,0 +1,19 @@
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+// 本机 inotify 实例上限（fs.inotify.max_user_instances=128）易被编辑器/多进程占满，
+// 导致 vite dev 的 fs.watch 报 EMFILE。这里提供显式 polling 开关，默认保持 inotify 原行为。
+// polling 代价：周期性 stat 全量监听文件，CPU 略高、变更延迟约 interval；仅需时用 dev:polling 开启。
+const usePolling = process.env.VITE_USE_POLLING === 'true'
+const pollingInterval = Number(process.env.VITE_POLLING_INTERVAL) || 300
+export default defineConfig({
+  plugins: [vue()],
+  server: {
+    host: '0.0.0.0',
+    port: 4173,
+    allowedHosts: ['terminal.local'],
+    ...(usePolling ? { watch: { usePolling: true, interval: pollingInterval } } : {}),
+  },
+  build: {
+    rollupOptions: { output: { manualChunks: { three: ['three'], charts: ['echarts'] } } },
+  },
+})
