@@ -1,0 +1,15 @@
+{
+  "schema_version": "1.0",
+  "capture_id": "test-cap-20261024",
+  "scene_id": "shuangjiangkou_reference_terrain",
+  "asset_version": "reference-v1",
+  "coordinate_frame_id": "SJK_REFERENCE_UTM47N_EGM2008_v1",
+  "width": 32,
+  "height": 24,
+  "intrinsics": { "fx": 60.0, "fy": 60.0, "cx": 16.0, "cy": 12.0 },
+  "distortion_model": "none",
+  "pose": {
+    "camera_to_world": [[1, 0, 0, 100], [0, 1, 0, 200], [0, 0, 1, 300], [0, 0, 0, 1]]
+  },
+  "simulation_time_s": 15.5
+}

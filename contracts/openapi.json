@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Fire-X Backend",
-    "description": "Minimal run creation and persistent query. algorithm_mode is unconfigured; image processing and upload are not yet integrated.",
+    "description": "Minimal run creation and persistent query, plus image upload with same-frame metadata. algorithm_mode is unconfigured; image processing is not yet integrated.",
     "version": "0.1.0"
   },
   "paths": {
@@ -171,10 +171,228 @@
           }
         }
       }
+    },
+    "/api/v1/runs/{run_id}/captures": {
+      "post": {
+        "tags": [
+          "captures"
+        ],
+        "summary": "Upload Capture",
+        "operationId": "upload_capture_api_v1_runs__run_id__captures_post",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_upload_capture_api_v1_runs__run_id__captures_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Capture received and queued",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaptureRecord"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Idempotent retry: capture already received",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaptureRecord"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "capture_id conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Payload too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/captures/{capture_id}": {
+      "get": {
+        "tags": [
+          "captures"
+        ],
+        "summary": "Get Capture Endpoint",
+        "operationId": "get_capture_endpoint_api_v1_captures__capture_id__get",
+        "parameters": [
+          {
+            "name": "capture_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Capture Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CaptureRecord"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "Body_upload_capture_api_v1_runs__run_id__captures_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File"
+          },
+          "metadata": {
+            "type": "string",
+            "title": "Metadata"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file",
+          "metadata"
+        ],
+        "title": "Body_upload_capture_api_v1_runs__run_id__captures_post"
+      },
+      "CaptureRecord": {
+        "properties": {
+          "capture_id": {
+            "type": "string",
+            "title": "Capture Id"
+          },
+          "run_id": {
+            "type": "string",
+            "title": "Run Id"
+          },
+          "received_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Received At"
+          },
+          "observation_time_s": {
+            "type": "number",
+            "title": "Observation Time S"
+          },
+          "content_sha256": {
+            "type": "string",
+            "title": "Content Sha256"
+          },
+          "byte_size": {
+            "type": "integer",
+            "title": "Byte Size"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "schema_version": {
+            "type": "string",
+            "title": "Schema Version"
+          },
+          "storage_key": {
+            "type": "string",
+            "title": "Storage Key"
+          }
+        },
+        "type": "object",
+        "required": [
+          "capture_id",
+          "run_id",
+          "received_at",
+          "observation_time_s",
+          "content_sha256",
+          "byte_size",
+          "status",
+          "schema_version",
+          "storage_key"
+        ],
+        "title": "CaptureRecord",
+        "description": "A received capture (stored original + queued record)."
+      },
       "ErrorDetail": {
         "properties": {
           "code": {
@@ -246,6 +464,11 @@
           "algorithm_mode": {
             "type": "string",
             "title": "Algorithm Mode"
+          },
+          "service": {
+            "type": "string",
+            "title": "Service",
+            "default": "firex-backend"
           }
         },
         "type": "object",

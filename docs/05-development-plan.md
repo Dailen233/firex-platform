@@ -46,6 +46,25 @@ R3 场景管线已完成配置解耦与双江口公开 DSM 参考底座接入：
 
 统一入口 `uv --directory backend sync --locked / run --locked uvicorn app.main:app / run --locked python -m pytest -q` 已在仓库根原样验证。9 个 pytest 通过，真实 HTTP 创建两类运行并重启后时间配置仍可查询（详见 `backend/README.md`）。上传接收、原图保存、任务工作器、fixture 火区、图像算法及前端 API 接入留待后续；`algorithm_mode` 保持 `unconfigured`。
 
+## 后端 B2（2026-10-24）
+
+实现图片上传与接收记录查询：`POST /api/v1/runs/{run_id}/captures`（multipart `file` + `metadata` JSON 字符串）与 `GET /api/v1/captures/{capture_id}`。新增依赖 python-multipart、Pillow（锁文件更新）。metadata 定义相机内参（像素单位、左上原点、`fx/fy/cx/cy`）、轴向（右/下/前）、`camera_to_world` 4×4（行存储、列向量乘法）、仅支持 `none` 畸变模型；时间沿用 B1 契约。原件按 `captures/<capture_id>/` 保存（不重新编码），原子落盘 + `BEGIN IMMEDIATE` + 唯一约束保证幂等与并发一致性；未知字段、非 JPEG/PNG、尺寸/场景/坐标/时间不符、超限均拒绝。接收记录 `status=queued`（等待处理器，不自动 completed），运行状态仍 `no_observation`。25 个 pytest 通过，真实 HTTP 上传/重试/重启再查询已验证（详见 `backend/README.md` 与 `contracts/conventions.md`）。原图后处理、任务工作器、fixture 火区、图像算法及前端接入留待后续。
+
+## 后端 B2 定点审查与收尾（2026-10-24）
+
+多轮定点审查修复四类可靠性问题：
+
+1. **中断恢复**：进程在“文件目录已落位、SQLite 未提交”之间退出会留下 `captures/<capture_id>/` 孤儿目录。落位前在临时目录写入服务端接收清单 `manifest.json`（`format_version`/`capture_id`/`run_id`/图片字节数与哈希/规范化 metadata 哈希/`received_at`），由服务端生成、不接受客户端指定。重试同一 `capture_id` 时核对路径边界、目录类型（拒绝符号链接）、清单及实际文件哈希：一致则复用原件并保留首次 `received_at`；不同运行/内容返回 409 并保留目录；缺/坏清单、归属不明或内容不完整时保留目录并返回 500 `RECOVERY_ERROR`，不直接删除。
+2. **服务识别**：`/health` 增加 `service="firex-backend"`，离线上传客户端先核对再 POST，避免误连被其他项目占用的端口。
+3. **JPEG 完整解码**：`image_validation` 由仅 `verify()`（不加载像素）改为 `load()` 强制完整解码，截断 JPEG 返回 422 `INVALID_IMAGE`；保存仍用上传原始字节，不重编码/旋转/裁切。
+4. **相机旋转手性**：`CameraPose` 增加 `det(R) ≈ +1` 校验，拒绝镜像变换（`det=-1`）；世界系采用右手规范，Unity 左手坐标须在上传适配端显式转换。
+
+新增子进程中断恢复、隔离模拟响应服务识别、截断 JPEG、镜像矩阵等回归用例，**39 个 pytest 通过**。`algorithm_mode` 仍 `unconfigured`，capture 仍 `queued`，run/state 仍 `no_observation`。
+
+## B3 前置项（记录）
+
+源码审查发现 `app.main` 在模块级 `app = create_app()` 导入时即初始化默认数据库（`db.init_db`）。本轮测试均以显式临时 `FIREX_BACKEND_DATA_DIR` 隔离；生命周期初始化调整记录为 B3 前置项，随后与工作器生命周期一起处理。
+
 ## 本轮变更与修复
 
 - CR-01：GPU禁用，新增明确兼容显示，保留GPU验收缺口。

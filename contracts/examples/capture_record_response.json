@@ -1,0 +1,11 @@
+{
+  "capture_id": "test-cap-20261024",
+  "run_id": "6dcb4cbb-1e8e-421a-87c3-e996c3ab264e",
+  "received_at": "2026-10-24T04:42:10.518944Z",
+  "observation_time_s": 5.5,
+  "content_sha256": "be5a233934aec558c0c0e6b9992c04b1787f64be01fa8878a5d55db48a148e06",
+  "byte_size": 95,
+  "status": "queued",
+  "schema_version": "1.0",
+  "storage_key": "test-cap-20261024"
+}

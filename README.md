@@ -44,26 +44,32 @@ npm --prefix frontend run dev
 npm --prefix frontend run dev:polling
 ```
 
-## 后端（B1，最小运行创建与持久化查询）
+## 后端（B1+B2：运行、时间契约、图片上传与接收记录）
 
-后端基础已实现；**图像处理、上传、火势算法未接入**（`GET /health` 返回 `algorithm_mode=unconfigured`）。需 Python 3.12 与 uv：
+后端已实现运行创建/查询、时间契约、图片上传与同帧 metadata 保存；**图像算法与火势估计未接入**（`GET /health` 返回 `algorithm_mode=unconfigured`，接收记录为 `queued`）。需 Python 3.12 与 uv：
 
 ```bash
 uv --directory backend sync --locked                                        # 首次：创建 backend/.venv 并安装锁定依赖
-uv --directory backend run --locked uvicorn app.main:app --host 127.0.0.1 --port 8001
-uv --directory backend run --locked python -m pytest -q                     # 后端测试
+uv --directory backend run --locked uvicorn app.main:app --host 127.0.0.1 --port 8002
+uv --directory backend run --locked python -m pytest -q                     # 后端测试（31 项）
 uv --directory backend run --locked python scripts/export_openapi.py        # 导出 contracts/openapi.json
 ```
 
-服务默认 `127.0.0.1:8001`；运行数据默认落在 `runtime-data/backend/runs.sqlite3`（已忽略，可用 `FIREX_BACKEND_DATA_DIR` 覆盖）。创建与查询运行示例（仿真需带 `simulation_time_origin_s`，真实需带带时区的 `time_origin_utc`）：
+服务默认 `127.0.0.1:8001`（本机该端口被其他项目占用，实际验证改用 `8002`）；运行数据默认落在 `runtime-data/backend/`（已忽略，可用 `FIREX_BACKEND_DATA_DIR` 覆盖）。`GET /health` 返回 `service="firex-backend"`，离线上传脚本据此核对目标服务，避免误连其他项目。创建运行与上传（仿真需带 `simulation_time_origin_s`，真实需带带时区的 `time_origin_utc`；`capture_id` 首次生成后复用）：
 
 ```bash
-curl -s http://127.0.0.1:8001/health
-curl -s -X POST http://127.0.0.1:8001/api/v1/runs -H "Content-Type: application/json" \
+curl -s http://127.0.0.1:8002/health
+curl -s -X POST http://127.0.0.1:8002/api/v1/runs -H "Content-Type: application/json" \
   -d '{"plant_id":"GEM_HYDRO_SHUANGJIANGKOU","scene_id":"shuangjiangkou_reference_terrain","asset_version":"reference-v1","coordinate_frame_id":"SJK_REFERENCE_UTM47N_EGM2008_v1","input_source":"simulation","simulation_time_origin_s":10.0}'
-curl -s http://127.0.0.1:8001/api/v1/runs/{run_id}
-curl -s http://127.0.0.1:8001/api/v1/runs/{run_id}/state
+curl -s -X POST http://127.0.0.1:8002/api/v1/runs/{run_id}/captures \
+  -F "file=@interface-test.png;type=image/png" -F "metadata=$(cat capture_metadata.json)"
+curl -s http://127.0.0.1:8002/api/v1/runs/{run_id}/state
+curl -s http://127.0.0.1:8002/api/v1/captures/{capture_id}
 ```
+
+离线上传脚本：`uv --directory backend run --locked python scripts/upload_test_capture.py --base-url http://127.0.0.1:8002 <run_id>`。
+
+详见 `backend/README.md` 与 `contracts/`。
 
 ### 构建后运行静态演示
 

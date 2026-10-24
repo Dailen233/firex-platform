@@ -92,9 +92,24 @@ class RunState(BaseModel):
     time_origin_utc: datetime | None
 
 
+class CaptureRecord(BaseModel):
+    """A received capture (stored original + queued record)."""
+
+    capture_id: str
+    run_id: str
+    received_at: datetime
+    observation_time_s: float
+    content_sha256: str
+    byte_size: int
+    status: str
+    schema_version: str
+    storage_key: str
+
+
 class HealthResponse(BaseModel):
     status: str
     algorithm_mode: str
+    service: str = "firex-backend"
 
 
 class ErrorDetail(BaseModel):

@@ -42,7 +42,7 @@ def test_health_reports_algorithm_unconfigured(tmp_path: Path) -> None:
     client = make_client(tmp_path)
     r = client.get("/health")
     assert r.status_code == 200
-    assert r.json() == {"status": "ok", "algorithm_mode": "unconfigured"}
+    assert r.json() == {"status": "ok", "algorithm_mode": "unconfigured", "service": "firex-backend"}
 
 
 def test_create_then_get_binding_consistent(tmp_path: Path) -> None:
