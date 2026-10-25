@@ -1,0 +1,39 @@
+{
+  "description": "C1 小样本清单（固定，仅用于结果复核，不参与检测计算）",
+  "weights": {
+    "path": "/home/dailen/vggt/runs/detect/train_full_v1/weights/best.pt",
+    "sha256": "69b1f5c11edc646274c9fbb1ac4879d2874ad627b571c156ece45452b612087a",
+    "task": "detect",
+    "names": { "0": "fire" }
+  },
+  "samples": [
+    {
+      "id": "case01_frame_0021",
+      "path": "/home/dailen/Nutstore Files/Fire_X/demo_sequences/case01_single_fire/images/frame_0021.png",
+      "sha256": "bbb66eae6476ca73c47f91b4b2fb7171f48f95fbfa88666d66de29a2a6c951ad",
+      "expected_label": "positive",
+      "note": "C0 已核对：火焰清晰可见（人工目视，前一对话）"
+    },
+    {
+      "id": "case01_frame_0022",
+      "path": "/home/dailen/Nutstore Files/Fire_X/demo_sequences/case01_single_fire/images/frame_0022.png",
+      "sha256": "ba81301a14ed690947e2db833aad216831dcaef558574ff0bca6366e338b5211",
+      "expected_label": "positive",
+      "note": "C0 已核对：火焰清晰可见（人工目视，前一对话）"
+    },
+    {
+      "id": "case05_frame_0001",
+      "path": "/home/dailen/Nutstore Files/Fire_X/demo_sequences/case05_false_positive_challenge/images/frame_0001.png",
+      "sha256": "9b468820bb01e1e52f92f90bdf08a01cc1efa026757035bba91cc7a47d13b332",
+      "expected_label": "uncertain",
+      "note": "case05 notes 标注该序列无火（有烟、高亮背景）；因当前会话模型不支持图像查看，未做逐帧目视核验，故标‘不确定’而非‘无火真值’。选帧依据：序列首帧，作为高亮复杂背景起点。"
+    },
+    {
+      "id": "case05_frame_0012",
+      "path": "/home/dailen/Nutstore Files/Fire_X/demo_sequences/case05_false_positive_challenge/images/frame_0012.png",
+      "sha256": "0e226a863d96980b1b2d68d26e179b1a84a77740b3564581039bb6e3b04a4095",
+      "expected_label": "uncertain",
+      "note": "同 case05；选帧依据：序列末帧，路线‘逐渐靠近烟’，作为烟/高亮干扰的最强反例候选。未目视核验，标‘不确定’。"
+    }
+  ]
+}
