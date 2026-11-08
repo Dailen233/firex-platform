@@ -1,0 +1,28 @@
+{
+  "asset_dir": "models/sjk-prototype-v0.1",
+  "generated_at": "2026-11-02",
+  "role": "prototype_model",
+  "registration_status": "unregistered",
+  "formal_model_ready": false,
+  "note": "两份草案均为未配准的概念预览资产，仅用于查看；不代表已配准到真实电站或队友地形。",
+  "entries": [
+    {
+      "file": "team_terrain_untextured_m.glb",
+      "kind": "terrain_draft",
+      "scene_id": "sjk_team_terrain_draft_v0_1",
+      "source": "队友提供的 ASCII FBX 地形（按 FBX 声明的厘米烘焙为米；约 10km×10km，129×129 网格，78.125m 间距）",
+      "texture": "无贴图；显示为高程示意色",
+      "bytes": 1194076,
+      "sha256": "fc61cb277f115af0537967d8324b9c43c7042b1d5a6c0f5ec45f075641dd0789"
+    },
+    {
+      "file": "sjk_concept_layout.glb",
+      "kind": "facility_concept",
+      "scene_id": "sjk_facility_concept_v0_1",
+      "source": "Fire-X 参数化概念建模：7 项原创概念组件组合（堆石坝/开关站/控制附属楼/GIS厅/进水口/交通洞口/线路杆塔），仅用于查看",
+      "texture": "无贴图；显示为概念构件材质色",
+      "bytes": 2602896,
+      "sha256": "41fd0be44fcc0c99b51e9b4005a345151d0f518ad8ec85d9eaacfb151d252d88"
+    }
+  ]
+}

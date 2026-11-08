@@ -11,3 +11,11 @@ backend/.venv/
 __pycache__/
 *.pyc
 .pytest_cache/
+
+# 本地原始采集包与模型权重不入库（ZIP/权重为交付物，保留在本机）
+data/
+*.zip
+*.pt
+
+# 本地 IDE/agent 项目数据，不入库
+.codebuddy/

@@ -44,6 +44,8 @@ export function relatedPlants(code:string){return plants.value.filter(p=>p.prope
 export function sceneFor(id:string){return sceneLinks.value.find(s=>s.plant_id===id&&s.asset_role==='formal_model')}
 // 公开参考底座场景（asset_role=public_reference_terrain）：双江口山地参考。
 export function referenceSceneFor(id:string){return sceneLinks.value.find(s=>s.plant_id===id&&s.asset_role==='public_reference_terrain')}
+// 模型草案/概念预览场景（asset_role=prototype_model）：双江口队友地形 + 枢纽构件草案（未配准，可能多份）。
+export function prototypeScenesFor(id:string){return sceneLinks.value.filter(s=>s.plant_id===id&&s.asset_role==='prototype_model')}
 // 按场景 ID 取链接（SceneView 路由 /scene/:sceneId 使用）。
 export function sceneBySceneId(sceneId:string){return sceneLinks.value.find(s=>s.scene_id===sceneId)}
 export function capacityScope(p:Plant){
@@ -57,12 +59,14 @@ export function capacityScope(p:Plant){
   }
 }
 export function identityLabel(status:string){
+  if(status.includes('模拟')||status.includes('simulated'))return '模拟设施 · 演示设计'
   if(status.includes('unverified')||status==='unassigned')return '身份未核实'
   if(status.includes('report'))return '资料参考'
   return '参考对象，待核实'
 }
 export function heightLabel(o:{object_id:string;height_status?:string}){
-  if(o.object_id==='terrain')return '地形与平台估计'
+  if(o.height_status?.includes('模拟')||o.height_status?.includes('simulated'))return '模拟尺寸 · 非实测'
+  if(o.object_id==='terrain')return o.height_status?.includes('文件')?'文件相对标高（未配准）':'地形与平台估计'
   if(o.object_id==='CH01')return '报告记载高度；外形仍含假设'
   if(o.object_id==='B01'||o.object_id.startsWith('CT-'))return '展示假设，非实测'
   return '资料预测，非实测'

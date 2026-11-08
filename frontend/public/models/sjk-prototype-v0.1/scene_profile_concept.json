@@ -1,0 +1,48 @@
+{
+  "scene_id": "sjk_facility_concept_v0_1",
+  "plant_id": "GEM_HYDRO_SHUANGJIANGKOU",
+  "asset_version": "prototype-v0.1",
+  "asset_role": "prototype_model",
+  "formal_model_ready": false,
+  "registration_status": "unregistered",
+  "display_name": "双江口枢纽构件草案（概念布局）",
+  "scene_badge": "模型草案 · 未配准",
+  "coordinate_frame_id": "SJK_CONCEPT_STAGING_ONLY_v1",
+  "model_uri": "sjk_concept_layout.glb",
+  "object_registry_uri": null,
+  "object_registry_required": false,
+  "overlay_markers_uri": null,
+  "terrain_mesh_name": null,
+  "terrain_grid": null,
+  "asset": {
+    "bytes": 2602896,
+    "sha256": "41fd0be44fcc0c99b51e9b4005a345151d0f518ad8ec85d9eaacfb151d252d88",
+    "object_meshes": null,
+    "triangles": 19656,
+    "vertex_count": null,
+    "mesh_count": 7,
+    "textures_present": false
+  },
+  "bounds_local_m": { "min": [-477.5, -1, -638], "max": [720.7999877929688, 322.32501220703125, 575] },
+  "cameras": {
+    "vertical_fov_degrees": 43,
+    "default": { "position": [1273.9999938964843, 1034.0225061035158, 1399.84], "target": [121.64999389648438, 160.66250610351562, -31.5] },
+    "plant": null,
+    "whole_terrain": null,
+    "panorama": { "strategy": "fit_world_bounding_box", "padding_factor": 1.15 }
+  },
+  "camera_limits": { "near": 0.08086666666666667, "far": 48520, "min_distance": 6.065, "max_distance": 12130 },
+  "capabilities": { "object_selection": false, "reference_markers": false, "fire_patch_overlay": false },
+  "ui_notice": "参数化概念组件，组合布局尚未对应真实厂区。",
+  "study_area_note": "仅模型预览；不能把本地几何范围当作已完成地理配准。",
+  "study_area_stat": "概念构件 · 未地理定位",
+  "coordinate_note": "米制文件轴，+Y向上；地理轴向、原点与高程基准未知。",
+  "sources_and_attribution": [
+    { "name": "Fire-X 参数化概念建模", "url": "", "notice": "保留来源及未核实属性；详见交接包审查记录。" }
+  ],
+  "limitations": [
+    "不能连接不匹配的run/state。",
+    "原始资产和旧参考坐标保持不变。",
+    "Unity导入、WebGL画面和地理配准待验。"
+  ]
+}

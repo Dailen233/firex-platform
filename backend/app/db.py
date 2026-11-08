@@ -48,6 +48,8 @@ CREATE TABLE IF NOT EXISTS captures (
 """
 
 # Result history (one row per published result; capture_id unique -> one result per capture).
+# A2 2D-observation columns are nullable: patch_id/patch_geometry stay NOT NULL with
+# an empty sentinel ("") for detection-only providers, so pre-A2 rows remain valid.
 _RESULTS_SCHEMA = """
 CREATE TABLE IF NOT EXISTS results (
     result_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -64,6 +66,10 @@ CREATE TABLE IF NOT EXISTS results (
     patch_id TEXT NOT NULL,
     patch_geometry TEXT NOT NULL,
     capture_id TEXT NOT NULL UNIQUE,
+    fire_detected INTEGER,
+    detections TEXT,
+    model_ref TEXT,
+    threshold REAL,
     FOREIGN KEY (run_id) REFERENCES runs(run_id)
 )
 """
@@ -81,6 +87,10 @@ CREATE TABLE IF NOT EXISTS snapshots (
     evidence_capture_ids TEXT NOT NULL,
     patch_id TEXT NOT NULL,
     patch_geometry TEXT NOT NULL,
+    fire_detected INTEGER,
+    detections TEXT,
+    model_ref TEXT,
+    threshold REAL,
     FOREIGN KEY (run_id) REFERENCES runs(run_id)
 )
 """
@@ -90,6 +100,14 @@ _CAPTURE_PROCESSING_COLUMNS = (
     ("processing_finished_at", "TEXT"),
     ("processing_error", "TEXT"),
     ("provider_version", "TEXT"),
+)
+
+# A2 2D-observation columns added to pre-existing results/snapshots tables.
+_RESULT_2D_COLUMNS = (
+    ("fire_detected", "INTEGER"),
+    ("detections", "TEXT"),
+    ("model_ref", "TEXT"),
+    ("threshold", "REAL"),
 )
 
 
@@ -102,7 +120,9 @@ def init_db(path: Path) -> None:
         conn.execute(_CAPTURES_SCHEMA)
         _migrate_captures(conn)
         conn.execute(_RESULTS_SCHEMA)
+        _migrate_results(conn)
         conn.execute(_SNAPSHOTS_SCHEMA)
+        _migrate_snapshots(conn)
         conn.commit()
     finally:
         conn.close()
@@ -121,6 +141,20 @@ def _migrate_captures(conn: sqlite3.Connection) -> None:
     for name, decl in _CAPTURE_PROCESSING_COLUMNS:
         if name not in cols:
             conn.execute(f"ALTER TABLE captures ADD COLUMN {name} {decl}")
+
+
+def _migrate_results(conn: sqlite3.Connection) -> None:
+    cols = {row[1] for row in conn.execute("PRAGMA table_info(results)")}
+    for name, decl in _RESULT_2D_COLUMNS:
+        if name not in cols:
+            conn.execute(f"ALTER TABLE results ADD COLUMN {name} {decl}")
+
+
+def _migrate_snapshots(conn: sqlite3.Connection) -> None:
+    cols = {row[1] for row in conn.execute("PRAGMA table_info(snapshots)")}
+    for name, decl in _RESULT_2D_COLUMNS:
+        if name not in cols:
+            conn.execute(f"ALTER TABLE snapshots ADD COLUMN {name} {decl}")
 
 
 def connect(path: Path) -> sqlite3.Connection:

@@ -5,6 +5,7 @@ import type { ActiveFirePatch, FireLevel, FireRing, ReferenceMarker, SceneObject
 import { assetUrl, readJson, resolveResource } from './data'
 import { sampleHeightOnTerrain } from './terrain-sampling'
 import { SoftwareRenderer } from './software-renderer'
+import { CONTROL_POINTS, TERRAIN_MESH_NAME, UNITY_WORLD_TO_GLB, type LocalRegistrationPointResult } from './dev/sjk-local-registration'
 
 export type FrameKind = 'default' | 'plant' | 'whole_terrain' | 'panorama'
 export interface ViewerCallbacks {progress:(percent:number,message:string)=>void;loaded:(profile:SceneProfile,objects:SceneObject[],markers:ReferenceMarker[])=>void;selected:(object:SceneObject|null)=>void;mode:(mode:'webgl'|'software')=>void;overlayIssue?:(message:string|null)=>void}
@@ -172,7 +173,44 @@ export class ModelViewer {
   this.camera.position.copy(center.clone().addScaledVector(dir,dist))
   this.controls.target.copy(center);this.camera.updateProjectionMatrix();this.controls.update();this.requestRender()
  }
- select(id:string|null,focus=false){
+ /** E3.1 开发态本地落点核验：按 unity_world_to_glb 转 P5/P6，只对地形网格做垂直射线检测。
+ *  不改变模型、不叠火区；仅返回转换点/命中点/残差供开发界面展示。 */
+runLocalRegistrationCheck(): LocalRegistrationPointResult[] {
+  const terrain = this.meshes.find((m) => m.name === TERRAIN_MESH_NAME)
+  if (!terrain) return []
+  const m = UNITY_WORLD_TO_GLB.flat()
+  const matrix = new THREE.Matrix4().set(
+    m[0], m[1], m[2], m[3],
+    m[4], m[5], m[6], m[7],
+    m[8], m[9], m[10], m[11],
+    m[12], m[13], m[14], m[15],
+  )
+  const raycaster = new THREE.Raycaster()
+  const down = new THREE.Vector3(0, -1, 0)
+  const results: LocalRegistrationPointResult[] = []
+  for (const cp of CONTROL_POINTS) {
+    const glb = new THREE.Vector3(...cp.unity_world_xyz).applyMatrix4(matrix)
+    const expected = new THREE.Vector3(...cp.expected_glb_xyz)
+    const origin = new THREE.Vector3(glb.x, glb.y + 4000, glb.z)
+    raycaster.set(origin, down)
+    raycaster.far = 8000
+    const hit = raycaster.intersectObject(terrain, false)[0] ?? null
+    const xReversed: boolean | null =
+      cp.id === 'P6' ? Math.abs(glb.x - (-cp.unity_mesh_local_xyz[0])) < 1e-6 : null
+    results.push({
+      id: cp.id,
+      unity_world_xyz: cp.unity_world_xyz,
+      converted_glb_xyz: [glb.x, glb.y, glb.z],
+      expected_glb_xyz: cp.expected_glb_xyz,
+      matrix_residual_m: glb.distanceTo(expected),
+      hit_glb_xyz: hit ? [hit.point.x, hit.point.y, hit.point.z] : null,
+      raycast_residual_m: hit ? glb.distanceTo(hit.point) : null,
+      x_axis_reversed: xReversed,
+    })
+  }
+  return results
+}
+select(id:string|null,focus=false){
   if(this.selectedBox){this.scene.remove(this.selectedBox);this.selectedBox.geometry.dispose();(this.selectedBox.material as THREE.Material).dispose();this.selectedBox=null}
   const object=this.objects.find(o=>o.object_id===id)??null
   if(object){const mesh=this.meshes.find(o=>o.name===object.glb_node_name)

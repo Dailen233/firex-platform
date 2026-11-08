@@ -315,10 +315,243 @@
           }
         }
       }
+    },
+    "/api/v1/atlas/fire-status": {
+      "get": {
+        "tags": [
+          "atlas"
+        ],
+        "summary": "Atlas Fire Status",
+        "operationId": "atlas_fire_status_api_v1_atlas_fire_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AtlasFireStatus"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "AtlasFireStatus": {
+        "properties": {
+          "generated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Generated At"
+          },
+          "fresh_after_s": {
+            "type": "integer",
+            "title": "Fresh After S"
+          },
+          "monitored_run_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Monitored Run Ids"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AtlasFireStatusItem"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "generated_at",
+          "fresh_after_s",
+          "monitored_run_ids",
+          "items"
+        ],
+        "title": "AtlasFireStatus"
+      },
+      "AtlasFireStatusItem": {
+        "properties": {
+          "plant_id": {
+            "type": "string",
+            "title": "Plant Id"
+          },
+          "run_id": {
+            "type": "string",
+            "title": "Run Id"
+          },
+          "scene_id": {
+            "type": "string",
+            "title": "Scene Id"
+          },
+          "asset_version": {
+            "type": "string",
+            "title": "Asset Version"
+          },
+          "coordinate_frame_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Coordinate Frame Id"
+          },
+          "input_source": {
+            "type": "string",
+            "enum": [
+              "simulation",
+              "real"
+            ],
+            "title": "Input Source"
+          },
+          "state_status": {
+            "type": "string",
+            "title": "State Status"
+          },
+          "alert_status": {
+            "type": "string",
+            "enum": [
+              "no_observation",
+              "no_detection",
+              "fire",
+              "stale"
+            ],
+            "title": "Alert Status"
+          },
+          "fire_detected": {
+            "type": "boolean",
+            "title": "Fire Detected"
+          },
+          "is_fresh": {
+            "type": "boolean",
+            "title": "Is Fresh"
+          },
+          "revision": {
+            "type": "integer",
+            "title": "Revision"
+          },
+          "observation_time_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Observation Time S"
+          },
+          "time_basis": {
+            "type": "string",
+            "title": "Time Basis"
+          },
+          "result_origin": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Result Origin"
+          },
+          "provider_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Version"
+          },
+          "produced_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Produced At"
+          },
+          "evidence_capture_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Evidence Capture Ids"
+          },
+          "patch_count": {
+            "type": "integer",
+            "title": "Patch Count"
+          },
+          "detection_count": {
+            "type": "integer",
+            "title": "Detection Count"
+          },
+          "model_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Ref"
+          },
+          "threshold": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Threshold"
+          }
+        },
+        "type": "object",
+        "required": [
+          "plant_id",
+          "run_id",
+          "scene_id",
+          "asset_version",
+          "coordinate_frame_id",
+          "input_source",
+          "state_status",
+          "alert_status",
+          "fire_detected",
+          "is_fresh",
+          "revision",
+          "observation_time_s",
+          "time_basis",
+          "result_origin",
+          "provider_version",
+          "produced_at",
+          "evidence_capture_ids",
+          "patch_count",
+          "detection_count",
+          "model_ref",
+          "threshold"
+        ],
+        "title": "AtlasFireStatusItem",
+        "description": "Per-run map feedback summary (A1).\n\n``alert_status`` is the derived display state; ``fire_detected``/``is_fresh``\nexpose the two raw inputs it is computed from. Only ``fire`` is a current\nalert; ``stale`` observations stay visible but are historical."
+      },
       "Body_upload_capture_api_v1_runs__run_id__captures_post": {
         "properties": {
           "file": {
@@ -438,6 +671,38 @@
         ],
         "title": "CaptureRecord",
         "description": "A received capture and its processing status (queued/processing/completed/failed)."
+      },
+      "Detection2D": {
+        "properties": {
+          "class_id": {
+            "type": "integer",
+            "title": "Class Id"
+          },
+          "class_name": {
+            "type": "string",
+            "title": "Class Name"
+          },
+          "confidence": {
+            "type": "number",
+            "title": "Confidence"
+          },
+          "bbox": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Bbox"
+          }
+        },
+        "type": "object",
+        "required": [
+          "class_id",
+          "class_name",
+          "confidence",
+          "bbox"
+        ],
+        "title": "Detection2D",
+        "description": "A single 2D detection box in original image pixels (A2 YOLO output).\n\n``bbox`` is ``[x1, y1, x2, y2]`` with ``x2 > x1``, ``y2 > y1`` and all values\nfinite. This is image-plane evidence only — it never claims world position."
       },
       "ErrorDetail": {
         "properties": {
@@ -835,6 +1100,47 @@
               }
             ],
             "title": "Time Origin Utc"
+          },
+          "detections": {
+            "items": {
+              "$ref": "#/components/schemas/Detection2D"
+            },
+            "type": "array",
+            "title": "Detections",
+            "default": []
+          },
+          "fire_detected": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fire Detected"
+          },
+          "model_ref": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Ref"
+          },
+          "threshold": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Threshold"
           }
         },
         "type": "object",

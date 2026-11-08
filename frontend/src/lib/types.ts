@@ -25,8 +25,8 @@ export interface PlantProperties {
 export interface Plant { type: 'Feature'; properties: PlantProperties; geometry: {type:'Point';coordinates:[number,number]} }
 export interface BoundaryFeature {type:'Feature';properties:{name:string;code?:string;gb?:string};geometry:{type:string;coordinates: unknown}}
 export interface Boundaries {type:'FeatureCollection';features:BoundaryFeature[]}
-export type SceneAssetRole = 'formal_model' | 'public_reference_terrain'
-export interface SceneLink {plant_id:string;scene_id:string;asset_version:string;asset_role:SceneAssetRole;formal_model_ready:boolean;display_name:string;profile_uri:string}
+export type SceneAssetRole = 'formal_model' | 'public_reference_terrain' | 'prototype_model'
+export interface SceneLink {plant_id:string;scene_id:string;asset_version:string;asset_role:SceneAssetRole;formal_model_ready:boolean;display_name:string;profile_uri:string;notice?:string}
 export interface CameraPreset {position_local_xyz_m: [number,number,number];target_local_xyz_m:[number,number,number];vertical_fov_degrees:number;near_m:number;far_m:number}
 export interface SceneManifest {
   scene_id:string;asset_version:string;display_name:string;model_uri:string;object_registry_uri:string;
@@ -50,6 +50,7 @@ export interface SceneProfile {
   asset_version: string;
   asset_role: SceneAssetRole;
   formal_model_ready: boolean;
+  registration_status?: string;
   display_name: string;
   scene_badge: string;
   coordinate_frame_id: string | null;

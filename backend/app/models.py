@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 from .time_contract import TIME_BASIS
 
 InputSource = Literal["simulation", "real"]
-ProcessingMode = Literal["unconfigured", "fixture"]
+ProcessingMode = Literal["unconfigured", "fixture", "yolo"]
 
 SCHEMA_VERSION = "1.0"
 
@@ -104,6 +104,36 @@ class FirePatch(BaseModel):
         return v
 
 
+class Detection2D(BaseModel):
+    """A single 2D detection box in original image pixels (A2 YOLO output).
+
+    ``bbox`` is ``[x1, y1, x2, y2]`` with ``x2 > x1``, ``y2 > y1`` and all values
+    finite. This is image-plane evidence only — it never claims world position.
+    """
+
+    class_id: int
+    class_name: str
+    confidence: float
+    bbox: list[float]
+
+    @field_validator("confidence")
+    @classmethod
+    def _validate_confidence(cls, v: float) -> float:
+        if not math.isfinite(v) or not 0.0 <= v <= 1.0:
+            raise ValueError("confidence must be a finite number in [0, 1]")
+        return v
+
+    @field_validator("bbox")
+    @classmethod
+    def _validate_bbox(cls, v: list[float]) -> list[float]:
+        if len(v) != 4 or not all(math.isfinite(x) for x in v):
+            raise ValueError("bbox must be four finite numbers [x1, y1, x2, y2]")
+        x1, y1, x2, y2 = v
+        if not (x2 > x1 and y2 > y1):
+            raise ValueError("bbox must have positive area (x2 > x1 and y2 > y1)")
+        return v
+
+
 class RunState(BaseModel):
     run_id: str
     plant_id: str
@@ -123,6 +153,14 @@ class RunState(BaseModel):
     time_basis: str
     simulation_time_origin_s: float | None
     time_origin_utc: datetime | None
+    # A2: 2D observation fields. ``fire_detected`` is the explicit 2D verdict from
+    # a detection provider (None for providers that only publish 3D patches, e.g.
+    # fixture, and for snapshots written before A2 — the map then falls back to
+    # patches). Detections are image-plane boxes, never world geometry.
+    detections: list[Detection2D] = []
+    fire_detected: bool | None = None
+    model_ref: str | None = None
+    threshold: float | None = None
 
 
 class CaptureRecord(BaseModel):
@@ -141,6 +179,47 @@ class CaptureRecord(BaseModel):
     processing_finished_at: datetime | None = None
     processing_error: str | None = None
     provider_version: str | None = None
+
+
+AlertStatus = Literal["no_observation", "no_detection", "fire", "stale"]
+
+
+class AtlasFireStatusItem(BaseModel):
+    """Per-run map feedback summary (A1).
+
+    ``alert_status`` is the derived display state; ``fire_detected``/``is_fresh``
+    expose the two raw inputs it is computed from. Only ``fire`` is a current
+    alert; ``stale`` observations stay visible but are historical.
+    """
+
+    plant_id: str
+    run_id: str
+    scene_id: str
+    asset_version: str
+    coordinate_frame_id: str | None
+    input_source: InputSource
+    state_status: str
+    alert_status: AlertStatus
+    fire_detected: bool
+    is_fresh: bool
+    revision: int
+    observation_time_s: float | None
+    time_basis: str
+    result_origin: str | None
+    provider_version: str | None
+    produced_at: datetime | None
+    evidence_capture_ids: list[str]
+    patch_count: int
+    detection_count: int
+    model_ref: str | None
+    threshold: float | None
+
+
+class AtlasFireStatus(BaseModel):
+    generated_at: datetime
+    fresh_after_s: int
+    monitored_run_ids: list[str]
+    items: list[AtlasFireStatusItem]
 
 
 class HealthResponse(BaseModel):

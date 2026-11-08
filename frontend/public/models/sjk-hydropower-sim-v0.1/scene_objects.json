@@ -1,0 +1,396 @@
+{
+  "scene_id": "sjk_hydropower_sim_v0_1",
+  "coordinate_frame_id": "SJK_TEAM_FBX_FILE_METRE_UNREGISTERED_v1",
+  "objects": [
+    {
+      "object_id": "terrain",
+      "glb_node_name": "team_fbx_terrain_129",
+      "display_name": "双江口贴图山地",
+      "category": "terrain",
+      "identity_status": "模型地形",
+      "height_status": "文件相对标高",
+      "position_status": "文件米制；未配准",
+      "base_status": "来自已核对的队友地形",
+      "shape_status": "保留队友影像贴图及 E2.1 原地形网格",
+      "fire_risk_level": null,
+      "display_height_m": 2079.39,
+      "focus_local_xyz_m": [
+        0.0,
+        1039.6961669921875,
+        0.0
+      ],
+      "bounds_local_xyz_m": [
+        [
+          -5000.0,
+          0.0,
+          -5000.0
+        ],
+        [
+          5000.0,
+          2079.392333984375,
+          5000.0
+        ]
+      ]
+    },
+    {
+      "object_id": "plant_terrace",
+      "glb_node_name": "sjk_plant_terrace",
+      "display_name": "发电厂房台地",
+      "category": "terrace",
+      "identity_status": "模拟设施",
+      "height_status": "模拟尺寸",
+      "position_status": "模拟选址；未配准",
+      "base_status": "基础参考原地形三角网格",
+      "shape_status": "按地形定标高，挡墙埋入地面",
+      "fire_risk_level": null,
+      "display_height_m": 26.87,
+      "focus_local_xyz_m": [
+        245.21129989624023,
+        46.36371040344238,
+        141.54684829711914
+      ],
+      "bounds_local_xyz_m": [
+        [
+          118.19261932373047,
+          32.92742156982422,
+          48.628273010253906
+        ],
+        [
+          372.22998046875,
+          59.79999923706055,
+          234.46542358398438
+        ]
+      ]
+    },
+    {
+      "object_id": "grid_terrace",
+      "glb_node_name": "sjk_grid_terrace",
+      "display_name": "升压区台地",
+      "category": "terrace",
+      "identity_status": "模拟设施",
+      "height_status": "模拟尺寸",
+      "position_status": "模拟选址；未配准",
+      "base_status": "基础参考原地形三角网格",
+      "shape_status": "按地形定标高，挡墙埋入地面",
+      "fire_risk_level": null,
+      "display_height_m": 38.87,
+      "focus_local_xyz_m": [
+        -49.84549331665039,
+        55.36444282531738,
+        35.52447032928467
+      ],
+      "bounds_local_xyz_m": [
+        [
+          -148.9308319091797,
+          35.92888259887695,
+          -28.569711685180664
+        ],
+        [
+          49.239845275878906,
+          74.80000305175781,
+          99.61865234375
+        ]
+      ]
+    },
+    {
+      "object_id": "ops_terrace",
+      "glb_node_name": "sjk_ops_terrace",
+      "display_name": "运维区台地",
+      "category": "terrace",
+      "identity_status": "模拟设施",
+      "height_status": "模拟尺寸",
+      "position_status": "模拟选址；未配准",
+      "base_status": "基础参考原地形三角网格",
+      "shape_status": "按地形定标高，挡墙埋入地面",
+      "fire_risk_level": null,
+      "display_height_m": 40.17,
+      "focus_local_xyz_m": [
+        520.3146667480469,
+        61.21524429321289,
+        331.6114196777344
+      ],
+      "bounds_local_xyz_m": [
+        [
+          440.908447265625,
+          41.13048553466797,
+          257.0095520019531
+        ],
+        [
+          599.7208862304688,
+          81.30000305175781,
+          406.2132873535156
+        ]
+      ]
+    },
+    {
+      "object_id": "powerhouse",
+      "glb_node_name": "sjk_powerhouse",
+      "display_name": "发电厂房",
+      "category": "powerhouse",
+      "identity_status": "模拟设施",
+      "height_status": "模拟尺寸",
+      "position_status": "模拟选址；未配准",
+      "base_status": "基础参考原地形三角网格",
+      "shape_status": "四开间厂房、通风、检修门和起重设备示意",
+      "fire_risk_level": null,
+      "display_height_m": 33.6,
+      "focus_local_xyz_m": [
+        243.87792205810547,
+        74.79999923706055,
+        148.6029167175293
+      ],
+      "bounds_local_xyz_m": [
+        [
+          140.08888244628906,
+          58.0,
+          84.59844207763672
+        ],
+        [
+          347.6669616699219,
+          91.5999984741211,
+          212.60739135742188
+        ]
+      ]
+    },
+    {
+      "object_id": "gis",
+      "glb_node_name": "sjk_gis",
+      "display_name": "GIS 开关楼",
+      "category": "switchgear",
+      "identity_status": "模拟设施",
+      "height_status": "模拟尺寸",
+      "position_status": "模拟选址；未配准",
+      "base_status": "基础参考原地形三角网格",
+      "shape_status": "金属屋面和开关设备检修门",
+      "fire_risk_level": null,
+      "display_height_m": 21.8,
+      "focus_local_xyz_m": [
+        -10.649654388427734,
+        83.9000015258789,
+        54.04301357269287
+      ],
+      "bounds_local_xyz_m": [
+        [
+          -52.86888122558594,
+          73.0,
+          20.88959312438965
+        ],
+        [
+          31.56957244873047,
+          94.80000305175781,
+          87.1964340209961
+        ]
+      ]
+    },
+    {
+      "object_id": "transformer_yard",
+      "glb_node_name": "sjk_transformer_yard",
+      "display_name": "主变及出线区",
+      "category": "switchyard",
+      "identity_status": "模拟设施",
+      "height_status": "模拟尺寸",
+      "position_status": "模拟选址；未配准",
+      "base_status": "基础参考原地形三角网格",
+      "shape_status": "四组主变、散热器、绝缘子及出线构架",
+      "fire_risk_level": null,
+      "display_height_m": 20.39,
+      "focus_local_xyz_m": [
+        -93.39157485961914,
+        83.22000122070312,
+        27.15853452682495
+      ],
+      "bounds_local_xyz_m": [
+        [
+          -141.7034149169922,
+          73.0250015258789,
+          -8.95455265045166
+        ],
+        [
+          -45.079734802246094,
+          93.41500091552734,
+          63.27162170410156
+        ]
+      ]
+    },
+    {
+      "object_id": "control_building",
+      "glb_node_name": "sjk_control_building",
+      "display_name": "综合控制楼",
+      "category": "operations",
+      "identity_status": "模拟设施",
+      "height_status": "模拟尺寸",
+      "position_status": "模拟选址；未配准",
+      "base_status": "基础参考原地形三角网格",
+      "shape_status": "三层运维控制楼和屋面设备",
+      "fire_risk_level": null,
+      "display_height_m": 23.0,
+      "focus_local_xyz_m": [
+        536.7255249023438,
+        91.0,
+        355.83815002441406
+      ],
+      "bounds_local_xyz_m": [
+        [
+          501.86163330078125,
+          79.5,
+          323.191650390625
+        ],
+        [
+          571.5894165039062,
+          102.5,
+          388.4846496582031
+        ]
+      ]
+    },
+    {
+      "object_id": "workshop",
+      "glb_node_name": "sjk_workshop",
+      "display_name": "检修库与停车场",
+      "category": "operations",
+      "identity_status": "模拟设施",
+      "height_status": "模拟尺寸",
+      "position_status": "模拟选址；未配准",
+      "base_status": "基础参考原地形三角网格",
+      "shape_status": "检修库、备件箱和停车位",
+      "fire_risk_level": null,
+      "display_height_m": 15.3,
+      "focus_local_xyz_m": [
+        482.33692932128906,
+        87.1500015258789,
+        306.01202392578125
+      ],
+      "bounds_local_xyz_m": [
+        [
+          451.7019348144531,
+          79.5,
+          275.51324462890625
+        ],
+        [
+          512.971923828125,
+          94.80000305175781,
+          336.51080322265625
+        ]
+      ]
+    },
+    {
+      "object_id": "dam",
+      "glb_node_name": "sjk_dam",
+      "display_name": "拦河坝与泄水闸",
+      "category": "headworks",
+      "identity_status": "模拟设施",
+      "height_status": "模拟尺寸",
+      "position_status": "模拟选址；未配准",
+      "base_status": "基础参考原地形三角网格",
+      "shape_status": "跨河谷的示意坝段、四孔泄水闸和坝顶检修设施",
+      "fire_risk_level": null,
+      "display_height_m": 70.57,
+      "focus_local_xyz_m": [
+        687.1053161621094,
+        78.29071807861328,
+        449.1526184082031
+      ],
+      "bounds_local_xyz_m": [
+        [
+          529.1306762695312,
+          43.006439208984375,
+          298.309814453125
+        ],
+        [
+          845.0799560546875,
+          113.57499694824219,
+          599.9954223632812
+        ]
+      ]
+    },
+    {
+      "object_id": "intake",
+      "glb_node_name": "sjk_intake",
+      "display_name": "进水口与启闭机房",
+      "category": "headworks",
+      "identity_status": "模拟设施",
+      "height_status": "模拟尺寸",
+      "position_status": "模拟选址；未配准",
+      "base_status": "基础参考原地形三角网格",
+      "shape_status": "取水口、启闭机房及与坝顶相连的平台",
+      "fire_risk_level": null,
+      "display_height_m": 67.68,
+      "focus_local_xyz_m": [
+        673.7457580566406,
+        80.55946350097656,
+        517.6710205078125
+      ],
+      "bounds_local_xyz_m": [
+        [
+          656.6868286132812,
+          46.71892547607422,
+          500.80950927734375
+        ],
+        [
+          690.8046875,
+          114.4000015258789,
+          534.5325317382812
+        ]
+      ]
+    },
+    {
+      "object_id": "tailrace",
+      "glb_node_name": "sjk_tailrace",
+      "display_name": "尾水出口",
+      "category": "hydraulic",
+      "identity_status": "模拟设施",
+      "height_status": "模拟尺寸",
+      "position_status": "模拟选址；未配准",
+      "base_status": "基础参考原地形三角网格",
+      "shape_status": "接河岸的尾水口和护岸，水面为示意",
+      "fire_risk_level": null,
+      "display_height_m": 14.09,
+      "focus_local_xyz_m": [
+        173.56537628173828,
+        50.63537788391113,
+        49.10708045959473
+      ],
+      "bounds_local_xyz_m": [
+        [
+          161.54397583007812,
+          43.590755462646484,
+          38.5367431640625
+        ],
+        [
+          185.58677673339844,
+          57.68000030517578,
+          59.67741775512695
+        ]
+      ]
+    },
+    {
+      "object_id": "access_roads",
+      "glb_node_name": "sjk_access_roads",
+      "display_name": "厂区联络道路",
+      "category": "access",
+      "identity_status": "模拟设施",
+      "height_status": "模拟尺寸",
+      "position_status": "模拟选址；未配准",
+      "base_status": "基础参考原地形三角网格",
+      "shape_status": "连接三个台地及坝顶的支承道路、标线和护栏",
+      "fire_risk_level": null,
+      "display_height_m": 64.75,
+      "focus_local_xyz_m": [
+        341.06413650512695,
+        70.80445671081543,
+        271.62678146362305
+      ],
+      "bounds_local_xyz_m": [
+        [
+          44.796791076660156,
+          38.43037033081055,
+          31.84343719482422
+        ],
+        [
+          637.3314819335938,
+          103.17854309082031,
+          511.4101257324219
+        ]
+      ]
+    }
+  ]
+}

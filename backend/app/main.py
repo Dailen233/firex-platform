@@ -21,7 +21,7 @@ from .config import db_path as default_db_path
 from .config import processing_mode as env_processing_mode
 from .errors import ApiError
 from .provider import make_provider
-from .routes import captures, health, runs
+from .routes import atlas, captures, health, runs
 from .worker import Worker
 
 TITLE = "Fire-X Backend"
@@ -91,6 +91,7 @@ def create_app(
     app.include_router(health.router)
     app.include_router(runs.router, prefix="/api/v1")
     app.include_router(captures.router)
+    app.include_router(atlas.router)
 
     return app
 

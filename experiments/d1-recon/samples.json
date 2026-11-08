@@ -1,0 +1,60 @@
+{
+  "description": "D1 环境建模固定样本组：case06_forward_static 无火对照 6 帧（不同机位、无人机路径、完整矩阵新 schema）。图像与 pose 双哈希在运行前强制核验；pose 仅用于输入绑定与后续核对，不用于生成结果。",
+  "source_dir": "/home/dailen/Nutstore Files/Fire_X/demo_sequences/case06_forward_static",
+  "model": {
+    "repo_id": "facebook/VGGT-1B",
+    "snapshot": "860abec7937da0a4c03c41d3c269c366e82abdf9",
+    "config": { "embed_dim": 1024, "img_size": 518, "patch_size": 14 },
+    "weight_sha256": "f164acf60724910d8fe1578bb499d800850c7bb0948db7555c413f9fbe60467e"
+  },
+  "frames": [
+    {
+      "id": "case6_01",
+      "image": "/home/dailen/Nutstore Files/Fire_X/demo_sequences/case06_forward_static/images/case6_01.png",
+      "image_sha256": "3b0581630948ce0f67157d24622f6a724cbaa356a50ac15ed0373b75f9e721b3",
+      "image_size": [2194, 1000],
+      "pose": "/home/dailen/Nutstore Files/Fire_X/demo_sequences/case06_forward_static/poses/case6_01.json",
+      "pose_sha256": "92a20665810afae0d6046f2affd4c33e71f8a94d0ba3cd224a6bf09ab1e7af21"
+    },
+    {
+      "id": "case6_02",
+      "image": "/home/dailen/Nutstore Files/Fire_X/demo_sequences/case06_forward_static/images/case6_02.png",
+      "image_sha256": "01e73ec9d9a38d20e4109eef84610ca292eae6e1f57f2849a471b49c9393881d",
+      "image_size": [2194, 1000],
+      "pose": "/home/dailen/Nutstore Files/Fire_X/demo_sequences/case06_forward_static/poses/case6_02.json",
+      "pose_sha256": "0fb57ea83db8a44aca471a969129406ba92fc742afd86214da9544c8b249cf82"
+    },
+    {
+      "id": "case6_03",
+      "image": "/home/dailen/Nutstore Files/Fire_X/demo_sequences/case06_forward_static/images/case6_03.png",
+      "image_sha256": "c3c6ab9d0f411fc99e24b593c54bb3eb5b6f895e85f698ecb53c5372fb474d15",
+      "image_size": [2194, 1000],
+      "pose": "/home/dailen/Nutstore Files/Fire_X/demo_sequences/case06_forward_static/poses/case6_03.json",
+      "pose_sha256": "64475d0826ac62aba07dba11374230349e6e30abcb4b5dcde03a3c1d61d51038"
+    },
+    {
+      "id": "case6_04",
+      "image": "/home/dailen/Nutstore Files/Fire_X/demo_sequences/case06_forward_static/images/case6_04.png",
+      "image_sha256": "a31d003cbb9f5764075af3e4f0acd2f7e545b3f715616eae3514991405371194",
+      "image_size": [2194, 1000],
+      "pose": "/home/dailen/Nutstore Files/Fire_X/demo_sequences/case06_forward_static/poses/case6_04.json",
+      "pose_sha256": "9424e4a7f60b7fbd18f1626f3501a575c362c1ce150db0a943e3978ef272330f"
+    },
+    {
+      "id": "case6_05",
+      "image": "/home/dailen/Nutstore Files/Fire_X/demo_sequences/case06_forward_static/images/case6_05.png",
+      "image_sha256": "2b7d317138661f648367343ed11090a92482d96b5c26dd8df0c02cce7851a50e",
+      "image_size": [2194, 1000],
+      "pose": "/home/dailen/Nutstore Files/Fire_X/demo_sequences/case06_forward_static/poses/case6_05.json",
+      "pose_sha256": "9db808c00d7d66fd7734b436f2b182fa73af4499e79695df76783ea29bf7e246"
+    },
+    {
+      "id": "case6_06",
+      "image": "/home/dailen/Nutstore Files/Fire_X/demo_sequences/case06_forward_static/images/case6_06.png",
+      "image_sha256": "c1f12e1f7428a61e360971d5fab3cdd49a58f751a50309d5b8917615885c7ab1",
+      "image_size": [2194, 1000],
+      "pose": "/home/dailen/Nutstore Files/Fire_X/demo_sequences/case06_forward_static/poses/case6_06.json",
+      "pose_sha256": "ea850159395e35db781285a41d5e50faea82f700e0373c8a37e4a4690d202246"
+    }
+  ]
+}

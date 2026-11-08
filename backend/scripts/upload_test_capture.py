@@ -22,6 +22,7 @@ from __future__ import annotations
 import argparse
 import io
 import json
+from pathlib import Path
 
 import httpx
 from PIL import Image
@@ -62,6 +63,7 @@ def main() -> None:
     parser.add_argument("--capture-id", default=None, help="Capture id (defaults to cap-<run_id>-f<frame>)")
     parser.add_argument("--frame", type=int, default=1, help="Frame index used to derive the capture id and simulation time")
     parser.add_argument("--simulation-time", type=float, default=None, help="Simulation time in seconds (defaults to 15 + frame)")
+    parser.add_argument("--image", default=None, help="Upload a real image file instead of the synthetic test image (metadata uses its actual size)")
     parser.add_argument("run_id", help="Existing run_id to attach the capture to")
     args = parser.parse_args()
 
@@ -69,8 +71,14 @@ def main() -> None:
     capture_id = args.capture_id or f"cap-{args.run_id}-f{args.frame:03d}"
     simulation_time_s = args.simulation_time if args.simulation_time is not None else 15.0 + args.frame
 
-    image = make_test_image()
-    metadata = json.dumps(make_metadata(capture_id, 32, 24, simulation_time_s))
+    if args.image:
+        image = Path(args.image).read_bytes()
+        with Image.open(io.BytesIO(image)) as im:
+            width, height = im.size
+    else:
+        image = make_test_image()
+        width, height = 32, 24
+    metadata = json.dumps(make_metadata(capture_id, width, height, simulation_time_s))
 
     with httpx.Client(timeout=10.0) as client:
         try:

@@ -49,6 +49,7 @@ backend/
 | `GET /api/v1/runs/{run_id}/state` | 从持久化结果读取当前快照：无结果时 `state_status=no_observation`、`revision=0`；有结果时 `state_status=observation`、`revision>=1` |
 | `POST /api/v1/runs/{run_id}/captures` | multipart 上传（`file` + `metadata` JSON 字符串），新接收返回 202，幂等重试返回 200，冲突返回 409；只保存原件与待处理记录，不执行计算 |
 | `GET /api/v1/captures/{capture_id}` | 查询所属运行、接收时间、观测时间、内容哈希与处理状态（`queued`/`processing`/`completed`/`failed`），未知返回 404 |
+| `GET /api/v1/atlas/fire-status` | 只读聚合：按 `FIREX_MONITORED_RUN_IDS` 列出的监测 run 生成厂站级火情简表（`alert_status`），不扫描历史、不新增告警存储 |
 
 创建运行绑定：`plant_id`、`scene_id`、`asset_version`、`coordinate_frame_id`、`input_source`（`simulation` 或 `real`），并携带对应的**时间配置**。`created_at` 为带时区的 UTC，仅表示服务端创建记录的时间。重复 POST 会新建独立运行，**不提供幂等创建能力**。
 
@@ -165,6 +166,58 @@ uv --directory backend run --locked python scripts/upload_test_capture.py --base
 ```
 
 服务默认绑定 `127.0.0.1:8001`；端口占用时另选可用端口（本机已改用 8002），不停止其他项目服务。`--directory` 会把工作目录切到 `backend/`，而 `app` 作为可编辑包安装到 `backend/.venv`，故 `app.main:app` 可从任意 cwd 导入；默认数据目录仍按项目根解析，与 cwd 无关。
+
+## 实际二维检测（A2，YOLO 模式）
+
+`FIREX_PROCESSING_MODE=yolo` 启用实际二维火焰检测：worker 对服务端保存的上传原图（哈希校验后）推理，产出图像平面检测框，**不生成任何三维轮廓**。推理在 C1 已验证的本机环境进行（后端 venv 无 ultralytics/torch/cv2，通过子进程调用），并复用 C1 的权重核对与框校验逻辑（`experiments/c1-detection/run_detection.py`）。
+
+| 环境变量 | 含义 | 默认（C1 已验证值） |
+| --- | --- | --- |
+| `FIREX_YOLO_PYTHON` | 推理解释器 | `/home/dailen/vggt/vggt-env/bin/python` |
+| `FIREX_YOLO_WEIGHTS` | 权重绝对路径 | `/home/dailen/vggt/runs/detect/train_full_v1/weights/best.pt` |
+| `FIREX_YOLO_WEIGHTS_SHA256` | 权重 SHA256（每次 predict 前核对） | `69b1f5c1…b612087a` |
+| `FIREX_YOLO_CONF` / `FIREX_YOLO_IMGSZ` / `FIREX_YOLO_IOU` / `FIREX_YOLO_DEVICE` | 推理参数 | 0.25 / 640 / 0.45 / cpu |
+| `FIREX_YOLO_TIMEOUT_S` | 单次推理超时 | 120 |
+
+语义：
+
+- 成功推理时记录 `result_origin="yolo"`、`provider_version`、`model_ref`（权重文件名#SHA 前 12 位）、`threshold`、`evidence_capture_ids`（即 `capture_id`），以及输出类别/置信度/二维框（`GET /api/v1/runs/{run_id}/state` 的 `detections`，图像像素坐标）。
+- **检出火焰**：≥1 个 fire 类框 → 快照 `fire_detected=true`，聚合接口 `alert_status="fire"`。
+- **推理成功但未检出**：0 个框是合法结果 → `fire_detected=false`，聚合接口 `alert_status="no_detection"`（"本次未检出"，可结束当前高亮）。
+- **处理失败**：权重缺失/SHA 不符/推理异常 → capture `status=failed` 并写入 `processing_error`，**不回退 fixture、不计为未检出、不刷新上一次有效观测**；陈旧/重复或更旧的结果同样不能覆盖新观测。
+- fixture 模式原样保留（三维 patch，`result_origin="fixture"`），供回归。
+
+## 全国地图火情反馈（A1，只读聚合）
+
+`GET /api/v1/atlas/fire-status` 从**显式纳入监测**的 run 及其最新快照生成厂站级简表（`plant_id`/`run_id`/观测状态/时间与 `time_basis`/`revision`/`result_origin`/`input_source`），不扫描历史、不存第二份告警历史。
+
+配置（环境变量）：
+
+| 变量 | 含义 | 默认 |
+| --- | --- | --- |
+| `FIREX_MONITORED_RUN_IDS` | 逗号分隔的监测 run_id；为空表示无监测 run（首页显示未连接/无告警） | 空 |
+| `FIREX_FIRE_STATUS_FRESH_S` | 快照新鲜窗口（秒）；超窗观测标记为 `stale` | 120 |
+
+`alert_status` 按序判定：`no_observation`（尚无快照，不能解释为"无火"）→ `stale`（超过新鲜窗口，历史/过期、不计入当前告警）→ `no_detection`（有效观测但不含火区，"本次未检出"）→ `fire`（新鲜且含正向火区证据，当前告警）。
+
+复现（隔离数据目录 + fixture，本机 8002）：
+
+```bash
+FIREX_BACKEND_DATA_DIR=/tmp/firex-a1-backend FIREX_PROCESSING_MODE=fixture \
+  uv --directory backend run --locked uvicorn app.main:app --host 127.0.0.1 --port 8002
+# 1) 创建 run 并记下服务端生成的 run_id
+curl -s -X POST http://127.0.0.1:8002/api/v1/runs -H "Content-Type: application/json" \
+  -d '{"plant_id":"GEM_HYDRO_SHUANGJIANGKOU","scene_id":"shuangjiangkou_reference_terrain","asset_version":"reference-v1","coordinate_frame_id":"SJK_REFERENCE_UTM47N_EGM2008_v1","input_source":"simulation","simulation_time_origin_s":10.0}'
+# 2) 用该 run_id 重启后端（监测配置在启动时注入）
+FIREX_BACKEND_DATA_DIR=/tmp/firex-a1-backend FIREX_PROCESSING_MODE=fixture \
+  FIREX_MONITORED_RUN_IDS=<run_id> \
+  uv --directory backend run --locked uvicorn app.main:app --host 127.0.0.1 --port 8002
+# 3) 上传测试帧，worker 出快照后查询聚合
+uv --directory backend run --locked python scripts/upload_test_capture.py --base-url http://127.0.0.1:8002 --frame 1 <run_id>
+curl -s http://127.0.0.1:8002/api/v1/atlas/fire-status
+```
+
+前端首页（`/atlas`）加载后自动查询并每 4 s 串行轮询该接口，按 `plant_id` 匹配电厂目录标点（标记表示"该厂站收到火情观测"，不是火点位置）；不写死 run_id、不遍历历史，后端断开时保留最近结果并明确标出断开。
 
 ## 持久化约定
 

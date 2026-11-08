@@ -1,6 +1,6 @@
 {
   "date": "2026-10-11",
-  "count": 26,
+  "count": 34,
   "checks": [
     {
       "id": "DATA-01-unique-plant-ids",
@@ -68,6 +68,38 @@
     },
     {
       "id": "SJK-05-formal-model-not-ready-and-points-sourced",
+      "result": "passed"
+    },
+    {
+      "id": "PROTO-01-terrain-draft-asset",
+      "result": "passed"
+    },
+    {
+      "id": "PROTO-02-concept-draft-asset",
+      "result": "passed"
+    },
+    {
+      "id": "PROTO-03-glb-root-transform-identity",
+      "result": "passed"
+    },
+    {
+      "id": "PROTO-04-unregistered-frame-isolated",
+      "result": "passed"
+    },
+    {
+      "id": "SIM-01-profile-asset",
+      "result": "passed"
+    },
+    {
+      "id": "SIM-02-glb-structure-root-identity-texture",
+      "result": "passed"
+    },
+    {
+      "id": "SIM-03-registry-bijective",
+      "result": "passed"
+    },
+    {
+      "id": "SIM-04-unregistered-frame-isolated",
       "result": "passed"
     },
     {

@@ -3,9 +3,11 @@
 
 export * from './backend-contract'
 import {
+  validateAtlasFireStatus,
   validateHealth,
   validateRunRecord,
   validateRunState,
+  type AtlasFireStatus,
   type BackendHealth,
   type BackendRunRecord,
   type BackendRunState,
@@ -60,4 +62,13 @@ export async function fetchRunState(runId: string, signal?: AbortSignal): Promis
   const value = unwrap(validateRunState(raw), 'run/state')
   if (value.run_id !== runId) throw new Error(`快照身份不符：请求 ${runId}，返回 ${value.run_id}`)
   return value
+}
+
+export function atlasFireStatusUrl(): string {
+  return `${API_ORIGIN}/api/v1/atlas/fire-status`
+}
+
+export async function fetchAtlasFireStatus(signal?: AbortSignal): Promise<AtlasFireStatus> {
+  const raw = await getJson(atlasFireStatusUrl(), signal)
+  return unwrap(validateAtlasFireStatus(raw), 'atlas/fire-status')
 }

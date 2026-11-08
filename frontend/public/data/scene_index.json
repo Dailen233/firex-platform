@@ -22,6 +22,36 @@
       "display_name": "双江口公开 DSM 山地参考底座",
       "profile_uri": "models/shuangjiangkou-reference-v1/scene_profile.json",
       "notice": "Public DSM reference terrain only; formal model still awaiting."
+    },
+    {
+      "plant_id": "GEM_HYDRO_SHUANGJIANGKOU",
+      "scene_id": "sjk_team_terrain_draft_v0_1",
+      "asset_version": "prototype-v0.1",
+      "asset_role": "prototype_model",
+      "formal_model_ready": false,
+      "display_name": "双江口队友地形草案（待贴图/配准）",
+      "profile_uri": "models/sjk-prototype-v0.1/scene_profile_terrain.json",
+      "notice": "地形待贴图 · 尚未配准"
+    },
+    {
+      "plant_id": "GEM_HYDRO_SHUANGJIANGKOU",
+      "scene_id": "sjk_facility_concept_v0_1",
+      "asset_version": "prototype-v0.1",
+      "asset_role": "prototype_model",
+      "formal_model_ready": false,
+      "display_name": "双江口枢纽构件草案（概念布局）",
+      "profile_uri": "models/sjk-prototype-v0.1/scene_profile_concept.json",
+      "notice": "概念模型 · 尚未配准"
+    },
+    {
+      "plant_id": "GEM_HYDRO_SHUANGJIANGKOU",
+      "scene_id": "sjk_hydropower_sim_v0_1",
+      "asset_version": "hydro-sim-v0.1-local",
+      "asset_role": "prototype_model",
+      "formal_model_ready": false,
+      "display_name": "双江口模拟水电厂",
+      "profile_uri": "models/sjk-hydropower-sim-v0.1/scene_profile.json",
+      "notice": "模拟厂区 · 未配准"
     }
   ]
 }

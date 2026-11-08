@@ -1,0 +1,113 @@
+{
+  "scene_id": "sjk_hydropower_sim_v0_1",
+  "plant_id": "GEM_HYDRO_SHUANGJIANGKOU",
+  "asset_version": "hydro-sim-v0.1-local",
+  "asset_role": "prototype_model",
+  "formal_model_ready": false,
+  "registration_status": "unregistered",
+  "display_name": "双江口模拟水电厂",
+  "scene_badge": "模拟厂区 · 未配准",
+  "coordinate_frame_id": "SJK_TEAM_FBX_FILE_METRE_UNREGISTERED_v1",
+  "model_uri": "sjk_hydropower_sim_v0_1.glb",
+  "object_registry_uri": "scene_objects.json",
+  "object_registry_required": true,
+  "overlay_markers_uri": null,
+  "terrain_mesh_name": null,
+  "terrain_grid": {
+    "nx": 129,
+    "nz": 129
+  },
+  "asset": {
+    "bytes": 8686568,
+    "sha256": "722b8514a17715f3c109b1cbaa8259dc958c8f212af71cd1c0ae75608566fb91",
+    "object_meshes": 13,
+    "triangles": 45506,
+    "vertex_count": 41919,
+    "mesh_count": 13,
+    "textures_present": true
+  },
+  "bounds_local_m": {
+    "min": [
+      -5000.0,
+      0.0,
+      -5000.0
+    ],
+    "max": [
+      5000.0,
+      2079.392333984375,
+      5000.0
+    ]
+  },
+  "cameras": {
+    "vertical_fov_degrees": 43,
+    "default": {
+      "position": [
+        240,
+        780,
+        -480
+      ],
+      "target": [
+        340,
+        78,
+        210
+      ]
+    },
+    "plant": {
+      "position": [
+        176,
+        371,
+        -150
+      ],
+      "target": [
+        216,
+        77,
+        143
+      ]
+    },
+    "whole_terrain": {
+      "position": [
+        10700,
+        11500,
+        13300
+      ],
+      "target": [
+        0,
+        1000,
+        0
+      ]
+    },
+    "panorama": {
+      "strategy": "fit_world_bounding_box",
+      "padding_factor": 1.1
+    }
+  },
+  "camera_limits": {
+    "near": 1,
+    "far": 140000,
+    "min_distance": 22,
+    "max_distance": 65000
+  },
+  "capabilities": {
+    "object_selection": true,
+    "reference_markers": false,
+    "fire_patch_overlay": false
+  },
+  "ui_notice": "影像地形上搭建的模拟厂区；坝址、厂房尺寸和设备布置均为演示设计。",
+  "study_area_note": "可定位各设施。局部坐标用于场景展示，暂不接入实际火情。",
+  "study_area_stat": "约 10 × 10 km · 文件米制",
+  "coordinate_note": "沿用 E2.1 文件坐标，+Y 向上。真实地理方向及位置未确认。",
+  "sources_and_attribution": [
+    {
+      "name": "队友地形 FBX 与 SatelliteCapture.png",
+      "notice": "E2.1 原网格与原贴图字节保留。"
+    },
+    {
+      "name": "Fire-X 模拟厂区",
+      "notice": "坝、厂房、升压站与运维区为自建示意模型。"
+    }
+  ],
+  "limitations": [
+    "模拟模型不代表实际双江口坝址或厂区布置。",
+    "Unity 与真实地理坐标未配准，火区叠加关闭。"
+  ]
+}

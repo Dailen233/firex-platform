@@ -5,8 +5,34 @@
 // viewer and scripts/check-data.ts (and unit-testable in Node).
 
 /**
+ * Validate a triangle-mesh buffer pair and throw an explicit error on any
+ * structural problem (bad length, out-of-range index, non-finite coordinate).
+ * Returns the vertex count. Shared by sampling and ray-casting so that a
+ * corrupt mesh fails loudly instead of yielding NaN results.
+ */
+export function validateTerrainMesh(positions: ArrayLike<number>, indices: ArrayLike<number> | null): number {
+  const n = positions.length
+  if (n < 9 || n % 3 !== 0) throw new Error(`非法地形网格：positions 长度 ${n}（须≥9 且为 3 的倍数）`)
+  for (let i = 0; i < n; i++) {
+    if (!Number.isFinite(positions[i]!)) throw new Error(`非法地形网格：positions[${i}] 非有限值`)
+  }
+  const vertexCount = n / 3
+  if (indices) {
+    if (indices.length < 3 || indices.length % 3 !== 0) throw new Error(`非法地形网格：indices 长度 ${indices.length}（须为 3 的倍数）`)
+    for (let i = 0; i < indices.length; i++) {
+      const idx = indices[i]!
+      if (!Number.isInteger(idx) || idx < 0 || idx >= vertexCount) {
+        throw new Error(`非法地形网格：indices[${i}] = ${idx} 越界（顶点数 ${vertexCount}）`)
+      }
+    }
+  }
+  return vertexCount
+}
+
+/**
  * Sample the height of the terrain triangle surface at (x, z).
- * Returns null when no triangle contains the point.
+ * Returns null when x/z are not finite, or when no triangle contains the point.
+ * Throws on an ill-formed mesh (see validateTerrainMesh).
  */
 export function sampleHeightOnTerrain(
   x: number,
@@ -14,7 +40,9 @@ export function sampleHeightOnTerrain(
   positions: ArrayLike<number>,
   indices: ArrayLike<number> | null,
 ): number | null {
-  const triCount = indices ? Math.floor(indices.length / 3) : Math.floor(positions.length / 9)
+  if (!Number.isFinite(x) || !Number.isFinite(z)) return null
+  validateTerrainMesh(positions, indices)
+  const triCount = indices ? indices.length / 3 : Math.floor(positions.length / 9)
   for (let t = 0; t < triCount; t++) {
     const i0 = indices ? indices[t * 3]! : t * 3
     const i1 = indices ? indices[t * 3 + 1]! : t * 3 + 1

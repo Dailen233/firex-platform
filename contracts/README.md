@@ -4,7 +4,7 @@
 
 ## 内容
 
-- `openapi.json`：当前已实现接口的 OpenAPI 快照，由 `backend/scripts/export_openapi.py` 生成。含 6 个接口（health / 创建运行 / 查询运行 / 查询状态 / 上传 capture / 查询 capture），**不含**尚未实现的上传后处理或算法接口。
+- `openapi.json`：当前已实现接口的 OpenAPI 快照，由 `backend/scripts/export_openapi.py` 生成。含 7 个接口（health / 创建运行 / 查询运行 / 查询状态 / 上传 capture / 查询 capture / atlas 火情反馈聚合），**不含**尚未实现的上传后处理或算法接口。
 - `examples/`：创建运行、运行记录、初始状态、上传 metadata、接收记录、错误样例。
 - `conventions.md`：相机（像素原点、内参、轴向、位姿）与时间约定的单一来源。
 

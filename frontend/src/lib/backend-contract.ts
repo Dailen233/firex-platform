@@ -56,6 +56,39 @@ export interface BackendRunState {
   time_origin_utc: string | null
 }
 
+export type AlertStatus = 'no_observation' | 'no_detection' | 'fire' | 'stale'
+
+export interface AtlasFireStatusItem {
+  plant_id: string
+  run_id: string
+  scene_id: string
+  asset_version: string
+  coordinate_frame_id: string | null
+  input_source: InputSource
+  state_status: string
+  alert_status: AlertStatus
+  fire_detected: boolean
+  is_fresh: boolean
+  revision: number
+  observation_time_s: number | null
+  time_basis: TimeBasis
+  result_origin: string | null
+  provider_version: string | null
+  produced_at: string | null
+  evidence_capture_ids: string[]
+  patch_count: number
+  detection_count: number
+  model_ref: string | null
+  threshold: number | null
+}
+
+export interface AtlasFireStatus {
+  generated_at: string
+  fresh_after_s: number
+  monitored_run_ids: string[]
+  items: AtlasFireStatusItem[]
+}
+
 export type Validation<T> = { ok: true; value: T } | { ok: false; errors: string[] }
 
 function isRecord(v: unknown): v is Record<string, unknown> {
@@ -267,6 +300,87 @@ export function validateRunState(raw: unknown): Validation<BackendRunState> {
       time_basis, simulation_time_origin_s, time_origin_utc,
     },
   }
+}
+
+const ALERT_STATUSES: AlertStatus[] = ['no_observation', 'no_detection', 'fire', 'stale']
+
+export function validateAtlasFireStatus(raw: unknown): Validation<AtlasFireStatus> {
+  const errors: string[] = []
+  if (!isRecord(raw)) return { ok: false, errors: ['atlas/fire-status 不是对象'] }
+  const generated_at = readString(raw, 'generated_at', errors, 'atlas')
+  const fresh_after_s = raw.fresh_after_s
+  if (typeof fresh_after_s !== 'number' || !Number.isInteger(fresh_after_s) || fresh_after_s <= 0) {
+    errors.push('atlas.fresh_after_s 必须为正整数')
+  }
+  const monitored_run_ids: string[] = []
+  if (!Array.isArray(raw.monitored_run_ids)) {
+    errors.push('atlas.monitored_run_ids 必须为数组')
+  } else {
+    for (let i = 0; i < raw.monitored_run_ids.length; i++) {
+      const e = raw.monitored_run_ids[i]
+      if (!isNonEmptyString(e)) { errors.push(`atlas.monitored_run_ids[${i}] 必须为非空字符串`); break }
+      monitored_run_ids.push(e)
+    }
+  }
+  const items: AtlasFireStatusItem[] = []
+  if (!Array.isArray(raw.items)) {
+    errors.push('atlas.items 必须为数组')
+  } else {
+    for (let i = 0; i < (raw.items as unknown[]).length; i++) {
+      const it = (raw.items as unknown[])[i]
+      if (!isRecord(it)) { errors.push(`atlas.items[${i}] 不是对象`); continue }
+      const where = `atlas.items[${i}]`
+      const plant_id = readString(it, 'plant_id', errors, where)
+      const run_id = readString(it, 'run_id', errors, where)
+      const scene_id = readString(it, 'scene_id', errors, where)
+      const asset_version = readString(it, 'asset_version', errors, where)
+      const coordinate_frame_id = readNullableString(it, 'coordinate_frame_id', errors, where)
+      const input_source = readInputSource(it, errors, where)
+      const state_status = readString(it, 'state_status', errors, where)
+      if (!ALERT_STATUSES.includes(it.alert_status as AlertStatus)) {
+        errors.push(`${where}.alert_status 必须为 ${ALERT_STATUSES.join('/')}`)
+      }
+      if (typeof it.fire_detected !== 'boolean') errors.push(`${where}.fire_detected 必须为布尔`)
+      if (typeof it.is_fresh !== 'boolean') errors.push(`${where}.is_fresh 必须为布尔`)
+      if (!isNonNegativeInteger(it.revision)) errors.push(`${where}.revision 必须为非负整数`)
+      const observation_time_s = readNullableNumber(it, 'observation_time_s', errors, where)
+      if (!TIME_BASES.includes(it.time_basis as TimeBasis)) errors.push(`${where}.time_basis 必须为 ${TIME_BASES.join('/')}`)
+      const result_origin = readNullableString(it, 'result_origin', errors, where)
+      const provider_version = readNullableString(it, 'provider_version', errors, where)
+      const produced_at = readNullableString(it, 'produced_at', errors, where)
+      if (!isNonNegativeInteger(it.patch_count)) errors.push(`${where}.patch_count 必须为非负整数`)
+      if (!isNonNegativeInteger(it.detection_count)) errors.push(`${where}.detection_count 必须为非负整数`)
+      const model_ref = readNullableString(it, 'model_ref', errors, where)
+      const threshold = readNullableNumber(it, 'threshold', errors, where)
+      const evidence_capture_ids: string[] = []
+      if (!Array.isArray(it.evidence_capture_ids)) {
+        errors.push(`${where}.evidence_capture_ids 必须为数组`)
+      } else {
+        for (let k = 0; k < (it.evidence_capture_ids as unknown[]).length; k++) {
+          const e = (it.evidence_capture_ids as unknown[])[k]
+          if (!isNonEmptyString(e)) { errors.push(`${where}.evidence_capture_ids[${k}] 必须为非空字符串`); break }
+          evidence_capture_ids.push(e)
+        }
+      }
+      items.push({
+        plant_id, run_id, scene_id, asset_version, coordinate_frame_id, input_source, state_status,
+        alert_status: it.alert_status as AlertStatus,
+        fire_detected: it.fire_detected as boolean,
+        is_fresh: it.is_fresh as boolean,
+        revision: it.revision as number,
+        observation_time_s,
+        time_basis: it.time_basis as TimeBasis,
+        result_origin, provider_version, produced_at,
+        evidence_capture_ids,
+        patch_count: it.patch_count as number,
+        detection_count: it.detection_count as number,
+        model_ref,
+        threshold,
+      })
+    }
+  }
+  if (errors.length) return { ok: false, errors }
+  return { ok: true, value: { generated_at, fresh_after_s: fresh_after_s as number, monitored_run_ids, items } }
 }
 
 /** Immutable binding fields that a snapshot must share with its run record. */

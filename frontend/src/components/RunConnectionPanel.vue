@@ -55,9 +55,9 @@ function submit(): void {
     </template>
 
     <template v-if="snapshot">
-      <div v-if="snapshot.state_status !== 'observation'" class="notice amber"><ShieldQuestion :size="14" />尚无观测<template v-if="snapshot.revision === 0">（revision 0）</template>。不能解释为确认无火。</div>
+      <div v-if="snapshot.state_status !== 'observation'" class="notice amber"><ShieldQuestion :size="14" />等待观测数据，不能解释为确认无火。</div>
       <div v-else class="snapshot-facts">
-        <div class="snapshot-head"><FlaskConical :size="15" /><strong>接口测试数据，不代表图像重建</strong></div>
+        <div class="snapshot-head"><FlaskConical :size="15" /><strong>{{snapshot.result_origin==='yolo'?'数据来源：仿真':'数据来源：接口测试'}}，不代表图像重建</strong></div>
         <dl class="conn-facts">
           <div><dt>revision</dt><dd>{{ snapshot.revision }}</dd></div>
           <div><dt>观测时间</dt><dd>{{ observationTimeLabel }}</dd></div>

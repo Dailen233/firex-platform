@@ -19,13 +19,18 @@ from pathlib import Path
 from . import db
 from .capture_metadata import CaptureMetadata
 from .capture_store import read_stored_capture
-from .models import FirePatch
+from .models import Detection2D, FirePatch
 from .provider import ProcessingResult
 
 STATUS_QUEUED = "queued"
 STATUS_PROCESSING = "processing"
 STATUS_COMPLETED = "completed"
 STATUS_FAILED = "failed"
+
+# Detection-only providers publish no 3D patch; these sentinels keep the
+# pre-A2 NOT NULL columns valid while meaning "no patch".
+NO_PATCH_ID = ""
+NO_PATCH_GEOMETRY = "[]"
 
 
 @dataclass
@@ -37,6 +42,10 @@ class Snapshot:
     provider_version: str
     evidence_capture_ids: list[str]
     patches: list[FirePatch]
+    detections: list[Detection2D]
+    fire_detected: bool | None
+    model_ref: str | None
+    threshold: float | None
 
 
 @dataclass
@@ -146,10 +155,22 @@ def complete_and_publish(path: Path, task: CaptureTask, result: ProcessingResult
     """
     # Validate before any write: an invalid provider result must fail the capture
     # instead of polluting results/snapshot (and later breaking GET state).
-    patch = FirePatch(patch_id=result.patch_id, geometry=result.geometry)
+    if result.patch_id is not None:
+        patch = FirePatch(patch_id=result.patch_id, geometry=result.geometry)
+        patch_id, geometry_json = patch.patch_id, json.dumps(patch.geometry)
+    else:
+        # Detection-only result: no world geometry is fabricated for the map.
+        patch_id, geometry_json = NO_PATCH_ID, NO_PATCH_GEOMETRY
+    fire_detected = result.fire_detected
+    if fire_detected is None:
+        # Providers without an explicit 2D verdict: a published patch is the
+        # positive-fire evidence (fixture). Detection providers always set it.
+        fire_detected = result.patch_id is not None
+    detections_json = json.dumps(
+        [d.model_dump() for d in result.detections], ensure_ascii=False, allow_nan=False
+    )
     now = datetime.now(timezone.utc).isoformat()
     evidence = json.dumps([task.capture_id])
-    geometry = json.dumps(patch.geometry)
     conn = db.connect(path)
     try:
         conn.execute("BEGIN IMMEDIATE")
@@ -168,7 +189,8 @@ def complete_and_publish(path: Path, task: CaptureTask, result: ProcessingResult
         cur = conn.execute(
             "INSERT INTO results (run_id, plant_id, scene_id, asset_version, coordinate_frame_id, "
             "observation_time_s, produced_at, result_origin, provider_version, evidence_capture_ids, "
-            "patch_id, patch_geometry, capture_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "patch_id, patch_geometry, capture_id, fire_detected, detections, model_ref, threshold) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 task.run_id,
                 task.plant_id,
@@ -180,12 +202,19 @@ def complete_and_publish(path: Path, task: CaptureTask, result: ProcessingResult
                 result.result_origin,
                 result.provider_version,
                 evidence,
-                patch.patch_id,
-                geometry,
+                patch_id,
+                geometry_json,
                 task.capture_id,
+                int(fire_detected),
+                detections_json,
+                result.model_ref,
+                result.threshold,
             ),
         )
-        _advance_snapshot(conn, task, cur.lastrowid, result, now, evidence, geometry)
+        _advance_snapshot(
+            conn, task, cur.lastrowid, result, now, evidence, geometry_json, patch_id,
+            fire_detected, detections_json,
+        )
         conn.commit()
     except Exception:
         conn.rollback()
@@ -202,15 +231,21 @@ def _advance_snapshot(
     produced_at: str,
     evidence: str,
     geometry: str,
+    patch_id: str,
+    fire_detected: bool,
+    detections_json: str,
 ) -> None:
     snap = conn.execute(
         "SELECT revision, observation_time_s FROM snapshots WHERE run_id = ?", (task.run_id,)
     ).fetchone()
+    model_ref = result.model_ref
+    threshold = result.threshold
     if snap is None:
         conn.execute(
             "INSERT INTO snapshots (run_id, revision, result_id, observation_time_s, produced_at, "
-            "result_origin, provider_version, evidence_capture_ids, patch_id, patch_geometry) "
-            "VALUES (?, 1, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "result_origin, provider_version, evidence_capture_ids, patch_id, patch_geometry, "
+            "fire_detected, detections, model_ref, threshold) "
+            "VALUES (?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 task.run_id,
                 result_id,
@@ -219,8 +254,12 @@ def _advance_snapshot(
                 result.result_origin,
                 result.provider_version,
                 evidence,
-                result.patch_id,
+                patch_id,
                 geometry,
+                int(fire_detected),
+                detections_json,
+                model_ref,
+                threshold,
             ),
         )
         return
@@ -228,7 +267,8 @@ def _advance_snapshot(
     if task.observation_time_s > snap["observation_time_s"]:
         conn.execute(
             "UPDATE snapshots SET revision = ?, result_id = ?, observation_time_s = ?, produced_at = ?, "
-            "result_origin = ?, provider_version = ?, evidence_capture_ids = ?, patch_id = ?, patch_geometry = ? "
+            "result_origin = ?, provider_version = ?, evidence_capture_ids = ?, patch_id = ?, patch_geometry = ?, "
+            "fire_detected = ?, detections = ?, model_ref = ?, threshold = ? "
             "WHERE run_id = ?",
             (
                 snap["revision"] + 1,
@@ -238,8 +278,12 @@ def _advance_snapshot(
                 result.result_origin,
                 result.provider_version,
                 evidence,
-                result.patch_id,
+                patch_id,
                 geometry,
+                int(fire_detected),
+                detections_json,
+                model_ref,
+                threshold,
                 task.run_id,
             ),
         )
@@ -270,6 +314,11 @@ def get_snapshot(path: Path, run_id: str) -> Snapshot | None:
         conn.close()
     if row is None:
         return None
+    patches: list[FirePatch] = []
+    if row["patch_id"]:
+        # Detection-only rows carry the empty sentinel and no world geometry.
+        patches = [FirePatch(patch_id=row["patch_id"], geometry=json.loads(row["patch_geometry"]))]
+    raw_detections = json.loads(row["detections"]) if row["detections"] else []
     return Snapshot(
         revision=row["revision"],
         observation_time_s=row["observation_time_s"],
@@ -277,5 +326,9 @@ def get_snapshot(path: Path, run_id: str) -> Snapshot | None:
         result_origin=row["result_origin"],
         provider_version=row["provider_version"],
         evidence_capture_ids=json.loads(row["evidence_capture_ids"]),
-        patches=[FirePatch(patch_id=row["patch_id"], geometry=json.loads(row["patch_geometry"]))],
+        patches=patches,
+        detections=[Detection2D.model_validate(d) for d in raw_detections],
+        fire_detected=None if row["fire_detected"] is None else bool(row["fire_detected"]),
+        model_ref=row["model_ref"],
+        threshold=row["threshold"],
     )

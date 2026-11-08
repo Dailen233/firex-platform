@@ -111,6 +111,10 @@ def get_run_state(path: Path, run_id: str) -> RunState | None:
         time_basis=TIME_BASIS[run.input_source],
         simulation_time_origin_s=run.simulation_time_origin_s,
         time_origin_utc=run.time_origin_utc,
+        detections=snap.detections,
+        fire_detected=snap.fire_detected,
+        model_ref=snap.model_ref,
+        threshold=snap.threshold,
     )
 
 

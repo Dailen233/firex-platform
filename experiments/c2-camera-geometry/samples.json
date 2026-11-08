@@ -1,0 +1,28 @@
+{
+  "description": "C2 相机几何核验：两张不同来源、不同位姿的 state_machine_case 帧（新 schema）。不同 source_stem，非重复 miss 帧（miss_1/2/3 同源 case6_06，已排除）。pose_sha256 用于读取时核对，保留原始文件不变。",
+  "source_dir": "/home/dailen/Nutstore Files/Fire_X/demo_sequences/state_machine_case",
+  "frames": [
+    {
+      "id": "state_000001",
+      "source_stem": "case6_01",
+      "role": "fire",
+      "image": "/home/dailen/Nutstore Files/Fire_X/demo_sequences/state_machine_case/images/state_000001.png",
+      "pose": "/home/dailen/Nutstore Files/Fire_X/demo_sequences/state_machine_case/poses/state_000001.json",
+      "image_sha256": "9b6d0a26b601007f2d11bb6db118eb59da2f6bdc227c684d5398f37a74991439",
+      "image_size": [2193, 1000],
+      "pose_sha256": "311893b19ef2e6c3d19137122a6b3400a6ab5cfdbc6dc107befb63b6bf47d2d4",
+      "note": "pos≈(-0.77,2.29,20.25)，euler≈(11.86,241.36,0)，fov_y=60.0"
+    },
+    {
+      "id": "state_000011",
+      "source_stem": "case6_09",
+      "role": "return_3",
+      "image": "/home/dailen/Nutstore Files/Fire_X/demo_sequences/state_machine_case/images/state_000011.png",
+      "pose": "/home/dailen/Nutstore Files/Fire_X/demo_sequences/state_machine_case/poses/state_000011.json",
+      "image_sha256": "ad77b76a3c3f19a4a4872a6989df310437a0c996a08b871c1e5fef27cb524f5a",
+      "image_size": [2193, 1000],
+      "pose_sha256": "a15b1fd3ba4ca64c971c1eeafb9811b706a010242d45429c1ede680d1c9dfef8",
+      "note": "pos≈(-8.05,4.58,19.25)，euler≈(49.04,74.09,0)，fov_y=60.0；pose 内部 frame_id=9（源计数），与 manifest frame_id=11 不一致（命名差异，不影响几何字段）"
+    }
+  ]
+}
