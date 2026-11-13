@@ -1,13 +1,13 @@
 # Fire-X 团队 Git 协作规范
 
-本仓库由三名成员共同维护。代码、需求和验收记录通过 GitHub 分支及 Pull Request（PR）流转；不得通过坚果云同步 `.git/`、`node_modules/` 或正在编辑的源码目录。CodeBuddy 修改代码同样遵守本规范。
+本仓库由三名成员共同维护。代码、需求和验收记录统一通过 GitHub 管理：成员可直接向 `develop` 提交，复杂或高风险变更也可采用 Pull Request（PR）；不得通过坚果云同步 `.git/`、`node_modules/` 或正在编辑的源码目录。CodeBuddy 修改代码同样遵守本规范。
 
 ## 1. 分支角色
 
 | 分支 | 职责 | 谁可以更新 |
 | --- | --- | --- |
 | `master` | 经团队验收的稳定基线、阶段演示及发布版本 | 仓库负责人 Dailen233；其他成员不得直接推送或合并 |
-| `develop` | 团队日常开发的唯一长期集成分支 | 成员通过 PR 合入，验收通过后集成 |
+| `develop` | 团队日常开发的唯一长期集成分支 | 授权成员可直接推送，需先同步、测试并核对变更；PR 可选 |
 | `feat/<topic>` | 新功能，例如 `feat/fire-region-update` | 对应任务成员 |
 | `fix/<topic>` | 缺陷修复，例如 `fix/capture-status` | 对应任务成员 |
 | `docs/<topic>` | 文档与流程改进，例如 `docs/api-contract` | 对应任务成员 |
@@ -15,7 +15,7 @@
 
 **当前默认分支为 `master`，从旧 `main` 的同一提交创建。旧 `main` 仅供迁移期核查，待队友 PR 与本机分支完成切换后清理；今后不再往 `main` 推送或发起 PR。**
 
-原则：从最新 `develop` 建立功能分支，PR 回 `develop`；只在需要发布或里程碑冻结时，由负责人发起/合并 `develop → master`。未经确认，不把实验分支直接合入稳定主线。历史 `laozhou` 一类个人长期分支在核实已合并、没有活动 PR 后清理。
+原则：日常可直接在 `develop` 开发并推送；涉及大范围重构、实验性算法、容易产生冲突的并行任务时建议从最新 `develop` 建短期功能分支，并通过 PR 回 `develop`。只在需要发布或里程碑冻结时，由负责人发起/合并 `develop → master`。未经确认，不把实验分支直接合入稳定主线。
 
 ## 2. 一项任务的标准流程
 
@@ -26,10 +26,9 @@ git fetch origin --prune
 git status --short --branch
 git switch develop
 git pull --ff-only origin develop
-git switch -c feat/<topic>
 ```
 
-若本机还没有 `develop` 分支，首次运行 `git switch -c develop --track origin/develop`，之后使用上述流程。分支名称中的 `<topic>` 换成简短的小写英文、数字和连字符。
+若本机还没有 `develop` 分支，首次运行 `git switch -c develop --track origin/develop`，之后使用上述流程。需要隔离开发时再创建 `feat/<topic>` / `fix/<topic>` 分支；`<topic>` 使用简短的小写英文、数字和连字符。切换前必须保护已有未提交文件及正在运行的本机服务。
 
 1. 先明确需求边界、涉及模块、真实输入与验收标准，再交由 VS Code 的 CodeBuddy 分步开发。
 2. 只修改本任务范围；不要覆盖队友提交、改写历史、擅自升级主要依赖或修改已核实的模型资源。
@@ -43,8 +42,8 @@ git switch -c feat/<topic>
    uv --directory backend run --locked python -m pytest -q
    ```
 5. 执行 `git diff --check`、核对 `git status`，只提交任务相关的代码、文档和小型验收证据。禁止提交密钥、模型大权重、`runtime-data/`、虚拟环境和构建产物。
-6. 推送功能分支并创建 **base=`develop`** 的 PR。PR 写明目标、修改范围、实际运行的检查及结果、截图/接口证据、风险和未验证项。
-7. 至少进行一次非作者审阅；由负责人或指定集成人员检查后合并。合并后删除已确认不再使用的远端功能分支，并清理本机已合并分支。
+6. 小型、已自测的修改可直接 `git push origin develop`。推送前检查远端是否有新提交；如果被拒绝，先 `fetch` 并核对差异，仅在可以快进时同步；冲突需要人工处理，禁止强推共享 `develop`。
+7. 复杂或高风险变更建议使用短期功能分支，推送后创建 **base=`develop`** 的 PR，写明范围、测试、验收证据和风险；有条件时由另一位成员审阅，合并后清理已确认无用的功能分支。任何方式均须在组内说明已完成内容和未验证项。
 
 ## 3. 从 develop 发布到 master
 
@@ -61,7 +60,7 @@ git switch -c feat/<topic>
 - 目标分支精确匹配 `master`；启用 `Restrict updates`、`Restrict deletions`、`Block force pushes`。
 - Bypass 仅授予 **Repository admins**，模式为 `Always allow`（需确认只有负责人拥有管理员权限）；不能把 Write/Maintain 或所有协作者放入 bypass。
 - 为留痕，负责人日常仍通过发布 PR 更新稳定分支。需要强制 PR 审核时，须验证与上述 bypass/发布流程兼容。
-- `develop` 建议另设规则：要求 PR、至少一位审阅者、阻止强推和删除；只有经过实际验证的 CI 检查才设置为 required。
+- `develop` 允许具有 Write 权限的成员直接推送；**不要启用强制 PR 审核**。可另设仅阻止强推和删除的规则，避免意外丢失共享提交；只有经过实际验证的 CI 检查才设置为 required。
 - 配置后通过 Rulesets 页面检查 Active 状态与目标分支，避免把尚未配置的规则当成事实。
 
 团队成员按任务获得写权限，但不应授予管理员权限。保护规则不代替代码审查。
