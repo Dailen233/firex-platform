@@ -1,6 +1,6 @@
 # Fire-X Platform
 
-Fire-X 新阶段团队协作工程。首轮前端基线为0.1.0；旧Fire-X仓库不再用于后续开发。仓库建立后，三位成员各自克隆；CodeBuddy只在本机克隆目录中实施，统一通过功能分支与Pull Request合并。具体规则见CONTRIBUTING.md。
+Fire-X 新阶段团队协作工程。首轮前端基线为0.1.0；旧Fire-X仓库不再用于后续开发。仓库建立后，三位成员各自克隆；CodeBuddy只在本机克隆目录中实施，日常直接在 `develop` 开发，复杂或高风险变更可用短期功能分支并经 PR 合并。具体规则见CONTRIBUTING.md。
 
 ## 第一轮前端（0.1.0）
 
