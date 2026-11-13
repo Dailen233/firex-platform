@@ -24,6 +24,7 @@ export class ModelViewer {
  private controls:OrbitControls;private resizeObserver:ResizeObserver;private abort=new AbortController()
  private rafId=0;private disposed=false;private root:THREE.Group|null=null;private objects:SceneObject[]=[]
  private meshes:THREE.Mesh[]=[];private selectedBox:THREE.BoxHelper|null=null;private profile:SceneProfile|null=null
+ private previousCameraPosition=new THREE.Vector3();private hasPreviousCameraPosition=false
  private fireOverlay:THREE.Group|null=null;private referenceMarkers:THREE.Group|null=null
  private terrainMesh:THREE.Mesh|null=null;private pendingFirePatches:ActiveFirePatch[]|null=null
  private pointerStart={x:0,y:0};private pointer=new THREE.Vector2();private raycaster=new THREE.Raycaster()
@@ -52,7 +53,28 @@ export class ModelViewer {
   this.camera.aspect=w/h;this.camera.updateProjectionMatrix();this.renderer.setSize(w,h,false);this.requestRender()
  }
  private requestRender=()=>{if(!this.disposed&&!this.rafId)this.rafId=requestAnimationFrame(this.render)}
- private render=()=>{this.rafId=0;if(this.disposed)return;this.controls.update();this.renderer.render(this.scene,this.camera)}
+ private render=()=>{this.rafId=0;if(this.disposed)return;this.controls.update();this.resolveCameraCollision();this.renderer.render(this.scene,this.camera)}
+ /** Sweep the camera from its previous position to the proposed position. Stop just before
+  * the first scene mesh so orbit, zoom and pan cannot move the viewpoint through geometry. */
+ private resolveCameraCollision(){
+  const current=this.camera.position
+  if(!this.hasPreviousCameraPosition){this.previousCameraPosition.copy(current);this.hasPreviousCameraPosition=true;return}
+  const movement=current.clone().sub(this.previousCameraPosition)
+  const distance=movement.length()
+  if(distance>1e-4){
+   this.raycaster.set(this.previousCameraPosition,movement.multiplyScalar(1/distance))
+   this.raycaster.near=0;this.raycaster.far=distance
+   const hit=this.raycaster.intersectObjects(this.meshes,false)[0]
+   if(hit?.face){
+    const normal=hit.face.normal.clone().applyMatrix3(new THREE.Matrix3().getNormalMatrix(hit.object.matrixWorld)).normalize()
+    const direction=current.clone().sub(this.previousCameraPosition).normalize()
+    if(normal.dot(direction)>0)normal.negate()
+    const clearance=Math.max(2,this.camera.near*2)
+    current.copy(hit.point).addScaledVector(normal,clearance)
+   }
+  }
+  this.previousCameraPosition.copy(current)
+ }
  private onPointerDown=(event:PointerEvent)=>{this.pointerStart={x:event.clientX,y:event.clientY}}
  private onPointerUp=(event:PointerEvent)=>{
   if(this.disposed||event.button!==0||Math.hypot(event.clientX-this.pointerStart.x,event.clientY-this.pointerStart.y)>5)return
