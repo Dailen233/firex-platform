@@ -14,6 +14,11 @@ import { provinces,provinceName } from '../lib/provinces'
 const route=useRoute();const router=useRouter()
 const province=computed(()=>provinces.some(p=>p[0]===route.query.province)?String(route.query.province):'')
 const currentPlants=computed(()=>province.value?relatedPlants(province.value):plants.value)
+const modeledProjectPlantIds=new Set(['GEM_HYDRO_SHUANGJIANGKOU','GEM_COAL_ZHIJIN'])
+const plantGroups=computed(()=>[
+ {key:'modeled',label:'双江口与织金建模项目',note:'双江口正式模型仍待接入；具体场景资源类型见标签。',plants:currentPlants.value.filter(p=>modeledProjectPlantIds.has(p.properties.plant_id))},
+ {key:'other',label:'其他电厂样例',note:'',plants:currentPlants.value.filter(p=>!modeledProjectPlantIds.has(p.properties.plant_id))},
+].filter(group=>group.plants.length))
 const selected=computed(()=>currentPlants.value.find(p=>p.properties.plant_id===route.query.plant))
 const browsableSceneCount=computed(()=>sceneLinks.value.length)
 const {isDemoOn,activeFirePatches}=useFireDemo()
@@ -78,7 +83,12 @@ onBeforeUnmount(()=>stopFireStatus())
    <section class="plant-list"><div class="section-heading"><h2>{{province?`${provinceName(province)}关联电厂`:'全国电厂样例'}}<span class="count-pill">{{currentPlants.length}}</span></h2><span class="small muted">按项目 ID 关联 · 全国数量去重</span></div>
     <div v-if="!dataReady&&!dataError" class="empty-state">正在读取电厂目录…</div>
     <div v-else-if="!currentPlants.length" class="empty-state"><MapPin :size="24"/><div><strong>暂无样例数据</strong><p>{{provinceName(province)}}尚未收录电厂样例，可选择贵州、四川或云南继续浏览。</p></div></div>
-    <div v-else class="plant-grid"><button v-for="p in currentPlants" :key="p.properties.plant_id" class="plant-item" :class="{chosen:selected?.properties.plant_id===p.properties.plant_id}" @click="choosePlant(p.properties.plant_id)"><span class="plant-type-icon"><Box v-if="sceneFor(p.properties.plant_id)" :size="19"/><Mountain v-else-if="referenceSceneFor(p.properties.plant_id)" :size="19"/><FlaskConical v-else-if="prototypeScenesFor(p.properties.plant_id).length" :size="19"/><MapPin v-else :size="19"/></span><span class="plant-item-text"><strong>{{p.properties.name}}</strong><span>{{p.properties.technology==='Coal'?'燃煤':'水电'}} · {{p.properties.capacity_mw?.toLocaleString()??'未知'}} MW</span></span><span v-if="sceneFor(p.properties.plant_id)" class="tag">三维试建</span><span v-else-if="referenceSceneFor(p.properties.plant_id)" class="tag">参考预览</span><span v-if="prototypeScenesFor(p.properties.plant_id).length" class="tag">模型草案</span><ChevronRight v-if="!sceneFor(p.properties.plant_id)&&!referenceSceneFor(p.properties.plant_id)&&!prototypeScenesFor(p.properties.plant_id).length" :size="16" class="muted"/></button></div>
+    <div v-else class="plant-groups">
+     <section v-for="group in plantGroups" :key="group.key" class="plant-group">
+      <div class="plant-group-heading"><h3>{{group.label}}<span class="count-pill">{{group.plants.length}}</span></h3><span v-if="group.note" class="small muted">{{group.note}}</span></div>
+      <div class="plant-grid"><button v-for="p in group.plants" :key="p.properties.plant_id" class="plant-item" :class="{chosen:selected?.properties.plant_id===p.properties.plant_id}" @click="choosePlant(p.properties.plant_id)"><span class="plant-type-icon"><Box v-if="sceneFor(p.properties.plant_id)" :size="19"/><Mountain v-else-if="referenceSceneFor(p.properties.plant_id)" :size="19"/><FlaskConical v-else-if="prototypeScenesFor(p.properties.plant_id).length" :size="19"/><MapPin v-else :size="19"/></span><span class="plant-item-text"><strong>{{p.properties.name}}</strong><span>{{p.properties.technology==='Coal'?'燃煤':'水电'}} · {{p.properties.capacity_mw?.toLocaleString()??'未知'}} MW</span></span><span v-if="sceneFor(p.properties.plant_id)" class="tag">三维试建</span><span v-else-if="referenceSceneFor(p.properties.plant_id)" class="tag">参考预览</span><span v-if="prototypeScenesFor(p.properties.plant_id).length" class="tag">模型草案</span><ChevronRight v-if="!sceneFor(p.properties.plant_id)&&!referenceSceneFor(p.properties.plant_id)&&!prototypeScenesFor(p.properties.plant_id).length" :size="16" class="muted"/></button></div>
+     </section>
+    </div>
    </section>
    <footer class="atlas-footnote"><details><summary>地图来源与精度说明</summary><p>GeoJSON.CN 第三方分发与转换，来源页注明天地图；2026-10-09 取得 34 个省级面与 8 个境界线要素。底图 CGCS2000 / EPSG:4490，点位 WGS84 / EPSG:4326，未进行坐标基准转换。本轮为省级浏览，不代表米级地理配准验收。</p><a href="https://geojson.cn/data/atlas/tiandi" target="_blank" rel="noopener noreferrer">来源及版本说明</a></details></footer>
   </section>
@@ -101,4 +111,9 @@ onBeforeUnmount(()=>stopFireStatus())
 .fire-history ul{margin:6px 0 0;padding-left:18px}
 .no-detect-list{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0}
 .no-detect-card{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border:1px solid #33414d;border-radius:8px;padding:10px 12px;background:#121a22;font-size:.875rem}
+.plant-group+.plant-group{margin-top:17px}
+.plant-group-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px}
+.plant-group-heading h3{display:flex;align-items:center;gap:8px;font-size:.9rem;font-weight:600}
+.plant-group-heading>.small{font-size:.75rem;text-align:right}
+@media(max-width:640px){.plant-group-heading{align-items:flex-start;flex-direction:column;gap:4px}.plant-group-heading>.small{text-align:left}}
 </style>
