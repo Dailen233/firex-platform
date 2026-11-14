@@ -151,3 +151,11 @@ Node 24.19.0；npm 11.9.0；Vue3.5.43、Vue Router4.6.4、Vite7.3.7、TypeScript
 本轮未启用演示告警、火势、无人机、算法、电网、应急；没有用假火情验证算法。下一项为CodeBuddy本机R1.1复现：WebGL2与390×844/768×1024视口验收，完成再规划演示火区。
 
 附带docs/04-codebuddy-prompt.md作为接手提示词。缺陷修复见docs/05-development-plan.md。
+
+## 省份与电厂地图自动聚焦（FR-02，2026-11-14）
+
+- 通过省份列表选择云南省后，地图自动聚焦并放大云南边界；选择乌东德水电站后，地图进一步以电厂点位为中心放大，详情坐标为 `102.6338, 26.318`（WGS84）。
+- 手动滚轮缩放后等待火情状态轮询，地图视角保持；重置取景回到当前选中的省份/电厂。
+- 浏览器截图：[省份聚焦](../evidence/2026-11-14-map-province-focus.png)、[电厂聚焦](../evidence/2026-11-14-map-plant-focus.png)、[手动缩放](../evidence/2026-11-14-map-manual-zoom.png)。
+- `npm --prefix frontend run test:data`：34 项通过；`npm --prefix frontend run build`：通过（保留既有 >500 kB 分块提示）；`git diff --check`：通过。
+- 本次浏览器未启动后端，火情状态请求返回 HTTP 500；地图聚焦与样例浏览正常。GPU与窄屏未在本轮测试。

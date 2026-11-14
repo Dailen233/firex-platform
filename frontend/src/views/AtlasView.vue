@@ -50,7 +50,7 @@ onBeforeUnmount(()=>stopFireStatus())
    <RunConnectionPanel class="atlas-connection"/>
    <div v-if="dataError" class="notice error" role="alert">{{dataError}}<button @click="loadCatalog">重新读取</button></div>
    <div class="map-section">
-    <div class="map-topline"><span><Compass :size="16"/>中国省级地图</span><span class="small muted">点击省份或电厂点位 · 滚轮缩放</span></div>
+    <div class="map-topline"><span><Compass :size="16"/>中国省级地图</span><span class="small muted">选择省份或电厂自动定位放大 · 滚轮缩放</span></div>
     <ProvinceMap v-if="boundaries && dataReady" :boundaries="boundaries" :lines="boundaryLines" :plants="plants" :province="province" :selected-plant="selected?.properties.plant_id??''" :demo-active="demoActive" :test-plant-id="boundPlantId" :fire-plants="firePlants" @province="chooseProvince" @plant="choosePlant"/>
     <div v-else class="map-empty"><Layers :size="36"/><h3>{{boundaryError?'地图资源暂不可用':'正在读取省级地图'}}</h3><p>{{boundaryError?'可继续通过左侧省份列表浏览电厂与模型。':'加载本地边界文件与电厂样例。'}}</p><button v-if="boundaryError" @click="loadCatalog">重新读取地图</button></div>
     <div class="map-bottomline"><span><span class="sample-dot"></span>点位表示电厂样例，不表示火情</span><span v-if="!everConnected" class="tag neutral">火情监测数据未接入</span><span v-else-if="!connected" class="tag danger"><Flame :size="13"/>火情监测连接断开</span><span v-else-if="fireAlertCount" class="tag danger"><Flame :size="13"/>火情监测：{{fireAlertCount}} 厂站检出火点</span><span v-else-if="noDetectionCount" class="tag neutral">火情监测已接入 · 本帧未检出火点</span><span v-else class="tag neutral">火情监测已接入 · 等待数据</span></div>
