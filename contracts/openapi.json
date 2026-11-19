@@ -336,6 +336,306 @@
           }
         }
       }
+    },
+    "/api/v1/runs/{run_id}/reconstruction": {
+      "get": {
+        "tags": [
+          "reconstruction"
+        ],
+        "summary": "Get Reconstruction Summary",
+        "operationId": "get_reconstruction_summary_api_v1_runs__run_id__reconstruction_get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReconstructionSummary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/runs/{run_id}/reconstruction/frames": {
+      "get": {
+        "tags": [
+          "reconstruction"
+        ],
+        "summary": "Get Reconstruction Frames",
+        "operationId": "get_reconstruction_frames_api_v1_runs__run_id__reconstruction_frames_get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReconstructionFrame"
+                  },
+                  "title": "Response Get Reconstruction Frames Api V1 Runs  Run Id  Reconstruction Frames Get"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/runs/{run_id}/reconstruction/{revision}/ply": {
+      "get": {
+        "tags": [
+          "reconstruction"
+        ],
+        "summary": "Get Reconstruction Ply",
+        "operationId": "get_reconstruction_ply_api_v1_runs__run_id__reconstruction__revision__ply_get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          },
+          {
+            "name": "revision",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Revision"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/runs/{run_id}/reconstruction-jobs": {
+      "post": {
+        "tags": [
+          "reconstruction-jobs"
+        ],
+        "summary": "Upload Reconstruction Job",
+        "operationId": "upload_reconstruction_job_api_v1_runs__run_id__reconstruction_jobs_post",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_upload_reconstruction_job_api_v1_runs__run_id__reconstruction_jobs_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "ZIP received and reconstruction queued",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReconstructionJob"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Payload too large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/runs/{run_id}/reconstruction-jobs/{job_id}": {
+      "get": {
+        "tags": [
+          "reconstruction-jobs"
+        ],
+        "summary": "Get Reconstruction Job",
+        "operationId": "get_reconstruction_job_api_v1_runs__run_id__reconstruction_jobs__job_id__get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          },
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReconstructionJob"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -571,6 +871,20 @@
         ],
         "title": "Body_upload_capture_api_v1_runs__run_id__captures_post"
       },
+      "Body_upload_reconstruction_job_api_v1_runs__run_id__reconstruction_jobs_post": {
+        "properties": {
+          "file": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "File"
+          }
+        },
+        "type": "object",
+        "required": [
+          "file"
+        ],
+        "title": "Body_upload_reconstruction_job_api_v1_runs__run_id__reconstruction_jobs_post"
+      },
       "CaptureRecord": {
         "properties": {
           "capture_id": {
@@ -778,6 +1092,142 @@
         "title": "FirePatch",
         "description": "A fire polygon in minimal local XZ coordinates.\n\n``geometry`` is an ordered ring of ``[x, z]`` pairs that closes on itself\n(first vertex == last vertex). All values must be finite. This is the local\nsurface frame; world meaning comes from ``coordinate_frame_id``."
       },
+      "FlameEstimate": {
+        "properties": {
+          "method": {
+            "type": "string",
+            "const": "single_view_flame_silhouette",
+            "title": "Method"
+          },
+          "capture_id": {
+            "type": "string",
+            "title": "Capture Id"
+          },
+          "glb_sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$",
+            "title": "Glb Sha256"
+          },
+          "anchor_xyz_m": {
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "type": "array",
+            "maxItems": 3,
+            "minItems": 3,
+            "title": "Anchor Xyz M"
+          },
+          "camera_xyz_m": {
+            "prefixItems": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "number"
+              }
+            ],
+            "type": "array",
+            "maxItems": 3,
+            "minItems": 3,
+            "title": "Camera Xyz M"
+          },
+          "vertices": {
+            "items": {
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array",
+              "maxItems": 3,
+              "minItems": 3
+            },
+            "type": "array",
+            "maxItems": 64,
+            "minItems": 3,
+            "title": "Vertices"
+          },
+          "triangles": {
+            "items": {
+              "prefixItems": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "integer"
+                }
+              ],
+              "type": "array",
+              "maxItems": 3,
+              "minItems": 3
+            },
+            "type": "array",
+            "maxItems": 62,
+            "minItems": 1,
+            "title": "Triangles"
+          },
+          "uv": {
+            "items": {
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "type": "array",
+              "maxItems": 2,
+              "minItems": 2
+            },
+            "type": "array",
+            "maxItems": 64,
+            "minItems": 3,
+            "title": "Uv"
+          },
+          "texture_png_base64": {
+            "type": "string",
+            "maxLength": 100000,
+            "minLength": 4,
+            "pattern": "^[A-Za-z0-9+/]+={0,2}$",
+            "title": "Texture Png Base64"
+          }
+        },
+        "type": "object",
+        "required": [
+          "method",
+          "capture_id",
+          "glb_sha256",
+          "anchor_xyz_m",
+          "camera_xyz_m",
+          "vertices",
+          "triangles",
+          "uv",
+          "texture_png_base64"
+        ],
+        "title": "FlameEstimate",
+        "description": "One visible flame section in the run's local metre frame, not a volume."
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -818,6 +1268,369 @@
           "algorithm_mode"
         ],
         "title": "HealthResponse"
+      },
+      "ReconstructionFrame": {
+        "properties": {
+          "revision": {
+            "type": "integer",
+            "title": "Revision"
+          },
+          "group_id": {
+            "type": "string",
+            "title": "Group Id"
+          },
+          "simulation_time_s": {
+            "type": "number",
+            "title": "Simulation Time S"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "mask_source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mask Source"
+          },
+          "voxel_count": {
+            "type": "integer",
+            "title": "Voxel Count"
+          },
+          "voxel_size_m": {
+            "type": "number",
+            "title": "Voxel Size M"
+          },
+          "byte_size": {
+            "type": "integer",
+            "title": "Byte Size"
+          },
+          "ply_sha256": {
+            "type": "string",
+            "title": "Ply Sha256"
+          },
+          "glb_sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Glb Sha256"
+          },
+          "produced_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Produced At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "revision",
+          "group_id",
+          "simulation_time_s",
+          "source",
+          "voxel_count",
+          "voxel_size_m",
+          "byte_size",
+          "ply_sha256",
+          "produced_at"
+        ],
+        "title": "ReconstructionFrame",
+        "description": "One published reconstruction frame in a run's history (read-only)."
+      },
+      "ReconstructionJob": {
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "title": "Job Id"
+          },
+          "run_id": {
+            "type": "string",
+            "title": "Run Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "queued",
+              "processing",
+              "completed",
+              "failed"
+            ],
+            "title": "Status"
+          },
+          "source": {
+            "type": "string",
+            "title": "Source"
+          },
+          "received_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Received At"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At"
+          },
+          "finished_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Finished At"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "simulation_time_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Simulation Time S"
+          },
+          "group_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group Id"
+          },
+          "voxel_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Voxel Count"
+          },
+          "mask_source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mask Source"
+          },
+          "revision": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revision"
+          },
+          "zip_sha256": {
+            "type": "string",
+            "title": "Zip Sha256"
+          },
+          "zip_byte_size": {
+            "type": "integer",
+            "title": "Zip Byte Size"
+          }
+        },
+        "type": "object",
+        "required": [
+          "job_id",
+          "run_id",
+          "status",
+          "source",
+          "received_at",
+          "zip_sha256",
+          "zip_byte_size"
+        ],
+        "title": "ReconstructionJob",
+        "description": "An uploaded-ZIP reconstruction task and its status (queued -> processing -> completed/failed)."
+      },
+      "ReconstructionSummary": {
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "title": "Run Id"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "none",
+              "available"
+            ],
+            "title": "Status"
+          },
+          "revision": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Revision"
+          },
+          "group_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Group Id"
+          },
+          "simulation_time_s": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Simulation Time S"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
+          },
+          "mask_source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mask Source"
+          },
+          "voxel_count": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Voxel Count"
+          },
+          "voxel_size_m": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Voxel Size M"
+          },
+          "byte_size": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Byte Size"
+          },
+          "ply_sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ply Sha256"
+          },
+          "glb_sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Glb Sha256"
+          },
+          "produced_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Produced At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "run_id",
+          "status"
+        ],
+        "title": "ReconstructionSummary",
+        "description": "Latest published offline reconstruction frame for a run (read-only).\n\n``status`` is ``none`` until a frame is published, so \"no result\" is an\nexplicit state rather than a fabricated empty frame."
       },
       "RunCreate": {
         "properties": {
@@ -1141,6 +1954,28 @@
               }
             ],
             "title": "Threshold"
+          },
+          "flame": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/FlameEstimate"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "observation_expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Observation Expires At"
           }
         },
         "type": "object",

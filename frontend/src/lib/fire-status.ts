@@ -107,6 +107,6 @@ export function observationTimeLabel(item: AtlasFireStatusItem): string {
 
 // A2：来源标签。合成火情（YOLO 检测的仿真影像）标「数据来源：仿真」；fixture 标「数据来源：接口测试」。
 export function originLabel(item: AtlasFireStatusItem): string {
-  if (item.result_origin === 'yolo') return '数据来源：仿真'
+  if (item.result_origin === 'yolo') return item.input_source === 'simulation' ? '数据来源：仿真' : '数据来源：现场影像'
   return '数据来源：接口测试'
 }

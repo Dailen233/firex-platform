@@ -6,12 +6,15 @@ so no background unit keeps writing the database after shutdown.
 """
 from __future__ import annotations
 
+import logging
 import threading
 from pathlib import Path
 
-from . import results
+from . import flame_surface, results
 from .config import WORKER_POLL_INTERVAL_S
-from .provider import ProcessingProvider
+from .provider import FIRE_LABELS, ProcessingProvider
+
+logger = logging.getLogger(__name__)
 
 
 class Worker:
@@ -59,6 +62,19 @@ class Worker:
         try:
             task, meta, original = results.load_for_processing(self._db_path, self._captures_dir, capture_id)
             outcome = self._provider.process(capture_id, meta, original, task.observation_time_s)
+            if (
+                outcome.result_origin == "yolo" and outcome.fire_detected
+                and task.input_source == "simulation" and task.plant_id == flame_surface.PLANT_ID
+                and (task.scene_id, task.asset_version, task.coordinate_frame_id) == flame_surface.SCENE_BINDING
+            ):
+                candidates = (d for d in outcome.detections if d.class_name.strip().lower() in FIRE_LABELS)
+                box = max(candidates, key=lambda d: d.confidence, default=None)
+                if box is not None:
+                    try:
+                        outcome.flame = flame_surface.estimate_flame(meta, original, box)
+                    except Exception:
+                        # Geometry is optional: never turn a valid detection into a failed capture.
+                        logger.warning("Flame section failed for capture %s", capture_id, exc_info=True)
             results.complete_and_publish(self._db_path, task, outcome)
         except Exception as exc:  # noqa: BLE001 - worker must keep running on per-task failure
             results.fail_task(self._db_path, capture_id, f"{type(exc).__name__}: {exc}")

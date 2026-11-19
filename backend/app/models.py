@@ -5,7 +5,7 @@ import math
 from datetime import datetime, timezone
 from typing import Literal
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, Field, FiniteFloat, field_validator, model_validator
 
 from .time_contract import TIME_BASIS
 
@@ -134,6 +134,28 @@ class Detection2D(BaseModel):
         return v
 
 
+class FlameEstimate(BaseModel):
+    """One visible flame section in the run's local metre frame, not a volume."""
+
+    method: Literal["single_view_flame_silhouette"]
+    capture_id: str
+    glb_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+    anchor_xyz_m: tuple[FiniteFloat, FiniteFloat, FiniteFloat]
+    camera_xyz_m: tuple[FiniteFloat, FiniteFloat, FiniteFloat]
+    vertices: list[tuple[FiniteFloat, FiniteFloat, FiniteFloat]] = Field(min_length=3, max_length=64)
+    triangles: list[tuple[int, int, int]] = Field(min_length=1, max_length=62)
+    uv: list[tuple[FiniteFloat, FiniteFloat]] = Field(min_length=3, max_length=64)
+    texture_png_base64: str = Field(min_length=4, max_length=100000, pattern=r"^[A-Za-z0-9+/]+={0,2}$")
+
+    @model_validator(mode="after")
+    def _validate_mesh(self) -> "FlameEstimate":
+        if len(self.uv) != len(self.vertices) or any(not 0 <= c <= 1 for pair in self.uv for c in pair):
+            raise ValueError("flame texture requires one normalized UV pair per vertex")
+        if any(len(set(face)) != 3 or min(face) < 0 or max(face) >= len(self.vertices) for face in self.triangles):
+            raise ValueError("flame triangle indices must reference three distinct vertices")
+        return self
+
+
 class RunState(BaseModel):
     run_id: str
     plant_id: str
@@ -161,6 +183,8 @@ class RunState(BaseModel):
     fire_detected: bool | None = None
     model_ref: str | None = None
     threshold: float | None = None
+    flame: FlameEstimate | None = None
+    observation_expires_at: datetime | None = None
 
 
 class CaptureRecord(BaseModel):
@@ -220,6 +244,64 @@ class AtlasFireStatus(BaseModel):
     fresh_after_s: int
     monitored_run_ids: list[str]
     items: list[AtlasFireStatusItem]
+
+
+class ReconstructionSummary(BaseModel):
+    """Latest published offline reconstruction frame for a run (read-only).
+
+    ``status`` is ``none`` until a frame is published, so "no result" is an
+    explicit state rather than a fabricated empty frame.
+    """
+
+    run_id: str
+    status: Literal["none", "available"]
+    revision: int | None = None
+    group_id: str | None = None
+    simulation_time_s: float | None = None
+    source: str | None = None
+    mask_source: str | None = None
+    voxel_count: int | None = None
+    voxel_size_m: float | None = None
+    byte_size: int | None = None
+    ply_sha256: str | None = None
+    glb_sha256: str | None = None
+    produced_at: datetime | None = None
+
+
+class ReconstructionJob(BaseModel):
+    """An uploaded-ZIP reconstruction task and its status (queued -> processing -> completed/failed)."""
+
+    job_id: str
+    run_id: str
+    status: Literal["queued", "processing", "completed", "failed"]
+    source: str
+    received_at: datetime
+    started_at: datetime | None = None
+    finished_at: datetime | None = None
+    error: str | None = None
+    simulation_time_s: float | None = None
+    group_id: str | None = None
+    voxel_count: int | None = None
+    mask_source: str | None = None
+    revision: int | None = None
+    zip_sha256: str
+    zip_byte_size: int
+
+
+class ReconstructionFrame(BaseModel):
+    """One published reconstruction frame in a run's history (read-only)."""
+
+    revision: int
+    group_id: str
+    simulation_time_s: float
+    source: str
+    mask_source: str | None = None
+    voxel_count: int
+    voxel_size_m: float
+    byte_size: int
+    ply_sha256: str
+    glb_sha256: str | None = None
+    produced_at: datetime
 
 
 class HealthResponse(BaseModel):

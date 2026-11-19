@@ -1,10 +1,10 @@
 # contracts（接口约定与样例）
 
-后端 B1+B2 已实现，本目录保存以实际后端模型和路由为源的接口规格，不另写一份互相矛盾的接口定义。坐标与时间约定见 `conventions.md`（单一来源）。
+本目录保存以实际后端模型和路由为源的接口规格，不另写一份互相矛盾的接口定义。坐标与时间约定见 `conventions.md`（单一来源）。
 
 ## 内容
 
-- `openapi.json`：当前已实现接口的 OpenAPI 快照，由 `backend/scripts/export_openapi.py` 生成。含 7 个接口（health / 创建运行 / 查询运行 / 查询状态 / 上传 capture / 查询 capture / atlas 火情反馈聚合），**不含**尚未实现的上传后处理或算法接口。
+- `openapi.json`：当前已实现接口的 OpenAPI 快照，由 `backend/scripts/export_openapi.py` 生成。含 7 个接口（health / 创建运行 / 查询运行 / 查询状态 / 上传 capture / 查询 capture / atlas 火情反馈聚合）。
 - `examples/`：创建运行、运行记录、初始状态、上传 metadata、接收记录、错误样例。
 - `conventions.md`：相机（像素原点、内参、轴向、位姿）与时间约定的单一来源。
 
@@ -41,6 +41,10 @@
 
 接收记录 `status=queued` 表示“尚未启用处理器/等待处理”，不自动标为 `completed`；收到图片不等于已有火情观测，运行状态仍为 `no_observation`。
 
-## 当前未实现（留待后续）
+## 二维检测与可选火焰剖面
 
-原图后处理、任务工作器、fixture 火区、图像算法与前端 API 接入均不在本轮范围内。
+`GET /api/v1/runs/{run_id}/state` 的 YOLO 观测可以有 `patches=[]`；结果用 `detections`、`fire_detected` 和 `evidence_capture_ids` 表示。成功未检出与推理失败是不同状态，失败不替换最近有效观测。
+
+双江口匹配资产的仿真结果可带 `flame`，包含 `method="single_view_flame_silhouette"`、来源 `capture_id`、`glb_sha256`、局部米制的 `anchor_xyz_m`、`camera_xyz_m`、`vertices` 、零起始的 `triangles` 索引、`uv` 和仅含火焰区域的小块 PNG（`texture_png_base64`）。该几何与运行的 `coordinate_frame_id` 一致，仅是竖直剖面估计。没有有效剖面时为 `null`，不影响告警。
+
+`observation_expires_at` 为 UTC 时间，由有效结果的 `produced_at` 加告警新鲜窗口得到；`no_observation` 返回 `null`。该字段不以轮询时间刷新。上传格式与路径保持不变。

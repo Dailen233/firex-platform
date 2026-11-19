@@ -19,7 +19,7 @@ from pathlib import Path
 from . import db
 from .capture_metadata import CaptureMetadata
 from .capture_store import read_stored_capture
-from .models import Detection2D, FirePatch
+from .models import Detection2D, FirePatch, FlameEstimate
 from .provider import ProcessingResult
 
 STATUS_QUEUED = "queued"
@@ -46,6 +46,7 @@ class Snapshot:
     fire_detected: bool | None
     model_ref: str | None
     threshold: float | None
+    flame: FlameEstimate | None
 
 
 @dataclass
@@ -169,6 +170,12 @@ def complete_and_publish(path: Path, task: CaptureTask, result: ProcessingResult
     detections_json = json.dumps(
         [d.model_dump() for d in result.detections], ensure_ascii=False, allow_nan=False
     )
+    flame = result.flame
+    if flame is not None and (
+        not fire_detected or result.result_origin != "yolo" or flame.capture_id != task.capture_id
+    ):
+        raise ValueError("flame estimate must correspond to this positive YOLO capture")
+    flame_json = flame.model_dump_json() if flame else None
     now = datetime.now(timezone.utc).isoformat()
     evidence = json.dumps([task.capture_id])
     conn = db.connect(path)
@@ -189,8 +196,8 @@ def complete_and_publish(path: Path, task: CaptureTask, result: ProcessingResult
         cur = conn.execute(
             "INSERT INTO results (run_id, plant_id, scene_id, asset_version, coordinate_frame_id, "
             "observation_time_s, produced_at, result_origin, provider_version, evidence_capture_ids, "
-            "patch_id, patch_geometry, capture_id, fire_detected, detections, model_ref, threshold) "
-            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "patch_id, patch_geometry, capture_id, fire_detected, detections, model_ref, threshold, flame) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 task.run_id,
                 task.plant_id,
@@ -209,11 +216,12 @@ def complete_and_publish(path: Path, task: CaptureTask, result: ProcessingResult
                 detections_json,
                 result.model_ref,
                 result.threshold,
+                flame_json,
             ),
         )
         _advance_snapshot(
             conn, task, cur.lastrowid, result, now, evidence, geometry_json, patch_id,
-            fire_detected, detections_json,
+            fire_detected, detections_json, flame_json,
         )
         conn.commit()
     except Exception:
@@ -234,6 +242,7 @@ def _advance_snapshot(
     patch_id: str,
     fire_detected: bool,
     detections_json: str,
+    flame_json: str | None,
 ) -> None:
     snap = conn.execute(
         "SELECT revision, observation_time_s FROM snapshots WHERE run_id = ?", (task.run_id,)
@@ -244,8 +253,8 @@ def _advance_snapshot(
         conn.execute(
             "INSERT INTO snapshots (run_id, revision, result_id, observation_time_s, produced_at, "
             "result_origin, provider_version, evidence_capture_ids, patch_id, patch_geometry, "
-            "fire_detected, detections, model_ref, threshold) "
-            "VALUES (?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "fire_detected, detections, model_ref, threshold, flame) "
+            "VALUES (?, 1, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 task.run_id,
                 result_id,
@@ -260,6 +269,7 @@ def _advance_snapshot(
                 detections_json,
                 model_ref,
                 threshold,
+                flame_json,
             ),
         )
         return
@@ -268,7 +278,7 @@ def _advance_snapshot(
         conn.execute(
             "UPDATE snapshots SET revision = ?, result_id = ?, observation_time_s = ?, produced_at = ?, "
             "result_origin = ?, provider_version = ?, evidence_capture_ids = ?, patch_id = ?, patch_geometry = ?, "
-            "fire_detected = ?, detections = ?, model_ref = ?, threshold = ? "
+            "fire_detected = ?, detections = ?, model_ref = ?, threshold = ?, flame = ? "
             "WHERE run_id = ?",
             (
                 snap["revision"] + 1,
@@ -284,6 +294,7 @@ def _advance_snapshot(
                 detections_json,
                 model_ref,
                 threshold,
+                flame_json,
                 task.run_id,
             ),
         )
@@ -331,4 +342,5 @@ def get_snapshot(path: Path, run_id: str) -> Snapshot | None:
         fire_detected=None if row["fire_detected"] is None else bool(row["fire_detected"]),
         model_ref=row["model_ref"],
         threshold=row["threshold"],
+        flame=FlameEstimate.model_validate_json(row["flame"]) if row["flame"] else None,
     )

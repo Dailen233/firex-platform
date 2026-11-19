@@ -7,11 +7,12 @@ the observation time, or fabricate results.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
 from . import db, results
+from .config import fire_status_fresh_s
 from .models import SCHEMA_VERSION, RunCreate, RunRecord, RunState
 from .time_contract import TIME_BASIS
 
@@ -115,6 +116,8 @@ def get_run_state(path: Path, run_id: str) -> RunState | None:
         fire_detected=snap.fire_detected,
         model_ref=snap.model_ref,
         threshold=snap.threshold,
+        flame=snap.flame,
+        observation_expires_at=snap.produced_at + timedelta(seconds=fire_status_fresh_s()),
     )
 
 

@@ -1,7 +1,7 @@
 // A1 全国地图火情反馈验收：直接打开首页（不输入 run_id、不进三维）。
 // 阶段 A：首页无有效火情（frame 1 已过期 -> 历史/过期，不计入当前告警）。
 // 阶段 B：页面保持打开，送入新的 fixture 帧 -> 一个轮询周期内自动点亮（不刷新/不切页）。
-// 阶段 C：点开详情入口，能看到厂站详情。阶段 D：直接重开首页仍显示。
+// 阶段 C：告警可直达绑定的场景，次级入口仍可查看厂站详情。阶段 D：直接重开首页仍显示。
 // 截图与结果写入 evidence/fire-status/。
 import { chromium } from 'playwright'
 import { execFileSync } from 'node:child_process'
@@ -50,15 +50,16 @@ try {
   await page.locator('.fire-card').first().waitFor({ timeout: 15000 })
   const fireCard = page.locator('.fire-card').filter({ hasText: '双江口' })
   check('fire-card-auto-lit', (await fireCard.count()) === 1)
-  check('fire-tag-simulated', await fireCard.getByText('模拟告警 / 接口测试').first().isVisible().catch(() => false))
+  check('fire-card-source', await fireCard.getByText('数据来源：接口测试').first().isVisible().catch(() => false))
   const cardText = await fireCard.innerText().catch(() => '')
-  check('fire-card-source', cardText.includes('fixture'), cardText.split('\n')[0] ?? '')
-  check('fire-card-run', /[0-9a-f]{8}-[0-9a-f]{4}-/.test(cardText))
+  const sceneLink = fireCard.getByRole('link', { name: '查看三维火情' })
+  const sceneHref = await sceneLink.getAttribute('href', { timeout: 2000 }).catch(() => null)
+  check('fire-card-bound-scene', sceneHref?.startsWith('#/scene/') && sceneHref.includes(`run_id=${RUN_ID}`))
   check('fire-card-time', cardText.includes('观测'))
   await page.screenshot({ path: `${OUT}/phase-b-auto-lit.png`, fullPage: true })
 
   // ---- 阶段 C：点开详情入口 ----
-  await fireCard.getByRole('button', { name: '查看电厂' }).click()
+  await fireCard.getByRole('button', { name: /^(电厂详情|查看电厂)$/ }).click()
   await page.waitForTimeout(500)
   check('plant-detail-opens', await page.getByText('双江口水电站').first().isVisible().catch(() => false))
   await page.screenshot({ path: `${OUT}/phase-c-plant-detail.png` })

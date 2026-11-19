@@ -41,7 +41,7 @@ function submit(): void {
 
     <template v-if="health">
       <dl class="conn-facts">
-        <div><dt>算法模式</dt><dd>{{ health.algorithm_mode === 'unconfigured' ? '未接入图像算法' : health.algorithm_mode }}</dd></div>
+        <div><dt>算法模式</dt><dd>{{ health.algorithm_mode === 'unconfigured' ? '未接入场景重建' : health.algorithm_mode }}</dd></div>
         <div><dt>处理模式</dt><dd>{{ health.processing_mode === 'fixture' ? 'fixture（接口测试）' : health.processing_mode }}</dd></div>
       </dl>
     </template>
@@ -57,13 +57,14 @@ function submit(): void {
     <template v-if="snapshot">
       <div v-if="snapshot.state_status !== 'observation'" class="notice amber"><ShieldQuestion :size="14" />等待观测数据，不能解释为确认无火。</div>
       <div v-else class="snapshot-facts">
-        <div class="snapshot-head"><FlaskConical :size="15" /><strong>{{snapshot.result_origin==='yolo'?'数据来源：仿真':'数据来源：接口测试'}}，不代表图像重建</strong></div>
+        <div class="snapshot-head"><FlaskConical :size="15" /><strong>{{snapshot.result_origin==='yolo'?(snapshot.input_source==='simulation'?'数据来源：仿真':'数据来源：现场影像'):'数据来源：接口测试'}}</strong></div>
         <dl class="conn-facts">
           <div><dt>revision</dt><dd>{{ snapshot.revision }}</dd></div>
           <div><dt>观测时间</dt><dd>{{ observationTimeLabel }}</dd></div>
           <div><dt>来源</dt><dd>{{ snapshot.result_origin }}</dd></div>
           <div><dt>提供者版本</dt><dd>{{ snapshot.provider_version }}</dd></div>
-          <div><dt>火区</dt><dd>{{ snapshot.patches.length }} 个</dd></div>
+          <div v-if="snapshot.result_origin==='yolo'"><dt>二维检测框</dt><dd>{{ snapshot.detections?.length??0 }} 个</dd></div>
+          <div v-else><dt>火区轮廓</dt><dd>{{ snapshot.patches.length }} 个</dd></div>
         </dl>
       </div>
     </template>

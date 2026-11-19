@@ -25,7 +25,7 @@ from pathlib import Path
 
 from . import config
 from .capture_metadata import CaptureMetadata
-from .models import Detection2D
+from .models import Detection2D, FlameEstimate
 
 # Class names that count as positive fire evidence (same rule as C1).
 FIRE_LABELS = {"fire", "flame", "fires"}
@@ -41,6 +41,7 @@ class ProcessingResult:
     fire_detected: bool | None = None
     model_ref: str | None = None
     threshold: float | None = None
+    flame: FlameEstimate | None = None
 
 
 class ProcessingProvider:

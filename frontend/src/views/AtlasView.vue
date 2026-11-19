@@ -5,7 +5,7 @@ import { MapPin,Box,Layers,Info,Compass,ChevronRight,Flame,Mountain,FlaskConical
 import ProvinceMap from '../components/ProvinceMap.vue'
 import PlantDetail from '../components/PlantDetail.vue'
 import RunConnectionPanel from '../components/RunConnectionPanel.vue'
-import { plants,boundaries,boundaryLines,dataReady,dataError,boundaryError,loadCatalog,relatedPlants,sceneFor,referenceSceneFor,prototypeScenesFor,sceneLinks } from '../lib/data'
+import { plants,boundaries,boundaryLines,dataReady,dataError,boundaryError,loadCatalog,relatedPlants,sceneFor,referenceSceneFor,prototypeScenesFor,sceneLinks,sceneBySceneId } from '../lib/data'
 import { useFireDemo } from '../lib/fire-demo'
 import { useRunConnection } from '../lib/run-connection'
 import { useAtlasFireStatus,observationTimeLabel,originLabel } from '../lib/fire-status'
@@ -33,6 +33,11 @@ function fireStatusText(item:AtlasFireStatusItem){return `观测 ${observationTi
 function plantName(id:string){return plants.value.find(p=>p.properties.plant_id===id)?.properties.name??id}
 function chooseProvince(code:string){router.push({path:'/atlas',query:code?{province:code}:{}})}
 function choosePlant(id:string){router.push({path:'/atlas',query:{...(province.value?{province:province.value}:{}),plant:id}})}
+function alertSceneRoute(item:AtlasFireStatusItem){
+ const scene=sceneBySceneId(item.scene_id)
+ if(!scene||scene.plant_id!==item.plant_id||scene.asset_version!==item.asset_version)return null
+ return {name:'scene',params:{sceneId:scene.scene_id},query:{run_id:item.run_id}}
+}
 function close(){router.push({path:'/atlas',query:province.value?{province:province.value}:{}})}
 onMounted(()=>{loadCatalog();startFireStatus()})
 onBeforeUnmount(()=>stopFireStatus())
@@ -64,11 +69,14 @@ onBeforeUnmount(()=>stopFireStatus())
       <div class="fire-card-head"><strong>{{plantName(i.plant_id)}}</strong><span class="tag danger"><Flame :size="12"/>{{originLabel(i)}}</span></div>
       <dl class="fire-facts">
        <div><dt>观测时间</dt><dd>{{observationTimeLabel(i)}}</dd></div>
-       <div v-if="i.detection_count"><dt>检测结果</dt><dd>{{i.detection_count}} 个火点</dd></div>
+       <div v-if="i.detection_count"><dt>检测结果</dt><dd>{{i.detection_count}} 个火焰检测框</dd></div>
        <div v-else-if="i.patch_count"><dt>火区</dt><dd>{{i.patch_count}} 个</dd></div>
        <div v-if="i.model_ref"><dt>检测模型</dt><dd class="mono">{{i.model_ref}}</dd></div>
       </dl>
-      <button class="secondary-button" @click="choosePlant(i.plant_id)">查看电厂</button>
+      <div class="fire-actions">
+       <RouterLink v-if="alertSceneRoute(i)" class="primary-button" :to="alertSceneRoute(i)!"><Box :size="15"/>查看三维火情</RouterLink>
+       <button class="secondary-button" @click="choosePlant(i.plant_id)">{{alertSceneRoute(i)?'电厂详情':'查看电厂'}}</button>
+      </div>
      </div>
     </div>
     <div v-else-if="connected&&noDetectionCount" class="no-detect-list">
@@ -99,6 +107,8 @@ onBeforeUnmount(()=>stopFireStatus())
 .fire-feedback{margin:14px 0}
 .fire-feedback .section-heading{margin-bottom:10px}
 .fire-list{display:flex;flex-wrap:wrap;gap:10px}
+.fire-actions{display:flex;gap:8px;flex-wrap:wrap}
+.fire-actions .primary-button{width:auto}
 .fire-card{border:1px solid #5a2f2f;border-radius:8px;padding:12px;background:#1a1216;min-width:240px}
 .fire-card-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
 .fire-facts{margin:0 0 10px}
