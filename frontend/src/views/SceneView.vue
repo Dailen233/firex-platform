@@ -15,6 +15,7 @@ import { useRunConnection } from '../lib/run-connection'
 import { createRun, snapshotToActiveFirePatches } from '../lib/backend'
 import type { ActiveFirePatch,ReferenceMarker,SceneProfile,SceneObject } from '../lib/types'
 import type { LocalRegistrationPointResult } from '../lib/dev/sjk-local-registration'
+import type { VoxelLayerMode } from '../lib/voxel-shell'
 const route=useRoute();const router=useRouter();const sceneCanvas=ref<InstanceType<typeof SceneCanvas>>();const profile=shallowRef<SceneProfile|null>(null)
 const objects=shallowRef<SceneObject[]>([]),markers=shallowRef<ReferenceMarker[]>([]),selected=shallowRef<SceneObject|null>(null),error=ref(''),attempt=ref(0)
 const renderMode=ref<'webgl'|'software'>('webgl'),overlayIssue=ref<string|null>('')
@@ -127,10 +128,26 @@ const flameEstimate=computed(()=>{
 const replayActive=ref(false)
 const followActive=ref(false)
 const effectiveFlameEstimate=computed(()=>(replayActive.value||followActive.value)?null:flameEstimate.value)
-function onReplayVoxels(points:Float32Array|null,voxelSizeM:number){sceneCanvas.value?.setVoxelLayer(points,voxelSizeM)}
+const voxelFrame=shallowRef<{points:Float32Array;sizeM:number}|null>(null)
+const voxelMode=ref<VoxelLayerMode>('points')
+const drawnVoxelMode=ref<VoxelLayerMode|null>(null)
+function paintVoxelFrame(){
+ const frame=voxelFrame.value
+ drawnVoxelMode.value=sceneCanvas.value?.setVoxelLayer(frame?.points??null,frame?.sizeM??0,voxelMode.value)??null
+}
+function setVoxelFrame(points:Float32Array|null,voxelSizeM:number){
+ voxelFrame.value=points?.length?{points,sizeM:voxelSizeM}:null
+ paintVoxelFrame()
+}
+function toggleVoxelShell(){
+ voxelMode.value=voxelMode.value==='points'?'shell':'points'
+ paintVoxelFrame()
+}
+function onReplayVoxels(points:Float32Array|null,voxelSizeM:number){if(!followActive.value)setVoxelFrame(points,voxelSizeM)}
 function onReplayActive(a:boolean){replayActive.value=a}
-function onFollowVoxels(points:Float32Array|null,voxelSizeM:number){sceneCanvas.value?.setVoxelLayer(points,voxelSizeM)}
+function onFollowVoxels(points:Float32Array|null,voxelSizeM:number){if(!replayActive.value)setVoxelFrame(points,voxelSizeM)}
 function onFollowActive(a:boolean){followActive.value=a}
+watch(alertRunId,()=>{if(!replayActive.value)setVoxelFrame(null,0)})
 function onPlantPreviewToggle(visible:boolean){sceneCanvas.value?.setPlantPreviewVisible(visible)}
 function onPlantPreviewFocus(view:'oblique'|'top'){sceneCanvas.value?.framePlantPreview(view)}
 const flameStatus=computed(()=>{
@@ -173,6 +190,7 @@ function loaded(p:SceneProfile,o:SceneObject[],m:ReferenceMarker[]){profile.valu
 function resetSceneState(){
  profile.value=null;objects.value=[];markers.value=[];selected.value=null;error.value=''
  gridVisible.value=false;gridIssue.value='';gridSummary.value=null
+ voxelMode.value='points';setVoxelFrame(null,0)
 }
 function retry(){resetSceneState();attempt.value++}
 // 场景切换（scene_id 变化）时清空上一场景状态，避免旧 profile/对象残留到新场景的加载或失败画面。
@@ -187,8 +205,18 @@ onMounted(()=>{loadCatalog();load()})
    <section class="viewer-frame">
     <SceneCanvas v-if="dataReady&&valid&&sceneLink" :key="canvasKey" ref="sceneCanvas" :profile-url="assetUrl(sceneLink.profile_uri)" :fire-patches="firePatches" :flame-estimate="effectiveFlameEstimate" @loaded="loaded" @selected="selected=$event" @error="error=$event" @mode="renderMode=$event" @overlay-issue="overlayIssue=$event"/>
     <div v-else class="loader-overlay" role="status"><h3>{{dataError||(dataReady?'场景不存在':'正在读取场景索引')}}</h3><button v-if="dataError" @click="loadCatalog">重新加载目录</button></div>
-    <div v-if="profile" class="viewer-toolbar"><button v-if="flameEstimate&&renderMode==='webgl'" @click="focusFlame"><Flame :size="17"/>聚焦火焰</button><button v-if="!isZhijinDemo&&firePatches.length" @click="focusFire"><Flame :size="17"/>聚焦火区</button><button v-if="profile.cameras.plant" @click="sceneCanvas?.frame('plant')"><Focus :size="17"/>厂区取景</button><button v-if="profile.cameras.whole_terrain" @click="sceneCanvas?.frame('whole_terrain')"><Mountain :size="17"/>全域地形</button><button v-if="!profile.cameras.whole_terrain" @click="sceneCanvas?.frame('panorama')"><Mountain :size="17"/>全景</button><button @click="sceneCanvas?.frame('default')" title="恢复初始取景"><RotateCcw :size="17"/>恢复默认视角</button></div>
-    <div class="viewer-badges"><span v-if="gridVisible" class="tag neutral">仿真塔线 · 非实际走向</span><span v-if="flameEstimate&&renderMode==='webgl'" class="tag danger"><Flame :size="13"/>单视角火焰剖面</span><template v-if="isZhijinDemo"><span v-if="!isDemoOn" class="tag neutral"><ShieldQuestion :size="13"/>火情数据未接入</span><span v-else-if="activeFirePatches.length" class="tag danger"><Flame :size="13"/>数据来源：仿真</span><span v-else class="tag amber">回放中 · 当前无火区</span></template><span v-else-if="profile?.asset_role==='prototype_model'" class="tag amber">{{profile.scene_badge}}</span><span v-else class="tag amber">正式模型待接入</span><span v-if="profile?.terrain_mesh_name" class="tag neutral">高程示意色 · 非植被或火险</span></div>
+    <div v-if="profile" class="viewer-toolbar">
+     <button v-if="flameEstimate&&renderMode==='webgl'" @click="focusFlame"><Flame :size="17"/>聚焦火焰</button>
+     <button v-if="!isZhijinDemo&&firePatches.length" @click="focusFire"><Flame :size="17"/>聚焦火区</button>
+     <button v-if="profile.cameras.plant" @click="sceneCanvas?.frame('plant')"><Focus :size="17"/>厂区取景</button>
+     <button v-if="profile.cameras.whole_terrain" @click="sceneCanvas?.frame('whole_terrain')"><Mountain :size="17"/>全域地形</button>
+     <button v-if="!profile.cameras.whole_terrain" @click="sceneCanvas?.frame('panorama')"><Mountain :size="17"/>全景</button>
+     <button @click="sceneCanvas?.frame('default')" title="恢复初始取景"><RotateCcw :size="17"/>恢复默认视角</button>
+     <button v-if="isSjkSim&&renderMode==='webgl'&&voxelFrame" type="button" :aria-pressed="voxelMode==='shell'"
+             title="切换同一帧的体素点和候选外壳" @click="toggleVoxelShell"><Box :size="17"/>体素外壳</button>
+     <button v-if="drawnVoxelMode" type="button" @click="sceneCanvas?.focusVoxels()"><Focus :size="17"/>定位重建结果</button>
+    </div>
+    <div class="viewer-badges"><span v-if="drawnVoxelMode==='shell'" class="tag amber">体素外壳 · 重建候选</span><span v-else-if="voxelMode==='shell'&&drawnVoxelMode==='points'" class="tag neutral" role="status">本帧无法显示外壳 · 已保留体素点</span><span v-if="gridVisible" class="tag neutral">仿真塔线 · 非实际走向</span><span v-if="flameEstimate&&renderMode==='webgl'" class="tag danger"><Flame :size="13"/>单视角火焰剖面</span><template v-if="isZhijinDemo"><span v-if="!isDemoOn" class="tag neutral"><ShieldQuestion :size="13"/>火情数据未接入</span><span v-else-if="activeFirePatches.length" class="tag danger"><Flame :size="13"/>数据来源：仿真</span><span v-else class="tag amber">回放中 · 当前无火区</span></template><span v-else-if="profile?.asset_role==='prototype_model'" class="tag amber">{{profile.scene_badge}}</span><span v-else class="tag amber">正式模型待接入</span><span v-if="profile?.terrain_mesh_name" class="tag neutral">高程示意色 · 非植被或火险</span></div>
     <div class="viewer-bottom"><span><MousePointer2 :size="14"/>拖动旋转 · 滚轮缩放 · 右键平移</span><span class="axis-label" :title="isSjkSim?'Unity 与此模型的局部坐标可对齐；真实经纬度、北向和高程基准尚未核准。':undefined">{{isSjkSim?'局部坐标（米）· 未做地理配准':isPrototypeDraft?'文件米制轴 · 地理方向待核实 / 米':'X 东 · Y 上 · Z 南 / 米'}}</span></div>
    </section>
    <aside class="scene-inspector">
@@ -274,6 +302,7 @@ onMounted(()=>{loadCatalog();load()})
  </main>
 </template>
 <style scoped>
+.viewer-toolbar button[aria-pressed="true"]{border-color:#a66d38;color:#ffd095}
 .connection-details{margin:12px 0}
 .create-run-panel{border:1px solid var(--border);border-radius:8px;padding:14px;margin:12px 0;background:#122436}
 .create-run-panel .panel-eyebrow{margin-bottom:10px}

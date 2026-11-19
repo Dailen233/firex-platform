@@ -9,6 +9,7 @@ import { buildSjkCorridor,SJK_CORRIDOR_TERRAIN,supportsSjkCorridor,type GridSumm
 import { makeSjkGridLayer } from './sjk-grid-render'
 import { makePlantPreviewLayer } from './sjk-plant-preview'
 import { SoftwareRenderer } from './software-renderer'
+import { buildVoxelShell, type VoxelLayerMode } from './voxel-shell'
 import { CONTROL_POINTS, TERRAIN_MESH_NAME, UNITY_WORLD_TO_GLB, type LocalRegistrationPointResult } from './dev/sjk-local-registration'
 
 export type FrameKind = 'default' | 'plant' | 'whole_terrain' | 'panorama'
@@ -35,7 +36,8 @@ export class ModelViewer {
  private referenceMarkers:THREE.Group|null=null
  private gridLayer:ReturnType<typeof makeSjkGridLayer>|null=null
  private plantPreviewLayer:ReturnType<typeof makePlantPreviewLayer>|null=null
- private voxelLayer:THREE.Points|null=null
+ private voxelLayer:THREE.Points<THREE.BufferGeometry,THREE.PointsMaterial>|
+  THREE.Mesh<THREE.BufferGeometry,THREE.MeshStandardMaterial>|null=null
  private terrainMesh:THREE.Mesh|null=null;private pendingFirePatches:ActiveFirePatch[]|null=null
  private pointerStart={x:0,y:0};private pointer=new THREE.Vector2();private raycaster=new THREE.Raycaster()
  constructor(private host:HTMLElement,private callback:ViewerCallbacks){
@@ -255,11 +257,25 @@ export class ModelViewer {
   this.hasPreviousCameraPosition=false
   this.applyCamera({position:position.toArray(),target:center.toArray()},false)
   }
-  /** 离线重建回放：用 THREE.Points 显示候选体素中心（坐标直接使用原 GLB 局部米制坐标）。
-  *  替换上一帧图层并保持相机视角；传入 null 清除图层。 */
- setVoxelLayer(points:Float32Array|null,voxelSizeM:number){
+  /** Show the same candidate frame as points or its occupied cube surfaces.
+   * Display mode never changes the source, coordinates, or camera. */
+ setVoxelLayer(points:Float32Array|null,voxelSizeM:number,mode:VoxelLayerMode='points'):VoxelLayerMode|null{
   this.disposeVoxelLayer()
-  if(points&&points.length>=3&&this.renderer instanceof THREE.WebGLRenderer){
+  if(!points||points.length<3||!(this.renderer instanceof THREE.WebGLRenderer)){
+   this.requestRender()
+   return null
+  }
+  const shell=mode==='shell'?buildVoxelShell(points,voxelSizeM):null
+  if(shell){
+   const geometry=new THREE.BufferGeometry()
+   geometry.setAttribute('position',new THREE.BufferAttribute(shell.positions,3))
+   geometry.setAttribute('normal',new THREE.BufferAttribute(shell.normals,3))
+   const material=new THREE.MeshStandardMaterial({color:0xf57228,emissive:0x722404,emissiveIntensity:0.3,roughness:0.85})
+   const layer=new THREE.Mesh(geometry,material)
+   layer.name='reconstruction-voxel-shell'
+   this.voxelLayer=layer
+   this.scene.add(layer)
+  }else{
    const geometry=new THREE.BufferGeometry()
    geometry.setAttribute('position',new THREE.BufferAttribute(points,3))
    const material=new THREE.PointsMaterial({color:0xff9a3c,size:Math.max(1.5,voxelSizeM*0.55),sizeAttenuation:true,transparent:true,opacity:0.7,depthWrite:false})
@@ -269,11 +285,24 @@ export class ModelViewer {
    this.scene.add(layer)
   }
   this.requestRender()
+  return shell?'shell':'points'
+ }
+ frameVoxelLayer(){
+  if(!this.voxelLayer)return
+  const box=new THREE.Box3().setFromObject(this.voxelLayer)
+  if(box.isEmpty())return
+  const {center,radius}=box.getBoundingSphere(new THREE.Sphere())
+  if(!Number.isFinite(radius))return
+  const dist=Math.max(8,radius)/Math.sin(THREE.MathUtils.degToRad(this.camera.fov/2))*1.35*Math.max(1,1/this.camera.aspect)
+  const direction=new THREE.Vector3(0.35,1.35,0.9).normalize()
+  const position=center.clone().addScaledVector(direction,dist)
+  this.hasPreviousCameraPosition=false
+  this.applyCamera({position:position.toArray(),target:center.toArray()},false)
  }
  private disposeVoxelLayer(){
   if(!this.voxelLayer)return
   this.scene.remove(this.voxelLayer)
-  this.voxelLayer.geometry.dispose();(this.voxelLayer.material as THREE.Material).dispose()
+  this.voxelLayer.geometry.dispose();this.voxelLayer.material.dispose()
   this.voxelLayer=null
  }
  /** Focus the observed surface from the capture side, so a ridge is less likely

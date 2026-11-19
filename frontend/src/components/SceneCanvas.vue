@@ -3,6 +3,7 @@ import { ref,watch,onMounted,onBeforeUnmount } from 'vue'
 import { ModelViewer } from '../lib/viewer'
 import type { BackendFlameEstimate } from '../lib/backend-contract'
 import type { FrameKind } from '../lib/viewer'
+import type { VoxelLayerMode } from '../lib/voxel-shell'
 import type { ActiveFirePatch, ReferenceMarker, SceneObject, SceneProfile } from '../lib/types'
 const props=defineProps<{profileUrl:string;firePatches:ActiveFirePatch[];flameEstimate:BackendFlameEstimate|null}>()
 const emit=defineEmits<{loaded:[profile:SceneProfile,objects:SceneObject[],markers:ReferenceMarker[]];selected:[object:SceneObject|null];error:[message:string];mode:[mode:'webgl'|'software'];overlayIssue:[message:string|null]}>()
@@ -19,6 +20,6 @@ onMounted(async()=>{
  }catch(e){if(destroyed)return;error.value=e instanceof Error?e.message:'模型加载失败';viewer?.dispose();viewer=null;emit('error',error.value)}
 })
 onBeforeUnmount(()=>{destroyed=true;viewer?.dispose();viewer=null})
-defineExpose({frame:(kind:FrameKind)=>viewer?.frame(kind),select:(id:string|null,focus=false)=>viewer?.select(id,focus),focusFire:()=>viewer?.frameFire(),focusFlame:()=>viewer?.frameFlame(),setGridVisible:(visible:boolean)=>viewer?.setSjkGridVisible(visible)??null,focusGrid:(view:'station'|'corridor')=>viewer?.frameSjkGrid(view),runLocalRegistrationCheck:()=>viewer?.runLocalRegistrationCheck()??[],setVoxelLayer:(points:Float32Array|null,voxelSizeM:number)=>viewer?.setVoxelLayer(points,voxelSizeM),setPlantPreviewVisible:(visible:boolean)=>viewer?.setPlantPreviewVisible(visible)??false,framePlantPreview:(view:'oblique'|'top')=>viewer?.framePlantPreview(view)})
+defineExpose({frame:(kind:FrameKind)=>viewer?.frame(kind),select:(id:string|null,focus=false)=>viewer?.select(id,focus),focusFire:()=>viewer?.frameFire(),focusFlame:()=>viewer?.frameFlame(),setGridVisible:(visible:boolean)=>viewer?.setSjkGridVisible(visible)??null,focusGrid:(view:'station'|'corridor')=>viewer?.frameSjkGrid(view),runLocalRegistrationCheck:()=>viewer?.runLocalRegistrationCheck()??[],setVoxelLayer:(points:Float32Array|null,voxelSizeM:number,mode:VoxelLayerMode)=>viewer?.setVoxelLayer(points,voxelSizeM,mode)??null,focusVoxels:()=>viewer?.frameVoxelLayer(),setPlantPreviewVisible:(visible:boolean)=>viewer?.setPlantPreviewVisible(visible)??false,framePlantPreview:(view:'oblique'|'top')=>viewer?.framePlantPreview(view)})
 </script>
 <template><div ref="host" class="scene-canvas"><div v-if="!ready&&!error" class="loader-overlay" role="status"><div class="loader-mark"></div><h3>{{message}}</h3><div class="progress-track"><div :style="{width:`${percent}%`}"></div></div><p>{{percent}}%</p></div><div v-if="error" class="loader-overlay error-state" role="alert"><h3>三维模型加载失败</h3><p>{{error}}</p><p class="muted">可在右侧重试，或返回电厂详情。</p></div></div></template>
