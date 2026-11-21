@@ -159,3 +159,12 @@ Node 24.19.0；npm 11.9.0；Vue3.5.43、Vue Router4.6.4、Vite7.3.7、TypeScript
 - 浏览器截图：[省份聚焦](../evidence/2026-11-14-map-province-focus.png)、[电厂聚焦](../evidence/2026-11-14-map-plant-focus.png)、[手动缩放](../evidence/2026-11-14-map-manual-zoom.png)。
 - `npm --prefix frontend run test:data`：34 项通过；`npm --prefix frontend run build`：通过（保留既有 >500 kB 分块提示）；`git diff --check`：通过。
 - 本次浏览器未启动后端，火情状态请求返回 HTTP 500；地图聚焦与样例浏览正常。GPU与窄屏未在本轮测试。
+
+## 地图自动对焦复测（FR-02，2026-11-21）
+
+- **省份聚焦**：通过云南省选择实际触发路由 `province=530000`，地图放大并以云南边界为主要取景范围；截图见 [云南省聚焦](../evidence/2026-11-21-province-focus.png)。
+- **电厂聚焦**：选择乌东德水电站后路由保持云南省并更新为 `plant=GEM_HYDRO_WUDONGDE`，详情显示坐标 `102.6338,26.318`，地图对应放大并突出该电厂点位；截图见 [乌东德电厂聚焦](../evidence/2026-11-21-plant-focus.png)。
+- **手动缩放保持**：在电厂聚焦状态进行滚轮缩放，等待约 6 秒的状态轮询后，手动缩放的地图比例与位置保持；裁切截图见 [缩放前](../evidence/2026-11-21-map-manual-zoom-before.png) 与 [缩放后](../evidence/2026-11-21-map-manual-zoom-after.png)。
+- **重置取景**：点击“重置地图取景”后，地图恢复到当前电厂选择的聚焦取景；截图见 [重置到当前电厂](../evidence/2026-11-21-map-reset-to-plant.png)。
+- `npm --prefix frontend run build` 通过；`npm --prefix frontend run test:data` 36 项通过；`git diff --check` 通过。
+- 本轮火情状态接口仍未启动，浏览器控制台持续收到 `/api/v1/atlas/fire-status` HTTP 500，不影响地图聚焦、缩放或重置行为；GPU与真实窄屏未测。
