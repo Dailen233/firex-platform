@@ -38,7 +38,7 @@ onBeforeUnmount(()=>abort.abort())
   </div>
   <div class="grid-simulation">
    <span class="grid-label">近端巡检走廊 · 仿真</span>
-   <p class="small muted">从模拟升压区出线，在山地中展示杆塔和两回导线。线路路径及塔位均为仿真布置。</p>
+   <p class="small muted">从模拟升压区出线，在山地中展示杆塔和两回导线。线路路径、塔位及 18 m 视效抬升均为仿真布置，不作安全净空依据。</p>
    <p v-if="summary" class="grid-stats">{{(summary.lengthM/1000).toFixed(1)}} km · 1 座门架 · {{summary.towers}} 基塔</p>
    <div v-if="visible" class="grid-legend" aria-label="导线图例"><span>第一回</span><span>第二回</span></div>
    <p v-if="!webgl" class="small muted">三维塔线需要 WebGL。</p>

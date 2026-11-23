@@ -16,7 +16,7 @@ function toggle() {
 <template>
   <section class="plant-preview-panel" aria-label="厂区近景预览">
     <div class="panel-eyebrow">厂区近景预览<Building2 :size="16" /></div>
-    <p class="small muted">参考公开资料的仿真布局：GIS 开关楼、地面副厂房、两栋辅助用房，以及场坪、挡墙与道路。开启时隐藏会误读的地面主厂房与露天主变，关闭后恢复原场景。</p>
+    <p class="small muted">参考公开资料的仿真布局：GIS 开关楼、地面副厂房、辅助用房和多栋候选厂房，以及场坪、挡墙与道路。开启时隐藏会误读的地面主厂房与露天主变，关闭后恢复原场景；新增厂房仅作建模效果，不代表真实设施。</p>
     <div class="preview-controls">
       <button class="primary-button" :disabled="!profile" @click="toggle">
         <Eye v-if="!previewVisible" :size="14" /><EyeOff v-else :size="14" />

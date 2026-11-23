@@ -168,3 +168,11 @@ Node 24.19.0；npm 11.9.0；Vue3.5.43、Vue Router4.6.4、Vite7.3.7、TypeScript
 - **重置取景**：点击“重置地图取景”后，地图恢复到当前电厂选择的聚焦取景；截图见 [重置到当前电厂](../evidence/2026-11-21-map-reset-to-plant.png)。
 - `npm --prefix frontend run build` 通过；`npm --prefix frontend run test:data` 36 项通过；`git diff --check` 通过。
 - 本轮火情状态接口仍未启动，浏览器控制台持续收到 `/api/v1/atlas/fire-status` HTTP 500，不影响地图聚焦、缩放或重置行为；GPU与真实窄屏未测。
+
+## 双江口厂房与导线建模效果（2026-11-22）
+
+- 在 `sjk_hydropower_sim_v0_1` 的“厂区近景预览”中新增候选厂房群、屋面、门窗和厂区道路；原始 GLB、哈希、根变换和正式模型状态不变。
+- 仿真塔线导线在现有局部坐标基础上增加 18 m 视效抬升；塔脚仍贴地形，抬升不作走向、潮流、机械或安全净空依据。
+- 浏览器截图：[候选厂房斜视](../evidence/2026-11-22-expanded-factories-oblique.png)、[山坡导线走廊](../evidence/2026-11-22-raised-cables-corridor.png)。
+- `npm --prefix frontend run build` 通过；`npm --prefix frontend run test:data` 36 项通过；`git diff --check` 通过。
+- 本轮仅完成桌面浏览器可视效果复查，GPU渲染质量、真实窄屏与地理配准未验收。

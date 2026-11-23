@@ -5,7 +5,8 @@ import type { GridSupport } from './sjk-grid'
 type XYZ = [number, number, number]
 type Segment = [XYZ, XYZ]
 
-/** Batched steel members and two separately colored conductor sets. */
+/** Batched steel members and two separately colored conductor sets.
+ *  导线节点已由 sjk-grid 使用视效抬升量单独抬高，不改变塔脚或地形坐标。 */
 export function makeSjkGridLayer(corridor: GridCorridor) {
   const group = new THREE.Group()
   group.name = 'sjk-simulated-grid-corridor'

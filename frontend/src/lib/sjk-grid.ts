@@ -18,6 +18,9 @@ export interface GridCorridor {
   summary: GridSummary
 }
 
+// 纯视觉的山坡导线抬升量，不用于潮流、受电安全距离或真实走廊验算。
+export const SJK_VISUAL_CONDUCTOR_LIFT_M = 18
+
 export const SJK_CORRIDOR_SCENE_ID = 'sjk_hydropower_sim_v0_1'
 export const SJK_CORRIDOR_TERRAIN = 'team_fbx_terrain_129'
 export function supportsSjkCorridor(profile: SceneProfile): boolean {
@@ -51,7 +54,7 @@ export function conductorAttachment(support: GridSupport, circuit: 1 | 2, phase:
   const side = (circuit === 1 ? -1 : 1) * (12 - 1.5 * phase)
   return [
     support.x + support.sideX * side,
-    support.y + support.heightM - 3 - 6 * phase,
+    support.y + support.heightM - 3 - 6 * phase + SJK_VISUAL_CONDUCTOR_LIFT_M,
     support.z + support.sideZ * side,
   ]
 }

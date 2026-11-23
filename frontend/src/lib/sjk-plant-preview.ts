@@ -27,6 +27,7 @@ export function makePlantPreviewLayer() {
   const auxMat = mat(0xc9b98a)
   const gisMat = mat(0xa8b6c0, { metalness: 0.65, roughness: 0.35 })
   const bushingMat = mat(0xd8e0e6, { metalness: 0.2, roughness: 0.5 })
+  const windowMat = mat(0x416275, { roughness: 0.45, metalness: 0.15 })
 
   const box = (w: number, h: number, d: number, m: THREE.Material, x: number, y: number, z: number) => {
     const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m)
@@ -53,6 +54,20 @@ export function makePlantPreviewLayer() {
   // 挡墙：台地北缘（z 较小一侧）的矮墙。
   box(180, 4.4, 2, wallMat, 245, PLANT_Y + 2.2, 52.5)
 
+  // 候选厂房模型：仅用于表达厂区密度与厂房群体效果，不代表真实设计或已核设施。
+  const factory = (x: number, z: number, w: number, d: number, h: number) => {
+    box(w, h, d, buildingMat, x, PLANT_Y + h / 2, z)
+    box(w + 3, 1.8, d + 3, roofMat, x, PLANT_Y + h + 0.9, z)
+    for (let i = -1; i <= 1; i++) {
+      box(Math.min(12, w * 0.16), 2.2, 0.5, windowMat, x + i * w * 0.28, PLANT_Y + h * 0.58, z + d / 2 + 0.26)
+    }
+  }
+  factory(352, 205, 62, 36, 16)
+  factory(418, 188, 48, 30, 13)
+  factory(388, 238, 52, 34, 15)
+  factory(454, 230, 56, 38, 17)
+  box(96, 0.35, 18, roadMat, 406, PLANT_Y + 0.45, 218)
+
   // GIS 开关楼：放在升压区台地西半（原主变被隐藏后空出的位置）。
   box(72, 21.2, 56, gisMat, -93, GRID_Y + 10.6, 27)
   for (let i = 0; i < 6; i++) {
@@ -65,9 +80,9 @@ export function makePlantPreviewLayer() {
 
   const bounds = new THREE.Box3()
   const boundsPoints: XYZ[] = [
-    [125, PLANT_Y, 52], [365, PLANT_Y, 228],
+    [125, PLANT_Y, 52], [475, PLANT_Y, 238],
     [-129, GRID_Y, -1], [-57, GRID_Y, 55],
-    [125, PLANT_Y + 21, 52], [336, PLANT_Y + 21, 173],
+    [125, PLANT_Y + 21, 52], [475, PLANT_Y + 21, 238],
     [-129, GRID_Y + 30, -1], [-57, GRID_Y + 30, 55],
   ]
   for (const b of boundsPoints) bounds.expandByPoint(new THREE.Vector3(...b))
