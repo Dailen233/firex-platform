@@ -6,9 +6,10 @@ import { ScatterChart,LinesChart } from 'echarts/charts'
 import { CanvasRenderer } from 'echarts/renderers'
 import type { Boundaries,Plant } from '../lib/types'
 import { RotateCcw } from 'lucide-vue-next'
+import { gridRegionForProvince,provinceCodesForGridRegion } from '../lib/grid-regions'
 echarts.use([GeoComponent,TooltipComponent,ScatterChart,LinesChart,CanvasRenderer])
-const props=defineProps<{boundaries:Boundaries;lines:Boundaries|null;plants:Plant[];province:string;selectedPlant:string;demoActive:boolean;testPlantId:string;firePlants:{plantId:string;label?:string;statusText:string}[]}>()
-const emit=defineEmits<{province:[code:string];plant:[id:string]}>()
+const props=defineProps<{boundaries:Boundaries;lines:Boundaries|null;plants:Plant[];province:string;mode:'province'|'grid';gridRegionId:string;selectedPlant:string;demoActive:boolean;testPlantId:string;firePlants:{plantId:string;label?:string;statusText:string}[]}>()
+const emit=defineEmits<{province:[code:string];'grid-region':[id:string];plant:[id:string]}>()
 const host=ref<HTMLDivElement>();let chart:echarts.ECharts|null=null;let observer:ResizeObserver|null=null
 interface MapBounds{minLon:number;minLat:number;maxLon:number;maxLat:number}
 interface MapViewport{center?:number[];zoom?:number}
@@ -36,6 +37,11 @@ function boundsFromCoordinates(coordinates:unknown):MapBounds|null{
 function mergeBounds(a:MapBounds|null,b:MapBounds):MapBounds{
  return a?{minLon:Math.min(a.minLon,b.minLon),minLat:Math.min(a.minLat,b.minLat),maxLon:Math.max(a.maxLon,b.maxLon),maxLat:Math.max(a.maxLat,b.maxLat)}:b
 }
+function boundsForProvinceCodes(codes:string[]):MapBounds|null{
+ let result:MapBounds|null=null
+ for(const code of codes){const bounds=provinceBounds.get(code);if(bounds)result=mergeBounds(result,bounds)}
+ return result
+}
 function indexBounds(){
  provinceBounds.clear();nationalBounds=null
  for(const feature of props.boundaries.features){
@@ -49,6 +55,13 @@ function indexBounds(){
 function focusForSelection():MapViewport{
  const plant=props.plants.find(p=>p.properties.plant_id===props.selectedPlant)
  if(plant)return{center:[...plant.geometry.coordinates],zoom:5.5}
+ if(props.mode==='grid'&&props.gridRegionId){
+  const bounds=boundsForProvinceCodes(provinceCodesForGridRegion(props.gridRegionId))
+  if(bounds&&nationalBounds){
+   const width=Math.max(bounds.maxLon-bounds.minLon,0.1);const height=Math.max(bounds.maxLat-bounds.minLat,0.1)
+   return{center:[(bounds.minLon+bounds.maxLon)/2,(bounds.minLat+bounds.maxLat)/2],zoom:Math.max(1,Math.min((nationalBounds.maxLon-nationalBounds.minLon)/width*0.78,(nationalBounds.maxLat-nationalBounds.minLat)/height*0.78,4.5))}
+  }
+ }
  const bounds=provinceBounds.get(props.province)
  if(bounds&&nationalBounds){
   const width=Math.max(bounds.maxLon-bounds.minLon,0.1)
@@ -67,7 +80,7 @@ function currentViewport():MapViewport|null{
  const center=geo.center?.map(Number)
  return{...(center?.length===2?{center}:{}),...(typeof geo.zoom==='number'?{zoom:geo.zoom}:{})}
 }
-function selectionKey(){return`${props.province}|${props.selectedPlant}`}
+function selectionKey(){return`${props.mode}|${props.province}|${props.gridRegionId}|${props.selectedPlant}`}
 function draw(resetFocus=false){
  if(!chart)return
  const key=selectionKey()
@@ -76,8 +89,17 @@ function draw(resetFocus=false){
  if(selectionChanged||resetFocus)userViewport=null
  const focus=viewport??focusForSelection()
  lastSelectionKey=key
- const regions=props.boundaries.features.map(f=>({name:f.properties.name,itemStyle:{areaColor:f.properties.code===props.province?'#226553':props.plants.some(p=>p.properties.related_province_codes.includes(f.properties.code??''))?'#1b3542':'#152636'},label:{show:['贵州省','四川省','云南省','台湾省'].includes(f.properties.name),color:'#aebfd1',fontSize:14}}))
- const points=props.plants.filter(p=>!props.province||p.properties.related_province_codes.includes(props.province))
+ const regions=props.boundaries.features.map(f=>{
+  const code=f.properties.code??'';const gridRegion=gridRegionForProvince(code)
+  const selectedArea=props.mode==='grid'&&gridRegion?.id===props.gridRegionId
+  const areaColor=props.mode==='grid'
+   ?gridRegion?.color??'#152636'
+   :code===props.province?'#226553':props.plants.some(p=>p.properties.related_province_codes.includes(code))?'#1b3542':'#152636'
+  return{name:f.properties.name,itemStyle:{areaColor,...(selectedArea?{borderColor:'#c5ffeb',borderWidth:1.5}:{})},label:{show:['贵州省','四川省','云南省','台湾省'].includes(f.properties.name),color:'#aebfd1',fontSize:14}}
+ })
+ const points=props.plants.filter(p=>props.mode==='grid'
+  ?(!props.gridRegionId||provinceCodesForGridRegion(props.gridRegionId).includes(p.properties.province_code))
+  :(!props.province||p.properties.related_province_codes.includes(props.province)))
  const testPoints=points.filter(p=>p.properties.plant_id===props.testPlantId)
  const firePoints=points.filter(p=>props.firePlants.some(f=>f.plantId===p.properties.plant_id))
  const lines=props.lines?.features.flatMap(f=>f.geometry.type==='MultiLineString'?(f.geometry.coordinates as number[][][]).map(coords=>({coords})):[])??[]
@@ -88,11 +110,16 @@ function draw(resetFocus=false){
     const plant=props.plants.find(x=>x.properties.plant_id===params.data?.plantId)
     if(plant){
      const fire=props.firePlants.find(f=>f.plantId===plant.properties.plant_id)
-     const s=fire?`${fire.label??'数据来源：接口测试'} · ${fire.statusText}`:plant.properties.plant_id==='GEM_COAL_ZHIJIN'&&props.demoActive?'数据来源：仿真':plant.properties.plant_id===props.testPlantId?'接口测试数据':'火情数据未接入'
+     const s=fire?`${fire.label??'来源：平台测试数据'} · ${fire.statusText}`:plant.properties.plant_id==='GEM_COAL_ZHIJIN'&&props.demoActive?'模拟数据':plant.properties.plant_id===props.testPlantId?'平台测试数据':'暂无火情观测'
      return `${plant.properties.name}<br/>${plant.properties.capacity_mw?.toLocaleString()??'未知'} MW · ${s}`
     }
     const code=props.boundaries.features.find(f=>f.properties.name===params.name)?.properties.code
-    return `${params.name}<br/>${props.plants.filter(p=>p.properties.related_province_codes.includes(code??'')).length} 个关联样例`
+    if(props.mode==='grid'){
+     const area=gridRegionForProvince(code)
+     const count=props.plants.filter(x=>x.properties.province_code===code).length
+     return `${params.name}<br/>${area?.name??'暂未纳入区域分组'}<br/>${count} 家场站（按登记省份）`
+    }
+    return `${params.name}<br/>${props.plants.filter(p=>p.properties.related_province_codes.includes(code??'')).length} 家关联场站`
   }},
   geo:{map:'firex-provinces',roam:true,scaleLimit:{min:0.8,max:6},layoutCenter:['50%','51%'],layoutSize:'98%',aspectScale:0.75,selectedMode:false,...focus,
     label:{show:false},itemStyle:{areaColor:'#152636',borderColor:'#406072',borderWidth:0.65},emphasis:{itemStyle:{areaColor:'#2b5261'},label:{color:'#f4fbff',fontSize:14}},regions},
@@ -112,15 +139,16 @@ onMounted(()=>{
   const data=params.data as {plantId?:string}|undefined
   if(data?.plantId){emit('plant',data.plantId);return}
   const code=props.boundaries.features.find(f=>f.properties.name===params.name)?.properties.code
-  if(code)emit('province',code)
+  if(code){if(props.mode==='grid'){const area=gridRegionForProvince(code);if(area)emit('grid-region',area.id)}else emit('province',code)}
  })
  chart.on('georoam',()=>{userViewport=currentViewport()})
  observer=new ResizeObserver(()=>chart?.resize());observer.observe(host.value!);indexBounds();draw()
 })
-watch(()=>[props.province,props.selectedPlant,props.plants,props.demoActive,props.testPlantId,props.firePlants],()=>draw())
+watch(()=>[props.province,props.mode,props.gridRegionId,props.selectedPlant,props.plants,props.demoActive,props.testPlantId,props.firePlants],()=>draw())
 onBeforeUnmount(()=>{observer?.disconnect();chart?.dispose();chart=null})
 </script>
-<template><div class="map-frame"><div ref="host" class="map-canvas" aria-label="中国省级地图，选择省份或电厂后自动定位和放大，可滚轮缩放"></div><button class="map-reset icon-button" @click="draw(true)" aria-label="重置地图取景" title="重置地图取景"><RotateCcw :size="17"/></button><div class="map-legend"><span class="sample-dot"></span>电厂样例<span class="fire-dot"></span>收到火情观测<span class="legend-line"></span>省级边界</div></div></template>
+<template><div class="map-frame"><div ref="host" class="map-canvas" :aria-label="mode==='grid'?'中国电网区域参考地图；不是精确调度边界':'中国省份地图，选择省份或场站查看分布'"></div><button class="map-reset icon-button" @click="draw(true)" aria-label="重置地图取景" title="重置地图取景"><RotateCcw :size="17"/></button><div class="map-legend"><span class="sample-dot"></span>场站<span class="fire-dot"></span>火情观测<span v-if="mode==='grid'" class="legend-area-chip"></span><template v-if="mode==='grid'">电网区域</template><span class="legend-line"></span>省级边界</div></div></template>
 <style scoped>
 .fire-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#ff6b6b;box-shadow:0 0 6px #ff6b6b}
+.legend-area-chip{display:inline-block;width:10px;height:10px;border-radius:2px;background:#527d47;margin-left:5px}
 </style>

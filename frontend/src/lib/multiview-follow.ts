@@ -48,10 +48,9 @@ export function useReconstructionFollow(opts: {
   function bindingError(): string | null {
     const run = opts.run()
     const p = opts.profile()
-    if (!run || !p) return '场景或运行尚未就绪，无法核对绑定。'
-    if (run.scene_id !== p.scene_id) return `运行场景 ${run.scene_id} 与当前 ${p.scene_id} 不符。`
-    if (run.asset_version !== p.asset_version) return `资产版本 ${run.asset_version} 与当前 ${p.asset_version} 不符。`
-    if (run.coordinate_frame_id !== p.coordinate_frame_id) return '坐标参考系与当前场景不符。'
+    if (!run || !p) return '场景或监测任务尚未准备好，请稍后重试。'
+    if (run.scene_id !== p.scene_id || run.asset_version !== p.asset_version) return '这份三维结果与当前场站不匹配，请选择对应场站的结果。'
+    if (run.coordinate_frame_id !== p.coordinate_frame_id) return '结果的位置参考与当前场景不一致，暂时无法显示。'
     return null
   }
 
@@ -59,7 +58,7 @@ export function useReconstructionFollow(opts: {
     const base = bindingError()
     if (base) return base
     if (s.glb_sha256 && s.glb_sha256 !== opts.profile()!.asset.sha256) {
-      return '重建结果的 GLB SHA 与当前模型不一致。'
+      return '这份三维结果与当前场站不匹配，已保留原画面。'
     }
     return null
   }
@@ -68,7 +67,7 @@ export function useReconstructionFollow(opts: {
     const base = bindingError()
     if (base) return base
     if (f.glb_sha256 && f.glb_sha256 !== opts.profile()!.asset.sha256) {
-      return '历史帧的 GLB SHA 与当前模型不一致。'
+      return '这条历史结果与当前场站不匹配，暂时无法显示。'
     }
     return null
   }
@@ -123,7 +122,7 @@ export function useReconstructionFollow(opts: {
         return
       }
       if (s.revision! < lastRevision) {
-        error.value = `收到旧 revision ${s.revision}，已忽略并保留最近有效结果。`
+        error.value = '收到较早的结果，已保留最近一次有效画面。'
         return
       }
       loading.value = true
@@ -131,21 +130,21 @@ export function useReconstructionFollow(opts: {
       if (mySession !== session) return
       const sha = await sha256hex(buf)
       if (sha !== s.ply_sha256) {
-        error.value = 'PLY SHA-256 与摘要不一致，保留最近有效结果。'
+        error.value = '三维结果文件校验未通过，已保留最近一次有效画面。'
         return
       }
       const ply = parseVoxelPly(buf)
       if (ply.vertex_count !== s.voxel_count) {
-        error.value = `PLY 点数 ${ply.vertex_count} 与摘要 ${s.voxel_count} 不一致，保留最近有效结果。`
+        error.value = '三维结果信息不一致，已保留最近一次有效画面。'
         return
       }
       lastRevision = s.revision!
       displayedRevision.value = s.revision!
       opts.onVoxels(ply.xyz, s.voxel_size_m ?? 4)
       error.value = ''
-    } catch (e) {
+    } catch {
       if (mySession !== session) return
-      error.value = `跟随异常：${e instanceof Error ? e.message : String(e)}（沿用最近有效帧）`
+      error.value = '暂时无法读取最新三维结果，已保留最近一次有效画面。'
     } finally {
       if (inFlight === controller) {
         inFlight = null
@@ -160,7 +159,7 @@ export function useReconstructionFollow(opts: {
     if (!id) return
     const frame = frames.value.find((f) => f.revision === revision)
     if (!frame) {
-      error.value = `未找到 revision ${revision}。`
+      error.value = '这条历史结果暂时不可用。'
       return
     }
     const bindErr = frameBindingError(frame)
@@ -179,20 +178,20 @@ export function useReconstructionFollow(opts: {
       if (mySession !== session) return
       const sha = await sha256hex(buf)
       if (sha !== frame.ply_sha256) {
-        error.value = '历史帧 PLY SHA-256 不一致，保留当前画面。'
+        error.value = '历史结果文件校验未通过，已保留当前画面。'
         return
       }
       const ply = parseVoxelPly(buf)
       if (ply.vertex_count !== frame.voxel_count) {
-        error.value = `历史帧 PLY 点数 ${ply.vertex_count} 与 ${frame.voxel_count} 不一致，保留当前画面。`
+        error.value = '历史结果信息不一致，已保留当前画面。'
         return
       }
       displayedRevision.value = revision
       opts.onVoxels(ply.xyz, frame.voxel_size_m)
       error.value = ''
-    } catch (e) {
+    } catch {
       if (mySession !== session) return
-      error.value = `加载历史帧异常：${e instanceof Error ? e.message : String(e)}`
+      error.value = '暂时无法加载这条历史结果，请稍后重试。'
     } finally {
       if (pinInFlight === controller) {
         pinInFlight = null

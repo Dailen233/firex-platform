@@ -21,11 +21,6 @@ export type ConnectionStatus = 'disconnected' | 'connecting' | 'connected' | 'er
 
 export const POLL_INTERVAL_MS = 1000
 
-function errorText(e: unknown): string {
-  if (e instanceof Error) return e.message
-  return String(e)
-}
-
 function createStore() {
   const status = shallowRef<ConnectionStatus>('disconnected')
   const runId = shallowRef('')
@@ -57,7 +52,7 @@ function createStore() {
       const decision = revisionDecision(lastRevision, state.revision)
       if (decision === 'regression') {
         // A backward revision must never overwrite the newer valid result.
-        error.value = `收到旧 revision ${state.revision}（当前 ${lastRevision}），已忽略并保留最近有效结果`
+        error.value = '收到较早的结果，已保留最近一次有效信息。'
         return // do not refresh lastSuccessfulQueryAt / snapshot / new-revision time
       }
       error.value = ''
@@ -72,8 +67,10 @@ function createStore() {
     } catch (e) {
       if (mySession !== session) return
       // Network/invalid response: keep the last valid snapshot of the same run.
-      const keep = snapshot.value !== null ? '连接异常（沿用最近有效结果）' : '连接异常，尚未取得有效结果'
-      error.value = `${keep}：${errorText(e)}`
+      console.warn('Fire-X 火情信息同步失败。', e)
+      error.value = snapshot.value !== null
+        ? '连接暂时中断，正在保留最近一次有效信息。'
+        : '暂时无法读取火情信息，请检查连接后重试。'
       if (snapshot.value === null) status.value = 'error'
       // lastSuccessfulQueryAt is intentionally not refreshed on failure.
     } finally {
@@ -107,7 +104,7 @@ function createStore() {
     const trimmed = id.trim()
     if (!trimmed) {
       status.value = 'error'
-      error.value = '请输入 run_id'
+      error.value = '请输入监测任务编号。'
       return
     }
     stopPoller() // cancel any in-flight poll
@@ -127,7 +124,7 @@ function createStore() {
     lastRevision = -1
     try {
       const h = await fetchHealth(controller.signal)
-      if (h.service !== 'firex-backend') throw new Error(`目标服务不是 firex-backend（service=${h.service}）`)
+      if (h.service !== 'firex-backend') throw new Error('暂时无法连接火情监测服务。')
       const r = await fetchRun(trimmed, controller.signal)
       if (mySession !== session) return // disconnected / reconnected during connect
       health.value = h
@@ -136,7 +133,8 @@ function createStore() {
     } catch (e) {
       if (mySession !== session) return
       status.value = 'error'
-      error.value = errorText(e)
+      console.warn('Fire-X 无法连接监测任务。', e)
+      error.value = '无法连接该监测任务，请检查任务编号或稍后重试。'
     } finally {
       if (connectAbort === controller) connectAbort = null
     }

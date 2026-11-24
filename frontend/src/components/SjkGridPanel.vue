@@ -21,29 +21,29 @@ onBeforeUnmount(()=>abort.abort())
 </script>
 
 <template>
- <section class="grid-panel" aria-label="电力网络">
-  <h3><Cable :size="17"/>电力网络</h3>
+ <section class="grid-panel" aria-label="输电线路信息">
+  <h3><Cable :size="17"/>输电线路</h3>
   <div class="grid-reference">
-   <span class="grid-label">公开接线关系</span>
+   <span class="grid-label">公开资料中的线路关系</span>
    <template v-if="reference">
     <ol class="grid-topology">
      <li>{{reference.from}}</li>
      <li class="grid-connection">{{reference.circuit_count_in_approval}} 回 · {{reference.reference_voltage_kv}} kV</li>
      <li>{{reference.to}}</li>
     </ol>
-    <p class="small muted">公开项目资料全线单回约 {{reference.route_length_per_circuit_approx_km}} 公里。实测塔位与路线未接入。</p>
+    <p class="small muted">资料记载线路长度约 {{reference.route_length_per_circuit_approx_km}} 公里；实际杆塔位置尚未接入。</p>
     <a v-if="reference.source_urls[1]" class="grid-source" :href="reference.source_urls[1]" target="_blank" rel="noopener noreferrer">查看公开资料<ExternalLink :size="11"/></a>
    </template>
    <p v-else class="small muted">{{unavailable?'暂时无法读取公开接线资料。':'正在读取公开接线资料…'}}</p>
   </div>
   <div class="grid-simulation">
-   <span class="grid-label">近端巡检走廊 · 仿真</span>
-   <p class="small muted">从模拟升压区出线，在山地中展示杆塔和两回导线。线路路径、塔位及 18 m 视效抬升均为仿真布置，不作安全净空依据。</p>
+   <span class="grid-label">输电线路位置参考</span>
+   <p class="small muted">场景中的杆塔和双回线路仅作展示，路径、塔位和高度均非实测，不可用于判断安全净空。</p>
    <p v-if="summary" class="grid-stats">{{(summary.lengthM/1000).toFixed(1)}} km · 1 座门架 · {{summary.towers}} 基塔</p>
    <div v-if="visible" class="grid-legend" aria-label="导线图例"><span>第一回</span><span>第二回</span></div>
-   <p v-if="!webgl" class="small muted">三维塔线需要 WebGL。</p>
+   <p v-if="!webgl" class="small muted">当前浏览器暂不支持显示三维线路。</p>
    <div class="grid-actions">
-    <button type="button" :disabled="!webgl" :aria-pressed="visible" @click="$emit('toggle')">{{visible?'隐藏仿真塔线':'显示仿真塔线'}}</button>
+    <button type="button" :disabled="!webgl" :aria-pressed="visible" @click="$emit('toggle')">{{visible?'隐藏线路参考':'显示线路参考'}}</button>
     <template v-if="visible">
      <button type="button" @click="$emit('focus','station')"><Focus :size="13"/>站端取景</button>
      <button type="button" @click="$emit('focus','corridor')"><Focus :size="13"/>走廊全景</button>

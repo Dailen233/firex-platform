@@ -22,12 +22,11 @@ const currentGroup = computed(() => groups.value[currentIndex.value] ?? null)
 
 function bindingError(s: MultiviewReplaySummary): string | null {
   const p = props.profile
-  if (!p) return '场景尚未加载，无法核对绑定。'
-  if (s.scene_id !== p.scene_id) return `场景 ID 不匹配：结果「${s.scene_id}」≠ 当前「${p.scene_id}」。`
-  if (s.asset_version !== p.asset_version) return `资产版本不匹配：结果「${s.asset_version}」≠ 当前「${p.asset_version}」。`
-  if (s.coordinate_frame_id !== p.coordinate_frame_id) return `坐标系 ID 不匹配：结果「${s.coordinate_frame_id}」≠ 当前「${p.coordinate_frame_id}」。`
+  if (!p) return '场景尚未准备好，请稍后重试。'
+  if (s.scene_id !== p.scene_id || s.asset_version !== p.asset_version) return '所选三维结果与当前场站不匹配，请选择对应场站的文件。'
+  if (s.coordinate_frame_id !== p.coordinate_frame_id) return '所选三维结果的位置参考与当前场景不一致。'
   for (const g of s.groups) {
-    if (g.glb_sha256 && g.glb_sha256 !== p.asset.sha256) return `分组 ${g.group_id} 的 GLB SHA 与当前模型不一致。`
+    if (g.glb_sha256 && g.glb_sha256 !== p.asset.sha256) return '所选三维结果与当前场站不匹配，请选择对应场站的文件。'
   }
   return null
 }
@@ -41,25 +40,25 @@ async function onImport(event: Event) {
   try {
     const jsonFile = files.find((f) => f.name.toLowerCase().endsWith('.json'))
     const plyFiles = files.filter((f) => f.name.toLowerCase().endsWith('.ply'))
-    if (!jsonFile) throw new Error('未选择 summary.json。')
+    if (!jsonFile) throw new Error('请同时选择重建说明文件和对应的点云文件。')
     const s = parseMultiviewSummary(await jsonFile.text())
     const bindIssue = bindingError(s)
     if (bindIssue) throw new Error(bindIssue)
     const plyByName = new Map<string, Float32Array>()
     for (const f of plyFiles) {
       const gid = plyGroupId(f.name)
-      if (!gid) throw new Error(`无法识别 PLY 对应的分组：${f.name}。`)
+      if (!gid) throw new Error('点云文件名称无法识别，请选择原始导出文件。')
       const ply = parseVoxelPly(await f.arrayBuffer())
       for (let i = 0; i < ply.xyz.length; i++) {
-        if (!Number.isFinite(ply.xyz[i]!)) throw new Error(`PLY ${f.name} 含无效坐标。`)
+        if (!Number.isFinite(ply.xyz[i]!)) throw new Error('点云文件包含无效数据，请重新导出三维结果。')
       }
       plyByName.set(gid, ply.xyz)
     }
     const merged: LoadedGroup[] = s.groups.map((g) => {
       const xyz = plyByName.get(g.group_id)
-      if (!xyz) throw new Error(`分组 ${g.group_id} 缺少对应的 *-voxels.ply。`)
+      if (!xyz) throw new Error('缺少部分点云文件，请同时选择全部重建文件。')
       if (xyz.length / 3 !== g.candidate_voxel_count) {
-        throw new Error(`分组 ${g.group_id} 的 PLY 点数 ${xyz.length / 3} 与摘要 ${g.candidate_voxel_count} 不一致。`)
+        throw new Error('重建说明与点云内容不一致，请重新导出完整结果。')
       }
       return { ...g, xyz }
     })
@@ -100,20 +99,20 @@ watch(
 </script>
 
 <template>
-  <section class="replay-panel" aria-label="多视角重建回放">
-    <h3><Box :size="17" />多视角重建回放</h3>
-    <p class="small muted">导入离线重建的 summary.json 与对应 *-voxels.ply，在原模型上叠加候选体素。</p>
+  <section class="replay-panel" aria-label="多角度三维重建预览">
+    <h3><Box :size="17" />多角度重建预览</h3>
+    <p class="small muted">加载多角度影像生成的三维结果，在场景中查看重建范围。当前结果仅供预览，精度尚未核验。</p>
     <label class="replay-import">
       <input type="file" multiple accept=".json,.ply" :disabled="!profile || disabled" @change="onImport" />
-      <span>{{ disabled ? '跟随服务端期间不可导入' : profile ? '选择 summary.json 与 *-voxels.ply' : '场景加载后可选文件' }}</span>
+      <span>{{ disabled ? '正在显示最新结果，暂不能切换文件' : profile ? '选择重建说明文件和点云文件' : '场景准备好后可选择文件' }}</span>
     </label>
     <p v-if="error" class="small replay-error" role="alert">{{ error }}</p>
     <template v-if="active && currentGroup">
-      <div class="replay-badge"><span class="tag amber">离线重建回放 · 候选体素</span></div>
+      <div class="replay-badge"><span class="tag amber">离线结果预览 · 精度待核验</span></div>
       <div class="replay-info">
-        仿真时间 <strong>{{ currentGroup.simulation_time_s }} s</strong> ·
-        重建机位 <strong>{{ currentGroup.source_camera_count }}</strong> ·
-        候选体素 <strong>{{ currentGroup.candidate_voxel_count.toLocaleString() }}</strong>
+        影像时间 <strong>{{ currentGroup.simulation_time_s }} 秒</strong> ·
+        拍摄角度 <strong>{{ currentGroup.source_camera_count }}</strong> ·
+        三维点数 <strong>{{ currentGroup.candidate_voxel_count.toLocaleString() }}</strong>
       </div>
       <div class="replay-controls">
         <button
@@ -123,9 +122,9 @@ watch(
           :class="{ active: i === currentIndex }"
           @click="select(i)"
         >{{ g.simulation_time_s }} s</button>
-        <button type="button" class="exit" @click="exit"><X :size="13" />退出回放</button>
+        <button type="button" class="exit" @click="exit"><X :size="13" />关闭预览</button>
       </div>
-      <p class="small muted">回放期间隐藏实时单帧火焰图层；退出后恢复实时显示。体素为候选重建，精度未验收。</p>
+      <p class="small muted">预览期间暂不显示实时火情图层；关闭预览后恢复。三维结果还未完成精度核验。</p>
     </template>
   </section>
 </template>

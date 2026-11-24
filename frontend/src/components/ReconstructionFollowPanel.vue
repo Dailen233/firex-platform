@@ -110,15 +110,15 @@ async function submit(file: File) {
     }
     if (job.status === 'failed') {
       uploadPhase.value = 'failed'
-      uploadError.value = job.error || '重建失败'
+      uploadError.value = '三维结果生成失败，请检查拍摄文件包后重试。'
       return
     }
     uploadPhase.value = job.status
     await pollJob(job.job_id, mySession)
-  } catch (e) {
+  } catch {
     if (mySession !== uploadSession) return
     uploadPhase.value = 'failed'
-    uploadError.value = `上传失败：${e instanceof Error ? e.message : String(e)}`
+    uploadError.value = '文件上传失败，请确认网络正常且文件包完整后重试。'
   }
 }
 
@@ -140,7 +140,7 @@ async function pollJob(id: string, mySession: number) {
     }
     if (job.status === 'failed') {
       uploadPhase.value = 'failed'
-      uploadError.value = job.error || '重建失败'
+      uploadError.value = '三维结果生成失败，请稍后重试。'
       return
     }
     uploadPhase.value = job.status
@@ -184,7 +184,7 @@ const frame = computed(() => {
 
 // 掩膜来源按实际字段显示：独立掩膜（binary_png）不默认标「历史采集」。
 const badge = computed(() =>
-  frame.value?.mask_source === 'binary_png' ? '独立掩膜' : '历史采集 · 颜色代理掩膜',
+  frame.value?.mask_source === 'binary_png' ? '使用标注图' : '依据影像估算范围',
 )
 
 function onPin(revision: number) {
@@ -193,40 +193,40 @@ function onPin(revision: number) {
 </script>
 
 <template>
-  <section class="follow-panel" aria-label="跟随服务端结果">
-    <h3><RefreshCw :size="17" />跟随服务端结果</h3>
-    <p class="small muted">连接运行后自动读取最新重建帧；仅在新 revision 时下载 PLY 并替换体素。</p>
-    <p v-if="!runId" class="small muted">请先连接一个运行（run_id）。</p>
+  <section class="follow-panel" aria-label="三维重建结果">
+    <h3><RefreshCw :size="17" />实时重建结果</h3>
+    <p class="small muted">连接监测任务后，页面会自动显示最新的三维重建结果。</p>
+    <p v-if="!runId" class="small muted">请先连接监测任务，再查看重建结果。</p>
     <button v-else type="button" class="follow-toggle" :disabled="disabled" @click="toggle">
-      {{ active ? '停止跟随' : '开始跟随' }}
+      {{ active ? '暂停更新' : '接收最新结果' }}
     </button>
     <p v-if="error" class="small follow-error" role="alert">{{ error }}</p>
 
     <div class="upload-block">
-      <h4><Upload :size="15" />上传多机位采集包</h4>
-      <p class="small muted">一个 ZIP 对应一个仿真时刻；沿用 manifest.csv、原图、相机参数与掩膜格式。</p>
-      <p v-if="!runId" class="small muted">请先连接一个运行（run_id）。</p>
+      <h4><Upload :size="15" />上传多角度拍摄文件</h4>
+      <p class="small muted">每个压缩包对应一次拍摄，需包含原始图片、拍摄参数和对应的掩膜文件。</p>
+      <p v-if="!runId" class="small muted">请先连接监测任务，再上传文件。</p>
       <template v-else>
         <label class="upload-file" :class="{ busy: submitting }">
           <input ref="fileInput" type="file" accept=".zip" :disabled="submitting || disabled" @change="onFileChosen" />
-          <span class="upload-file-label">{{ fileName || '选择同步采集 ZIP' }}</span>
+          <span class="upload-file-label">{{ fileName || '选择拍摄文件包' }}</span>
           <button v-if="fileName && !submitting" type="button" class="upload-clear" aria-label="清除" @click="clearUpload">
             <X :size="13" />
           </button>
         </label>
         <div class="upload-status" role="status">
           <span v-if="uploadPhase === 'uploading'" class="muted">上传中…</span>
-          <span v-else-if="uploadPhase === 'queued'" class="muted">已排队，等待重建…</span>
-          <span v-else-if="uploadPhase === 'processing'" class="muted">重建中…</span>
-          <span v-else-if="uploadPhase === 'completed' && !layerShown" class="muted">重建完成 revision {{ uploadedRevision }}，加载图层…</span>
-          <span v-else-if="uploadPhase === 'completed' && layerShown" class="done">已显示 revision {{ uploadedRevision }} 的体素。</span>
+          <span v-else-if="uploadPhase === 'queued'" class="muted">文件已收到，准备处理…</span>
+          <span v-else-if="uploadPhase === 'processing'" class="muted">正在生成三维结果…</span>
+          <span v-else-if="uploadPhase === 'completed' && !layerShown" class="muted">结果已生成，正在加载…</span>
+          <span v-else-if="uploadPhase === 'completed' && layerShown" class="done">三维重建结果已显示。</span>
           <span v-else-if="uploadPhase === 'failed'" class="upload-error" role="alert">{{ uploadError }}</span>
         </div>
       </template>
     </div>
 
     <div v-if="runId && frames.length" class="history-block">
-      <h4><History :size="15" />历史重建</h4>
+      <h4><History :size="15" />历史结果</h4>
       <div class="history-list">
         <button
           v-for="f in frames"
@@ -236,24 +236,24 @@ function onPin(revision: number) {
           :class="{ selected: pinnedRevision === f.revision }"
           @click="onPin(f.revision)"
         >
-          {{ f.simulation_time_s }} s · {{ f.voxel_count.toLocaleString() }}
+          {{ f.simulation_time_s }} 秒 · {{ f.voxel_count.toLocaleString() }} 个点
         </button>
       </div>
       <div v-if="pinnedRevision !== null" class="history-pinned">
-        <span class="muted">已固定 revision {{ pinnedRevision }}</span>
-        <button type="button" class="history-back" @click="backToLatest">回到最新</button>
+        <span class="muted">正在查看第 {{ pinnedRevision }} 批结果</span>
+        <button type="button" class="history-back" @click="backToLatest">查看最新结果</button>
       </div>
-      <div v-if="hasNewer" class="history-newer" role="status">有新结果（revision {{ summary?.revision }}），点击「回到最新」查看。</div>
+      <div v-if="hasNewer" class="history-newer" role="status">已收到更新结果，点击「查看最新结果」切换。</div>
     </div>
 
     <template v-if="active && frame">
       <div class="follow-badge"><span class="tag amber">{{ badge }}</span></div>
       <div class="follow-info">
-        仿真时间 <strong>{{ frame.simulation_time_s }} s</strong> ·
-        候选体素 <strong>{{ frame.voxel_count.toLocaleString() }}</strong> ·
-        revision <strong>{{ frame.revision }}</strong>
+        影像时间 <strong>{{ frame.simulation_time_s }} 秒</strong> ·
+        三维点数 <strong>{{ frame.voxel_count.toLocaleString() }}</strong> ·
+        结果批次 <strong>{{ frame.revision }}</strong>
       </div>
-      <p class="small muted">结果来自服务端发布的历史重建帧，为候选体素，精度未验收。</p>
+      <p class="small muted">此结果为三维预览，尚未完成精度核验。</p>
     </template>
     <p v-if="active && !frame && loading" class="small muted">正在读取最新重建帧…</p>
   </section>

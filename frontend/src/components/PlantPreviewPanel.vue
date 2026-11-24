@@ -14,18 +14,18 @@ function toggle() {
 </script>
 
 <template>
-  <section class="plant-preview-panel" aria-label="厂区近景预览">
-    <div class="panel-eyebrow">厂区近景预览<Building2 :size="16" /></div>
-    <p class="small muted">参考公开资料的仿真布局：GIS 开关楼、地面副厂房、辅助用房和多栋候选厂房，以及场坪、挡墙与道路。开启时隐藏会误读的地面主厂房与露天主变，关闭后恢复原场景；新增厂房仅作建模效果，不代表真实设施。</p>
+  <section class="plant-preview-panel" aria-label="厂区布局参考">
+    <div class="panel-eyebrow">厂区布局参考<Building2 :size="16" /></div>
+    <p class="small muted">包含开关楼、副厂房和辅助用房等场景建筑，供查看相对布局；新增建筑仅作场景示意，位置和尺寸尚未实地核实。</p>
     <div class="preview-controls">
       <button class="primary-button" :disabled="!profile" @click="toggle">
         <Eye v-if="!previewVisible" :size="14" /><EyeOff v-else :size="14" />
-        {{ previewVisible ? '关闭预览层' : '开启预览层' }}
+        {{ previewVisible ? '恢复原场景' : '查看布局参考' }}
       </button>
       <button class="secondary-button" :disabled="!profile" @click="emit('focus', 'oblique')">斜视</button>
       <button class="secondary-button" :disabled="!profile" @click="emit('focus', 'top')">俯视</button>
     </div>
-    <p v-if="previewVisible" class="preview-tag"><Layers :size="13" />参考公开资料的仿真布局 · 坝区与卫星底图待位置核准</p>
+    <p v-if="previewVisible" class="preview-tag"><Layers :size="13" />公开资料布局参考 · 位置尚未校准</p>
   </section>
 </template>
 

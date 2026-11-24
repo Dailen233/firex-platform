@@ -38,19 +38,19 @@ export function parseMultiviewSummary(text: string): MultiviewReplaySummary {
   try {
     raw = JSON.parse(text) as Record<string, unknown>
   } catch {
-    throw new Error('summary.json 不是有效 JSON。')
+    throw new Error('重建说明文件无法读取，请确认文件没有损坏。')
   }
-  if (typeof raw.scene_id !== 'string' || !raw.scene_id) throw new Error('summary.json 缺少场景 ID。')
-  if (typeof raw.asset_version !== 'string' || !raw.asset_version) throw new Error('summary.json 缺少资产版本。')
-  if (typeof raw.coordinate_frame_id !== 'string' || !raw.coordinate_frame_id) throw new Error('summary.json 缺少坐标系 ID。')
+  if (typeof raw.scene_id !== 'string' || !raw.scene_id) throw new Error('重建说明文件信息不完整，请选择对应场景的文件。')
+  if (typeof raw.asset_version !== 'string' || !raw.asset_version) throw new Error('重建说明文件信息不完整，请选择对应场景的文件。')
+  if (typeof raw.coordinate_frame_id !== 'string' || !raw.coordinate_frame_id) throw new Error('重建说明文件信息不完整，请选择对应场景的文件。')
   const rawGroups = raw.groups
-  if (!Array.isArray(rawGroups) || rawGroups.length === 0) throw new Error('summary.json 缺少重建分组。')
+  if (!Array.isArray(rawGroups) || rawGroups.length === 0) throw new Error('文件中没有可显示的三维结果。')
   const groups: MultiviewReplayGroup[] = rawGroups.map((g) => {
     const group = g as RawGroup
-    if (typeof group.group_id !== 'string' || !group.group_id) throw new Error('分组缺少 group_id。')
-    if (typeof group.simulation_time_s !== 'number') throw new Error(`分组 ${group.group_id} 缺少 simulation_time_s。`)
+    if (typeof group.group_id !== 'string' || !group.group_id) throw new Error('重建结果信息不完整，请重新导出文件。')
+    if (typeof group.simulation_time_s !== 'number') throw new Error('重建结果信息不完整，请重新导出文件。')
     if (typeof group.source_camera_count !== 'number' || typeof group.candidate_voxel_count !== 'number') {
-      throw new Error(`分组 ${group.group_id} 缺少重建机位数或候选体素数。`)
+      throw new Error('重建结果信息不完整，请重新导出文件。')
     }
     const b = group.candidate_bounds_xyz_m
     const hasBounds = Array.isArray(b) && Array.isArray(b[0]) && Array.isArray(b[1])
@@ -78,20 +78,20 @@ export function parseVoxelPly(buffer: ArrayBuffer): VoxelPly {
   const bytes = new Uint8Array(buffer)
   const headerText = new TextDecoder('ascii').decode(bytes.slice(0, 4096))
   const marker = headerText.indexOf('end_header')
-  if (marker < 0) throw new Error('PLY 缺少 end_header。')
+  if (marker < 0) throw new Error('点云文件格式无法识别，请重新导出三维结果。')
   const header = headerText.slice(0, marker)
   const vertexMatch = header.match(/element\s+vertex\s+(\d+)/)
-  if (!vertexMatch) throw new Error('PLY 缺少 element vertex。')
+  if (!vertexMatch) throw new Error('点云文件格式无法识别，请重新导出三维结果。')
   const count = Number(vertexMatch[1])
   const props = [...header.matchAll(/property\s+float\s+(\w+)/g)].map((m) => m[1])
   const xi = props.indexOf('x')
   const yi = props.indexOf('y')
   const zi = props.indexOf('z')
-  if (xi < 0 || yi < 0 || zi < 0) throw new Error('PLY 顶点缺少 x/y/z 属性。')
+  if (xi < 0 || yi < 0 || zi < 0) throw new Error('点云文件格式无法识别，请重新导出三维结果。')
   const stride = props.length
   let dataOffset = marker + 'end_header'.length
   while (dataOffset < bytes.length && (bytes[dataOffset] === 0x0a || bytes[dataOffset] === 0x0d)) dataOffset++
-  if (dataOffset + count * stride * 4 > bytes.length) throw new Error('PLY 顶点数据长度不足。')
+  if (dataOffset + count * stride * 4 > bytes.length) throw new Error('点云文件不完整，请重新导出三维结果。')
   const view = new DataView(buffer)
   const xyz = new Float32Array(count * 3)
   for (let i = 0; i < count; i++) {
