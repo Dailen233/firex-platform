@@ -31,6 +31,13 @@ const {fireItems,staleItems,noDetectionItems,connected,everConnected,start:start
 const firePlants=computed(()=>fireItems.value.map(i=>({plantId:i.plant_id,label:originLabel(i),statusText:fireStatusText(i)})))
 const fireAlertCount=computed(()=>fireItems.value.length)
 const noDetectionCount=computed(()=>noDetectionItems.value.length)
+const fireOverviewText=computed(()=>{
+ if(!everConnected.value)return '火情数据尚未接通，当前状态未知。'
+ if(!connected.value)return '火情信息连接中断，正在保留最近收到的信息。'
+ if(fireAlertCount.value)return `收到 ${fireAlertCount.value} 条火情信息，请查看下方详情。`
+ if(noDetectionCount.value)return '本次观测暂未发现火点；这不等于确认无火。'
+ return '当前没有收到火情告警；未收到信息不代表现场没有火情。'
+})
 const sampleSceneCount=computed(()=>sceneLinks.value.filter(link=>currentPlants.value.some(p=>p.properties.plant_id===link.plant_id)).length)
 const areaHeading=computed(()=>gridView.value?(gridArea.value?.name??'全国'):provinceName(province.value))
 const browseQuery=computed<Record<string,string>>(()=>gridView.value?{mode:'grid',...(gridArea.value?{area:gridArea.value.id}:{})}:province.value?{province:province.value}:{})
@@ -70,7 +77,9 @@ onBeforeUnmount(()=>stopFireStatus())
   </aside>
   <section class="atlas-workspace">
    <div class="workspace-heading"><div><div class="eyebrow">Fire-X · 电厂与火情地图</div><h1>{{areaHeading}}<span>{{gridView?'电网区域':'场站总览'}}</span></h1></div><div class="overview-stats"><div><strong>{{currentPlants.length}}</strong><span>已录入场站</span></div><div><strong>{{sampleSceneCount}}</strong><span>可查看三维场景</span></div><div><strong>{{gridView?gridRegions.length:34}}</strong><span>{{gridView?'电网区域':'省级地区'}}</span></div></div></div>
-   <RunConnectionPanel class="atlas-connection"/>
+   <div class="coverage-note" role="note"><Info :size="17"/><span><strong>当前覆盖范围有限</strong> · 已录入 {{plants.length}} 家场站，尚非全国完整名录。未显示不代表当地没有电厂。</span></div>
+   <div class="fire-overview" :class="{alert:fireAlertCount>0}" role="status" aria-live="polite"><Flame :size="19"/><div><strong>火情动态</strong><span>{{fireOverviewText}}</span></div><b>{{fireAlertCount}}</b></div>
+   <details class="advanced-connection"><summary>连接指定监测任务</summary><p class="small muted">用于查看某个已有任务的火情与三维重建结果。</p><RunConnectionPanel/></details>
    <div v-if="dataError" class="notice error" role="alert">{{dataError}}<button @click="loadCatalog">重新读取</button></div>
    <div class="map-section">
     <div class="map-topline"><span><Compass :size="16"/>{{gridView?'电网区域参考图':'已录入场站分布'}}</span><span class="small muted">选择{{gridView?'区域':'省份'}}或场站查看分布</span></div>
@@ -139,6 +148,21 @@ onBeforeUnmount(()=>stopFireStatus())
 .grid-source-links a:hover{color:#c5e8f6}
 .map-bottomline .fire-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#ff6b6b;box-shadow:0 0 6px #ff6b6b}
 .fire-feedback{margin:14px 0}
+.coverage-note{display:flex;align-items:flex-start;gap:9px;margin:-8px 0 12px;padding:10px 13px;border:1px solid #4c422d;border-radius:7px;background:#201e18;color:#e2d1a8;font-size:.8rem;line-height:1.5}
+.coverage-note svg{flex:none;margin-top:2px;color:#f1d491}
+.coverage-note strong{color:#f1d491}
+.fire-overview{display:flex;align-items:center;gap:10px;margin:0 0 14px;padding:12px 15px;border:1px solid var(--border);border-radius:8px;background:#101f2e;color:#c8d6e2}
+.fire-overview>svg{flex:none;color:#9bacbc}
+.fire-overview>div{display:flex;align-items:baseline;gap:10px;flex:1;min-width:0}
+.fire-overview>div strong{color:#e4edf6}
+.fire-overview>div span{font-size:.82rem;color:var(--muted)}
+.fire-overview>b{font-size:1.25rem;font-variant-numeric:tabular-nums}
+.fire-overview.alert{border-color:#6b3838;background:#1a1216}
+.fire-overview.alert>svg,.fire-overview.alert>b{color:#ff8b86}
+.advanced-connection{margin:0 0 14px;padding:10px 13px;border:1px solid var(--border);border-radius:8px;background:#0d1a26}
+.advanced-connection summary{cursor:pointer;color:#a9c0cf;font-size:.8rem;font-weight:600}
+.advanced-connection>p{margin:8px 0}
+.advanced-connection .run-connection{margin-top:8px}
 .fire-feedback .section-heading{margin-bottom:10px}
 .fire-list{display:flex;flex-wrap:wrap;gap:10px}
 .fire-actions{display:flex;gap:8px;flex-wrap:wrap}
@@ -160,5 +184,5 @@ onBeforeUnmount(()=>stopFireStatus())
 .plant-group-heading h3{display:flex;align-items:center;gap:8px;font-size:.9rem;font-weight:600}
 .plant-group-heading>.small{font-size:.75rem;text-align:right}
 @media(max-width:640px){.plant-group-heading{align-items:flex-start;flex-direction:column;gap:4px}.plant-group-heading>.small{text-align:left}}
-@media(max-width:640px){.atlas-mode-switch{margin-bottom:10px;max-width:380px}.grid-map-note{grid-template-columns:1fr;gap:4px;padding:10px 12px}.grid-region-key,.grid-source-links{grid-column:1;gap:4px 10px}}
+@media(max-width:640px){.atlas-mode-switch{margin-bottom:10px;max-width:380px}.grid-map-note{grid-template-columns:1fr;gap:4px;padding:10px 12px}.grid-region-key,.grid-source-links{grid-column:1;gap:4px 10px}.coverage-note{margin-top:-4px}.fire-overview{align-items:flex-start}.fire-overview>div{display:flex;flex-direction:column;gap:2px}.fire-overview>b{font-size:1.05rem}}
 </style>
