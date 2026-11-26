@@ -6,7 +6,7 @@ import { ScatterChart,LinesChart } from 'echarts/charts'
 import { CanvasRenderer } from 'echarts/renderers'
 import type { Boundaries,Plant } from '../lib/types'
 import { RotateCcw } from 'lucide-vue-next'
-import { gridRegionForProvince,provinceCodesForGridRegion } from '../lib/grid-regions'
+import { gridRegionForProvince,provinceCodesForGridRegion,gridRegions,gridUnassigned } from '../lib/grid-regions'
 echarts.use([GeoComponent,TooltipComponent,ScatterChart,LinesChart,CanvasRenderer])
 const props=defineProps<{boundaries:Boundaries;lines:Boundaries|null;plants:Plant[];province:string;mode:'province'|'grid';gridRegionId:string;selectedPlant:string;demoActive:boolean;testPlantId:string;firePlants:{plantId:string;label?:string;statusText:string}[]}>()
 const emit=defineEmits<{province:[code:string];'grid-region':[id:string];plant:[id:string]}>()
@@ -93,16 +93,27 @@ function draw(resetFocus=false){
   const code=f.properties.code??'';const gridRegion=gridRegionForProvince(code)
   const selectedArea=props.mode==='grid'&&gridRegion?.id===props.gridRegionId
   const areaColor=props.mode==='grid'
-   ?gridRegion?.color??'#152636'
+   ?selectedArea?'#6ca994':gridRegion?.color??'#152636'
    :code===props.province?'#226553':props.plants.some(p=>p.properties.related_province_codes.includes(code))?'#1b3542':'#152636'
-  return{name:f.properties.name,itemStyle:{areaColor,...(selectedArea?{borderColor:'#c5ffeb',borderWidth:1.5}:{})},label:{show:['贵州省','四川省','云南省','台湾省'].includes(f.properties.name),color:'#aebfd1',fontSize:14}}
+  return{name:f.properties.name,itemStyle:{areaColor,...(props.mode==='grid'?{borderWidth:0}:{}),...(selectedArea&&props.mode==='province'?{borderColor:'#c5ffeb',borderWidth:1.5}:{})},label:{show:props.mode==='province'&&['贵州省','四川省','云南省','台湾省'].includes(f.properties.name),color:'#aebfd1',fontSize:14}}
  })
  const points=props.plants.filter(p=>props.mode==='grid'
   ?(!props.gridRegionId||provinceCodesForGridRegion(props.gridRegionId).includes(p.properties.province_code))
   :(!props.province||p.properties.related_province_codes.includes(props.province)))
+ const labelPlacements:Record<string,{point:[number,number];fontSize:number}>={
+  north:{point:[117.2,37.4],fontSize:12},east:{point:[120.1,30.5],fontSize:12},central:{point:[112.7,29.8],fontSize:12},
+  northeast:{point:[126.5,44.2],fontSize:13},northwest:{point:[96.1,37.2],fontSize:14},southwest:{point:[102.8,30.1],fontSize:13},
+  southern:{point:[109.2,23.1],fontSize:13},unassigned:{point:[111.5,43.2],fontSize:12},
+ }
+ const gridLabels=props.mode==='grid'?[...gridRegions,gridUnassigned].flatMap(region=>{
+  const placement=labelPlacements[region.id]
+  if(!placement)return[]
+  const label=region.id==='unassigned'?'待核定':region.id==='southern'?'南方电网':`${region.shortName}电网`
+  return[{name:label,label,value:[...placement.point,1],fontSize:placement.fontSize}]
+ }):[]
  const testPoints=points.filter(p=>p.properties.plant_id===props.testPlantId)
  const firePoints=points.filter(p=>props.firePlants.some(f=>f.plantId===p.properties.plant_id))
- const lines=props.lines?.features.flatMap(f=>f.geometry.type==='MultiLineString'?(f.geometry.coordinates as number[][][]).map(coords=>({coords})):[])??[]
+ const lines=props.mode==='grid'?[]:props.lines?.features.flatMap(f=>f.geometry.type==='MultiLineString'?(f.geometry.coordinates as number[][][]).map(coords=>({coords})):[])??[]
  chart.setOption({
   animation:false,backgroundColor:'transparent',
   tooltip:{trigger:'item',backgroundColor:'#142538',borderColor:'#365163',textStyle:{color:'#e2ecf5'},formatter:(p:unknown)=>{
@@ -116,14 +127,17 @@ function draw(resetFocus=false){
     const code=props.boundaries.features.find(f=>f.properties.name===params.name)?.properties.code
     if(props.mode==='grid'){
      const area=gridRegionForProvince(code)
-     const count=props.plants.filter(x=>x.properties.province_code===code).length
-     return `${params.name}<br/>${area?.name??'暂未纳入区域分组'}<br/>${count} 家场站（按登记省份）`
+     const codes=provinceCodesForGridRegion(area?.id??'')
+     const count=props.plants.filter(x=>codes.includes(x.properties.province_code)).length
+     return `${area?.name??'暂未纳入区域'}<br/>${count} 家已录入场站`
     }
     return `${params.name}<br/>${props.plants.filter(p=>p.properties.related_province_codes.includes(code??'')).length} 家关联场站`
   }},
   geo:{map:'firex-provinces',roam:true,scaleLimit:{min:0.8,max:6},layoutCenter:['50%','51%'],layoutSize:'98%',aspectScale:0.75,selectedMode:false,...focus,
-    label:{show:false},itemStyle:{areaColor:'#152636',borderColor:'#406072',borderWidth:0.65},emphasis:{itemStyle:{areaColor:'#2b5261'},label:{color:'#f4fbff',fontSize:14}},regions},
+    label:{show:false},itemStyle:{areaColor:'#152636',borderColor:'#406072',borderWidth:props.mode==='grid'?0:0.65},emphasis:{disabled:props.mode==='grid',itemStyle:{areaColor:'#2b5261'},label:{show:false,color:'#f4fbff',fontSize:14}},regions},
   series:[{type:'lines',coordinateSystem:'geo',polyline:true,silent:true,data:lines,lineStyle:{color:'#627d90',width:1,opacity:0.75}},
+   ...(props.mode==='grid'?gridLabels.map(point=>({type:'scatter' as const,coordinateSystem:'geo' as const,symbolSize:1,silent:true,data:[point],
+    itemStyle:{color:'transparent'},label:{show:true,position:'inside' as const,formatter:(params:unknown)=>((params as {data:{label:string}}).data.label),color:'#f2f6f3',fontSize:point.fontSize,fontWeight:700,lineHeight:18,align:'center' as const,textBorderColor:'rgba(8,20,30,0.72)',textBorderWidth:3,textShadowColor:'rgba(0,0,0,0.5)',textShadowBlur:5},z:8})) : []),
    {type:'scatter',coordinateSystem:'geo',symbolSize:(val:number[],params:unknown)=>((params as {data:{plantId:string}}).data.plantId===props.selectedPlant?17:10),
     itemStyle:{color:'#56e3bb',borderColor:'#c4ffe8',borderWidth:1.5,shadowColor:'#4eddb8',shadowBlur:10},
     data:points.map(p=>({name:p.properties.name,value:[...p.geometry.coordinates,1],plantId:p.properties.plant_id})),z:10},
@@ -147,7 +161,7 @@ onMounted(()=>{
 watch(()=>[props.province,props.mode,props.gridRegionId,props.selectedPlant,props.plants,props.demoActive,props.testPlantId,props.firePlants],()=>draw())
 onBeforeUnmount(()=>{observer?.disconnect();chart?.dispose();chart=null})
 </script>
-<template><div class="map-frame"><div ref="host" class="map-canvas" :aria-label="mode==='grid'?'中国电网区域参考地图；不是精确调度边界':'中国省份地图，选择省份或场站查看分布'"></div><button class="map-reset icon-button" @click="draw(true)" aria-label="重置地图取景" title="重置地图取景"><RotateCcw :size="17"/></button><div class="map-legend"><span class="sample-dot"></span>场站<span class="fire-dot"></span>火情观测<span v-if="mode==='grid'" class="legend-area-chip"></span><template v-if="mode==='grid'">电网区域</template><span class="legend-line"></span>省级边界</div></div></template>
+<template><div class="map-frame"><div ref="host" class="map-canvas" :aria-label="mode==='grid'?'中国电网区域参考地图；区域内不显示省界，不是精确调度边界':'中国省份地图，选择省份或场站查看分布'"></div><button class="map-reset icon-button" @click="draw(true)" aria-label="重置地图取景" title="重置地图取景"><RotateCcw :size="17"/></button><div class="map-legend"><span class="sample-dot"></span>场站<span class="fire-dot"></span>火情观测<span v-if="mode==='grid'" class="legend-area-chip"></span><template v-if="mode==='grid'">区域色块</template><template v-else><span class="legend-line"></span>省级边界</template></div></div></template>
 <style scoped>
 .fire-dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#ff6b6b;box-shadow:0 0 6px #ff6b6b}
 .legend-area-chip{display:inline-block;width:10px;height:10px;border-radius:2px;background:#527d47;margin-left:5px}

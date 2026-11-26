@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed,onMounted,onBeforeUnmount } from 'vue'
+import { computed,onMounted,onBeforeUnmount,ref } from 'vue'
 import { useRoute,useRouter } from 'vue-router'
-import { MapPin,Box,Layers,Info,Compass,ChevronRight,Flame,Mountain,FlaskConical } from 'lucide-vue-next'
+import { MapPin,Box,Layers,Info,Compass,ChevronRight,Flame,Mountain,FlaskConical,Search,X } from 'lucide-vue-next'
 import ProvinceMap from '../components/ProvinceMap.vue'
 import PlantDetail from '../components/PlantDetail.vue'
 import RunConnectionPanel from '../components/RunConnectionPanel.vue'
@@ -17,10 +17,16 @@ const gridView=computed(()=>route.query.mode==='grid')
 const gridArea=computed(()=>[...gridRegions,gridUnassigned].find(area=>area.id===route.query.area))
 const province=computed(()=>!gridView.value&&provinces.some(p=>p[0]===route.query.province)?String(route.query.province):'')
 const currentPlants=computed(()=>gridView.value?(gridArea.value?plants.value.filter(p=>provinceCodesForGridRegion(gridArea.value!.id).includes(p.properties.province_code)):plants.value):province.value?relatedPlants(province.value):plants.value)
+const plantSearch=ref('')
+const visiblePlants=computed(()=>{
+ const query=plantSearch.value.trim().toLocaleLowerCase()
+ if(!query)return currentPlants.value
+ return currentPlants.value.filter(p=>`${p.properties.name} ${provinceName(p.properties.province_code)} ${p.properties.technology==='Coal'?'燃煤':'水电'}`.toLocaleLowerCase().includes(query))
+})
 const modeledProjectPlantIds=new Set(['GEM_HYDRO_SHUANGJIANGKOU','GEM_COAL_ZHIJIN'])
 const plantGroups=computed(()=>[
- {key:'modeled',label:'可查看三维内容',note:'包含厂区预览或周边地形，具体内容和校核状态见场站详情。',plants:currentPlants.value.filter(p=>modeledProjectPlantIds.has(p.properties.plant_id))},
- {key:'other',label:'其他场站信息',note:'',plants:currentPlants.value.filter(p=>!modeledProjectPlantIds.has(p.properties.plant_id))},
+ {key:'modeled',label:'可查看三维内容',note:'包含厂区预览或周边地形，具体内容和校核状态见场站详情。',plants:visiblePlants.value.filter(p=>modeledProjectPlantIds.has(p.properties.plant_id))},
+ {key:'other',label:'其他场站信息',note:'',plants:visiblePlants.value.filter(p=>!modeledProjectPlantIds.has(p.properties.plant_id))},
 ].filter(group=>group.plants.length))
 const selected=computed(()=>currentPlants.value.find(p=>p.properties.plant_id===route.query.plant))
 const {isDemoOn,activeFirePatches}=useFireDemo()
@@ -116,9 +122,11 @@ onBeforeUnmount(()=>stopFireStatus())
     <div v-else-if="connected" class="empty-state">暂无火情告警{{staleItems.length?'（历史/过期记录不计入）':''}}。</div>
     <details v-if="staleItems.length" class="fire-history"><summary>较早的火情信息（{{staleItems.length}}）</summary><ul><li v-for="i in staleItems" :key="i.run_id">{{plantName(i.plant_id)}} · 观测 {{observationTimeLabel(i)}} · {{originLabel(i)}}（信息已过期）</li></ul></details>
    </section>
-   <section class="plant-list"><div class="section-heading"><h2>{{gridView?`${gridArea?.shortName??'全国'}场站`:province?`${provinceName(province)}场站`:'全国场站信息'}}<span class="count-pill">{{currentPlants.length}}</span></h2><span class="small muted">{{gridView?'按登记位置展示；不代表场站调度归属':'按登记省份筛选 · 全国数量去重'}}</span></div>
+   <section class="plant-list"><div class="section-heading"><h2>{{gridView?`${gridArea?.shortName??'全国'}场站`:province?`${provinceName(province)}场站`:'全国场站信息'}}<span class="count-pill">{{visiblePlants.length}}</span></h2><span class="small muted">显示 {{visiblePlants.length}} / {{currentPlants.length}} 家 · {{gridView?'按登记位置展示；不代表场站调度归属':'按登记省份筛选 · 全国数量去重'}}</span></div>
+    <label class="plant-search"><Search :size="16"/><input v-model="plantSearch" type="search" placeholder="搜索电厂名称、省份或类型" aria-label="搜索当前列表中的电厂"/><button v-if="plantSearch" type="button" aria-label="清空搜索" @click="plantSearch=''" @mousedown.prevent><X :size="15"/></button></label>
     <div v-if="!dataReady&&!dataError" class="empty-state">正在读取电厂目录…</div>
     <div v-else-if="!currentPlants.length" class="empty-state"><MapPin :size="24"/><div><strong>暂无场站信息</strong><p>{{gridView?(gridArea?.name??'本区域'):provinceName(province)}}目前没有已录入的场站信息，可选择其他区域查看。</p></div></div>
+    <div v-else-if="!visiblePlants.length" class="empty-state"><Search :size="22"/><div><strong>没有找到匹配的电厂</strong><p>试试其他名称、省份或电厂类型。</p></div></div>
     <div v-else class="plant-groups">
      <section v-for="group in plantGroups" :key="group.key" class="plant-group">
       <div class="plant-group-heading"><h3>{{group.label}}<span class="count-pill">{{group.plants.length}}</span></h3><span v-if="group.note" class="small muted">{{group.note}}</span></div>
@@ -183,6 +191,12 @@ onBeforeUnmount(()=>stopFireStatus())
 .plant-group-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px}
 .plant-group-heading h3{display:flex;align-items:center;gap:8px;font-size:.9rem;font-weight:600}
 .plant-group-heading>.small{font-size:.75rem;text-align:right}
+.plant-search{display:flex;align-items:center;gap:9px;max-width:440px;margin:0 0 13px;padding:0 11px;border:1px solid var(--border);border-radius:8px;background:#0d1a26;color:var(--muted)}
+.plant-search:focus-within{border-color:#4b9d89;box-shadow:0 0 0 2px rgba(76,184,153,.12)}
+.plant-search input{width:100%;min-width:0;padding:10px 0;border:0;outline:0;background:transparent;color:#e7eff5;font:inherit;font-size:.82rem}
+.plant-search input::placeholder{color:#8193a2}
+.plant-search button{display:grid;place-items:center;padding:4px;border:0;background:transparent;color:#9bacbc;cursor:pointer}
+.plant-search button:hover{color:#e7eff5}
 @media(max-width:640px){.plant-group-heading{align-items:flex-start;flex-direction:column;gap:4px}.plant-group-heading>.small{text-align:left}}
 @media(max-width:640px){.atlas-mode-switch{margin-bottom:10px;max-width:380px}.grid-map-note{grid-template-columns:1fr;gap:4px;padding:10px 12px}.grid-region-key,.grid-source-links{grid-column:1;gap:4px 10px}.coverage-note{margin-top:-4px}.fire-overview{align-items:flex-start}.fire-overview>div{display:flex;flex-direction:column;gap:2px}.fire-overview>b{font-size:1.05rem}}
 </style>

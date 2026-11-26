@@ -12,12 +12,12 @@ export interface GridRegion {
 }
 
 export const gridRegions: GridRegion[] = [
-  { id: 'north', name: '国家电网华北分部', shortName: '华北', operator: '国家电网', provinceCodes: ['110000', '120000', '130000', '140000', '370000'], color: '#287a68' },
-  { id: 'east', name: '国家电网华东分部', shortName: '华东', operator: '国家电网', provinceCodes: ['310000', '320000', '330000', '340000', '350000'], color: '#3b6e9a' },
-  { id: 'central', name: '国家电网华中分部', shortName: '华中', operator: '国家电网', provinceCodes: ['360000', '410000', '420000', '430000'], color: '#8162a2' },
-  { id: 'northeast', name: '国家电网东北分部', shortName: '东北', operator: '国家电网', provinceCodes: ['210000', '220000', '230000'], color: '#a45d4e' },
-  { id: 'northwest', name: '国家电网西北分部', shortName: '西北', operator: '国家电网', provinceCodes: ['610000', '620000', '630000', '640000', '650000'], color: '#9a7a38' },
-  { id: 'southwest', name: '国家电网西南分部', shortName: '西南', operator: '国家电网', provinceCodes: ['500000', '510000', '540000'], color: '#387e7a' },
+  { id: 'north', name: '华北电网', shortName: '华北', operator: '国家电网', provinceCodes: ['110000', '120000', '130000', '140000', '370000'], color: '#287a68' },
+  { id: 'east', name: '华东电网', shortName: '华东', operator: '国家电网', provinceCodes: ['310000', '320000', '330000', '340000', '350000'], color: '#3b6e9a' },
+  { id: 'central', name: '华中电网', shortName: '华中', operator: '国家电网', provinceCodes: ['360000', '410000', '420000', '430000'], color: '#8162a2' },
+  { id: 'northeast', name: '东北电网', shortName: '东北', operator: '国家电网', provinceCodes: ['210000', '220000', '230000'], color: '#a45d4e' },
+  { id: 'northwest', name: '西北电网', shortName: '西北', operator: '国家电网', provinceCodes: ['610000', '620000', '630000', '640000', '650000'], color: '#9a7a38' },
+  { id: 'southwest', name: '西南电网', shortName: '西南', operator: '国家电网', provinceCodes: ['500000', '510000', '540000'], color: '#387e7a' },
   { id: 'southern', name: '中国南方电网', shortName: '南方电网', operator: '中国南方电网', provinceCodes: ['440000', '450000', '460000', '520000', '530000'], color: '#527d47' },
 ]
 
