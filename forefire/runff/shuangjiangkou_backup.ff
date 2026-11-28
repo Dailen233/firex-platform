@@ -1,0 +1,24 @@
+# Shuangjiangkou ForeFire test
+# Terrain: FBX-derived NetCDF
+# Fuel ID 1: official table entry, not locally validated
+# Wind: placeholder calm wind
+
+setParameter[ForeFireDataDirectory=.]
+setParameter[fuelsTableFile=fuels.csv]
+setParameter[propagationModel=Rothermel]
+setParameter[dumpMode=geojson]
+
+setParameter[perimeterResolution=10]
+setParameter[spatialIncrement=3]
+setParameter[propagationSpeedAdjustmentFactor=0.6]
+setParameter[windReductionFactor=0.4]
+
+loadData[forefire_terrain.nc;2025-02-10T00:00:00Z]
+
+startFire[loc=(5130,5130,0);t=0]
+
+goTo[t=60]
+
+print[shuangjiangkou_60s.geojson]
+
+quit[]
