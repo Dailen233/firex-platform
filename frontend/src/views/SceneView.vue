@@ -241,7 +241,7 @@ onMounted(()=>{loadCatalog();load()})
 </script>
 <template>
  <main class="scene-layout">
-  <header class="scene-heading"><div><RouterLink class="back-link" :to="{path:'/atlas',query:backQuery}"><ArrowLeft :size="16"/>返回场站信息</RouterLink><h1>{{sceneTitle}}<span v-if="profile" class="tag">{{sceneBadgeText}}</span></h1><p v-if="plant">{{plant.properties.name}} · {{plant.properties.source_province}}</p></div><div v-if="profile" class="scene-size"><strong>{{sceneSizeText}}</strong></div></header>
+  <header class="scene-heading"><div><RouterLink class="back-link" :to="{path:'/atlas',query:backQuery}"><ArrowLeft :size="16"/>返回场站信息</RouterLink><h1><span class="scene-title-art">{{sceneTitle}}</span><span v-if="profile" class="tag">{{sceneBadgeText}}</span></h1><p v-if="plant">{{plant.properties.name}} · {{plant.properties.source_province}}</p></div><div v-if="profile" class="scene-size"><strong>{{sceneSizeText}}</strong></div></header>
   <div class="scene-workspace">
    <section class="viewer-frame">
     <SceneCanvas v-if="dataReady&&valid&&sceneLink" :key="canvasKey" ref="sceneCanvas" :profile-url="assetUrl(sceneLink.profile_uri)" :fire-patches="firePatches" :flame-estimate="effectiveFlameEstimate" @loaded="loaded" @selected="selected=$event" @error="error=$event" @mode="renderMode=$event" @overlay-issue="overlayIssue=$event"/>
