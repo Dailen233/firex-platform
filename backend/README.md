@@ -169,7 +169,7 @@ uv --directory backend run --locked python scripts/upload_test_capture.py --base
 
 ## 实际二维检测（A2，YOLO 模式）
 
-`FIREX_PROCESSING_MODE=yolo` 启用实际二维火焰检测：worker 对服务端保存的上传原图（哈希校验后）推理，产出图像平面检测框，**不生成任何三维轮廓**。推理在 C1 已验证的本机环境进行（后端 venv 无 ultralytics/torch/cv2，通过子进程调用），并复用 C1 的权重核对与框校验逻辑（`experiments/c1-detection/run_detection.py`）。
+`FIREX_PROCESSING_MODE=yolo` 启用实际二维火焰检测：worker 对服务端保存的上传原图（哈希校验后）推理，产出图像平面检测框。推理在 C1 已验证的本机环境进行（后端 venv 无 ultralytics/torch/cv2，通过子进程调用），并复用 C1 的权重核对与框校验逻辑（`experiments/c1-detection/run_detection.py`）。
 
 | 环境变量 | 含义 | 默认（C1 已验证值） |
 | --- | --- | --- |
@@ -186,6 +186,12 @@ uv --directory backend run --locked python scripts/upload_test_capture.py --base
 - **推理成功但未检出**：0 个框是合法结果 → `fire_detected=false`，聚合接口 `alert_status="no_detection"`（"本次未检出"，可结束当前高亮）。
 - **处理失败**：权重缺失/SHA 不符/推理异常 → capture `status=failed` 并写入 `processing_error`，**不回退 fixture、不计为未检出、不刷新上一次有效观测**；陈旧/重复或更旧的结果同样不能覆盖新观测。
 - fixture 模式原样保留（三维 patch，`result_origin="fixture"`），供回归。
+
+## 双江口火焰剖面
+
+双江口模拟场景中，已检出火焰的抓拍可另产生可选的 `flame` 几何。工作器用原图检测框内的亮橙区域估计火焰剪影，由同帧位姿和内参向现有 GLB 地形求交，再将剪影放到经过该落点的竖直平面。二维检测不依赖该步骤；无法求交、图像缺少可用颜色锚点或部署未包含指定 GLB 时，仍发布原来的检测结果。
+
+估计只对 `GEM_HYDRO_SHUANGJIANGKOU` / `sjk_hydropower_sim_v0_1` / `hydro-sim-v0.1-local` / `SJK_TEAM_FBX_FILE_METRE_UNREGISTERED_v1` 的仿真抓拍启用，需保留仓库中 `frontend/public/models/sjk-hydropower-sim-v0.1/sjk_hydropower_sim_v0_1.glb`。不接受未知模型的地形作近似，也不回填旧抓拍。告警卡「查看三维火情」直达绑定场景并跟踪同一 run；三维页用新证据帧更新剖面，未检出或过期时不显示当前剖面。该几何为单视角估计，未测深度、体积与实际地理位置，底座模型不随之重建。参见 [联调验收步骤](../docs/shuangjiangkou-live-flame.md)。
 
 ## 全国地图火情反馈（A1，只读聚合）
 

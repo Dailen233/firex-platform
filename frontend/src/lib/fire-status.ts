@@ -102,11 +102,11 @@ export function useAtlasFireStatus() {
 export function observationTimeLabel(item: AtlasFireStatusItem): string {
   if (item.observation_time_s === null) return '—'
   const base = `${item.observation_time_s.toFixed(1)} s`
-  return item.time_basis === 'utc_anchored' ? `${base}（相对 UTC 锚点）` : `${base}（相对仿真原点）`
+  return item.time_basis === 'utc_anchored' ? `${base}（观测时间轴）` : `${base}（模拟时间）`
 }
 
-// A2：来源标签。合成火情（YOLO 检测的仿真影像）标「数据来源：仿真」；fixture 标「数据来源：接口测试」。
+// A2：以普通用户能理解的方式标明观测来源。
 export function originLabel(item: AtlasFireStatusItem): string {
-  if (item.result_origin === 'yolo') return '数据来源：仿真'
-  return '数据来源：接口测试'
+  if (item.result_origin === 'yolo') return item.input_source === 'simulation' ? '来源：模拟数据' : '来源：现场影像'
+  return '来源：平台测试数据'
 }

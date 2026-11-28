@@ -4,7 +4,12 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js'
 import type { ActiveFirePatch, FireLevel, FireRing, ReferenceMarker, SceneObject, SceneProfile } from './types'
 import { assetUrl, readJson, resolveResource } from './data'
 import { sampleHeightOnTerrain } from './terrain-sampling'
+import type { BackendFlameEstimate } from './backend-contract'
+import { buildSjkCorridor,SJK_CORRIDOR_TERRAIN,supportsSjkCorridor,type GridSummary } from './sjk-grid'
+import { makeSjkGridLayer } from './sjk-grid-render'
+import { makePlantPreviewLayer } from './sjk-plant-preview'
 import { SoftwareRenderer } from './software-renderer'
+import { buildVoxelShell, type VoxelLayerMode } from './voxel-shell'
 import { CONTROL_POINTS, TERRAIN_MESH_NAME, UNITY_WORLD_TO_GLB, type LocalRegistrationPointResult } from './dev/sjk-local-registration'
 
 export type FrameKind = 'default' | 'plant' | 'whole_terrain' | 'panorama'
@@ -24,7 +29,15 @@ export class ModelViewer {
  private controls:OrbitControls;private resizeObserver:ResizeObserver;private abort=new AbortController()
  private rafId=0;private disposed=false;private root:THREE.Group|null=null;private objects:SceneObject[]=[]
  private meshes:THREE.Mesh[]=[];private selectedBox:THREE.BoxHelper|null=null;private profile:SceneProfile|null=null
- private fireOverlay:THREE.Group|null=null;private referenceMarkers:THREE.Group|null=null
+ private previousCameraPosition=new THREE.Vector3();private hasPreviousCameraPosition=false
+ private fireOverlay:THREE.Group|null=null
+ private flameMesh:THREE.Mesh<THREE.BufferGeometry,THREE.MeshBasicMaterial>|null=null
+ private flameCapturePosition:THREE.Vector3|null=null
+ private referenceMarkers:THREE.Group|null=null
+ private gridLayer:ReturnType<typeof makeSjkGridLayer>|null=null
+ private plantPreviewLayer:ReturnType<typeof makePlantPreviewLayer>|null=null
+ private voxelLayer:THREE.Points<THREE.BufferGeometry,THREE.PointsMaterial>|
+  THREE.Mesh<THREE.BufferGeometry,THREE.MeshStandardMaterial>|null=null
  private terrainMesh:THREE.Mesh|null=null;private pendingFirePatches:ActiveFirePatch[]|null=null
  private pointerStart={x:0,y:0};private pointer=new THREE.Vector2();private raycaster=new THREE.Raycaster()
  constructor(private host:HTMLElement,private callback:ViewerCallbacks){
@@ -52,7 +65,28 @@ export class ModelViewer {
   this.camera.aspect=w/h;this.camera.updateProjectionMatrix();this.renderer.setSize(w,h,false);this.requestRender()
  }
  private requestRender=()=>{if(!this.disposed&&!this.rafId)this.rafId=requestAnimationFrame(this.render)}
- private render=()=>{this.rafId=0;if(this.disposed)return;this.controls.update();this.renderer.render(this.scene,this.camera)}
+ private render=()=>{this.rafId=0;if(this.disposed)return;this.controls.update();this.resolveCameraCollision();this.renderer.render(this.scene,this.camera)}
+ /** Sweep the camera from its previous position to the proposed position. Stop just before
+  * the first scene mesh so orbit, zoom and pan cannot move the viewpoint through geometry. */
+ private resolveCameraCollision(){
+  const current=this.camera.position
+  if(!this.hasPreviousCameraPosition){this.previousCameraPosition.copy(current);this.hasPreviousCameraPosition=true;return}
+  const movement=current.clone().sub(this.previousCameraPosition)
+  const distance=movement.length()
+  if(distance>1e-4){
+   this.raycaster.set(this.previousCameraPosition,movement.multiplyScalar(1/distance))
+   this.raycaster.near=0;this.raycaster.far=distance
+   const hit=this.raycaster.intersectObjects(this.meshes,false)[0]
+   if(hit?.face){
+    const normal=hit.face.normal.clone().applyMatrix3(new THREE.Matrix3().getNormalMatrix(hit.object.matrixWorld)).normalize()
+    const direction=current.clone().sub(this.previousCameraPosition).normalize()
+    if(normal.dot(direction)>0)normal.negate()
+    const clearance=Math.max(2,this.camera.near*2)
+    current.copy(hit.point).addScaledVector(normal,clearance)
+   }
+  }
+  this.previousCameraPosition.copy(current)
+ }
  private onPointerDown=(event:PointerEvent)=>{this.pointerStart={x:event.clientX,y:event.clientY}}
  private onPointerUp=(event:PointerEvent)=>{
   if(this.disposed||event.button!==0||Math.hypot(event.clientX-this.pointerStart.x,event.clientY-this.pointerStart.y)>5)return
@@ -131,10 +165,10 @@ export class ModelViewer {
   this.controls.minDistance=p.camera_limits.min_distance;this.controls.maxDistance=p.camera_limits.max_distance
   this.camera.updateProjectionMatrix()
  }
- private applyCamera(cam:{position:[number,number,number];target:[number,number,number]}){
+ private applyCamera(cam:{position:[number,number,number];target:[number,number,number]},adaptAspect=true){
   const target=new THREE.Vector3(...cam.target);let position=new THREE.Vector3(...cam.position)
   // Adapt preset to the viewport's limiting FOV, including a narrow portrait canvas.
-  const ratio=Math.max(1,1/this.camera.aspect)
+  const ratio=adaptAspect?Math.max(1,1/this.camera.aspect):1
   position=target.clone().add(position.sub(target).multiplyScalar(ratio))
   this.camera.position.copy(position);this.controls.target.copy(target);this.camera.updateProjectionMatrix();this.controls.update();this.requestRender()
  }
@@ -157,6 +191,171 @@ export class ModelViewer {
   const dir=new THREE.Vector3(1,0.65,1).normalize()
   this.camera.position.copy(center.clone().addScaledVector(dir,dist))
   this.controls.target.copy(center);this.camera.updateProjectionMatrix();this.controls.update();this.requestRender()
+ }
+ setSjkGridVisible(visible:boolean):GridSummary|null{
+  if(this.disposed)return null
+  if(!this.gridLayer&&visible){
+   if(!this.profile||!supportsSjkCorridor(this.profile)||!(this.renderer instanceof THREE.WebGLRenderer))return null
+   const terrain=this.meshes.find(m=>m.name===SJK_CORRIDOR_TERRAIN)
+   if(!terrain)throw new Error('未找到仿真走廊绑定的地形网格。')
+   terrain.updateWorldMatrix(true,false)
+   if(!terrain.matrixWorld.equals(new THREE.Matrix4()))throw new Error('仿真走廊与地形坐标不一致。')
+   const pos=terrain.geometry.getAttribute('position') as THREE.BufferAttribute
+   const index=terrain.geometry.index?.array??null
+   this.gridLayer=makeSjkGridLayer(buildSjkCorridor(this.profile,this.objects,(x,z)=>
+    sampleHeightOnTerrain(x,z,pos.array,index)))
+   this.scene.add(this.gridLayer.group)
+  }
+  if(!this.gridLayer)return null
+  this.gridLayer.group.visible=visible
+  this.requestRender()
+  return this.gridLayer.summary
+ }
+ frameSjkGrid(view:'station'|'corridor'){
+  if(!this.gridLayer?.group.visible)return
+  const box=view==='station'?this.gridLayer.stationBounds:this.gridLayer.bounds
+  const {center,radius}=box.getBoundingSphere(new THREE.Sphere())
+  const dist=radius/Math.sin(THREE.MathUtils.degToRad(this.camera.fov/2))*1.18*Math.max(1,1/this.camera.aspect)
+  const direction=view==='station'?new THREE.Vector3(-0.18,1.65,-0.72):new THREE.Vector3(0.1,1.05,-0.85)
+  const position=center.clone().addScaledVector(direction.normalize(),dist)
+  this.hasPreviousCameraPosition=false
+  this.applyCamera({position:position.toArray(),target:center.toArray()},false)
+  }
+  /** 厂区近景预览层：叠加「参考公开资料的仿真布局」并隐藏会误读的地面主厂房与露天主变。
+  *  关闭时恢复原场景节点可见性，不改动原模型几何、哈希或坐标。 */
+  setPlantPreviewVisible(visible:boolean):boolean{
+  if(this.disposed||this.profile?.scene_id!=='sjk_hydropower_sim_v0_1')return false
+  if(!(this.renderer instanceof THREE.WebGLRenderer))return false
+  if(visible){
+    if(!this.plantPreviewLayer){
+      this.plantPreviewLayer=makePlantPreviewLayer()
+      this.scene.add(this.plantPreviewLayer.group)
+    }
+    this.plantPreviewLayer.group.visible=true
+    this.setNodesVisible(['powerhouse','transformer_yard'],false)
+  }else{
+    if(this.plantPreviewLayer)this.plantPreviewLayer.group.visible=false
+    this.setNodesVisible(['powerhouse','transformer_yard'],true)
+  }
+  this.requestRender()
+  return true
+  }
+  private setNodesVisible(objectIds:string[],visible:boolean){
+  for(const id of objectIds){
+    const object=this.objects.find(o=>o.object_id===id)
+    if(!object)continue
+    const mesh=this.meshes.find(m=>m.name===object.glb_node_name)
+    if(mesh)mesh.visible=visible
+  }
+  }
+  framePlantPreview(view:'oblique'|'top'){
+  if(!this.plantPreviewLayer?.group.visible)return
+  const {center,radius}=this.plantPreviewLayer.bounds.getBoundingSphere(new THREE.Sphere())
+  const dist=radius/Math.sin(THREE.MathUtils.degToRad(this.camera.fov/2))*1.25*Math.max(1,1/this.camera.aspect)
+  const direction=view==='top'?new THREE.Vector3(0.08,1,0.16):new THREE.Vector3(0.45,0.85,0.9)
+  const position=center.clone().addScaledVector(direction.normalize(),dist)
+  this.hasPreviousCameraPosition=false
+  this.applyCamera({position:position.toArray(),target:center.toArray()},false)
+  }
+  /** Show the same candidate frame as points or its occupied cube surfaces.
+   * Display mode never changes the source, coordinates, or camera. */
+ setVoxelLayer(points:Float32Array|null,voxelSizeM:number,mode:VoxelLayerMode='points'):VoxelLayerMode|null{
+  this.disposeVoxelLayer()
+  if(!points||points.length<3||!(this.renderer instanceof THREE.WebGLRenderer)){
+   this.requestRender()
+   return null
+  }
+  const shell=mode==='shell'?buildVoxelShell(points,voxelSizeM):null
+  if(shell){
+   const geometry=new THREE.BufferGeometry()
+   geometry.setAttribute('position',new THREE.BufferAttribute(shell.positions,3))
+   geometry.setAttribute('normal',new THREE.BufferAttribute(shell.normals,3))
+   const material=new THREE.MeshStandardMaterial({color:0xf57228,emissive:0x722404,emissiveIntensity:0.3,roughness:0.85})
+   const layer=new THREE.Mesh(geometry,material)
+   layer.name='reconstruction-voxel-shell'
+   this.voxelLayer=layer
+   this.scene.add(layer)
+  }else{
+   const geometry=new THREE.BufferGeometry()
+   geometry.setAttribute('position',new THREE.BufferAttribute(points,3))
+   const material=new THREE.PointsMaterial({color:0xff9a3c,size:Math.max(1.5,voxelSizeM*0.55),sizeAttenuation:true,transparent:true,opacity:0.7,depthWrite:false})
+   const layer=new THREE.Points(geometry,material)
+   layer.name='offline-reconstruction-voxels'
+   this.voxelLayer=layer
+   this.scene.add(layer)
+  }
+  this.requestRender()
+  return shell?'shell':'points'
+ }
+ frameVoxelLayer(){
+  if(!this.voxelLayer)return
+  const box=new THREE.Box3().setFromObject(this.voxelLayer)
+  if(box.isEmpty())return
+  const {center,radius}=box.getBoundingSphere(new THREE.Sphere())
+  if(!Number.isFinite(radius))return
+  const dist=Math.max(8,radius)/Math.sin(THREE.MathUtils.degToRad(this.camera.fov/2))*1.35*Math.max(1,1/this.camera.aspect)
+  const direction=new THREE.Vector3(0.35,1.35,0.9).normalize()
+  const position=center.clone().addScaledVector(direction,dist)
+  this.hasPreviousCameraPosition=false
+  this.applyCamera({position:position.toArray(),target:center.toArray()},false)
+ }
+ private disposeVoxelLayer(){
+  if(!this.voxelLayer)return
+  this.scene.remove(this.voxelLayer)
+  this.voxelLayer.geometry.dispose();this.voxelLayer.material.dispose()
+  this.voxelLayer=null
+ }
+ /** Focus the observed surface from the capture side, so a ridge is less likely
+  * to hide it. An explicit focus may relocate the camera past the orbit sweep. */
+ frameFlame(){
+  if(!this.flameMesh||!this.flameCapturePosition)return
+  const box=new THREE.Box3().setFromObject(this.flameMesh)
+  const center=box.getCenter(new THREE.Vector3())
+  const offset=this.flameCapturePosition.clone().sub(center)
+  const radius=box.getBoundingSphere(new THREE.Sphere()).radius
+  const dist=radius/Math.sin(THREE.MathUtils.degToRad(this.camera.fov/2))*1.25*Math.max(1,1/this.camera.aspect)
+  if(offset.lengthSq()===0)return
+  this.camera.position.copy(center).add(offset.setLength(Math.min(offset.length(),dist)))
+  this.controls.target.copy(center)
+  this.hasPreviousCameraPosition=false
+  this.controls.update();this.requestRender()
+ }
+ setFlameEstimate(estimate:BackendFlameEstimate|null){
+  this.disposeFlameEstimate()
+  if(estimate&&this.profile?.asset?.sha256===estimate.glb_sha256&&this.renderer instanceof THREE.WebGLRenderer){
+   const geometry=new THREE.BufferGeometry()
+   geometry.setAttribute('position',new THREE.Float32BufferAttribute(estimate.vertices.flat(),3))
+   geometry.setIndex(estimate.triangles.flat())
+   geometry.setAttribute('uv',new THREE.Float32BufferAttribute(estimate.uv.flat(),2))
+   const material=new THREE.MeshBasicMaterial({side:THREE.DoubleSide,transparent:true,opacity:0.96,depthWrite:false,toneMapped:false})
+   const mesh=new THREE.Mesh(geometry,material)
+   mesh.name='observed-flame-section'
+   mesh.visible=false
+   this.flameMesh=mesh
+   this.flameCapturePosition=new THREE.Vector3(...estimate.camera_xyz_m)
+   this.scene.add(mesh)
+   const texture=new THREE.TextureLoader().load(`data:image/png;base64,${estimate.texture_png_base64}`,()=>{
+    if(this.flameMesh!==mesh)return // a newer observation or unmount disposed it
+    mesh.visible=true
+    this.requestRender()
+   },undefined,()=>{
+    if(this.flameMesh!==mesh)return
+    // The solid color still follows the same derived outline if decoding fails.
+    material.map=null;texture.dispose();material.color.setHex(0xff912d);material.needsUpdate=true
+    mesh.visible=true;this.requestRender()
+   })
+   texture.colorSpace=THREE.SRGBColorSpace
+   material.map=texture
+  }
+  this.requestRender()
+ }
+ private disposeFlameEstimate(){
+  if(!this.flameMesh)return
+  this.scene.remove(this.flameMesh)
+  this.flameMesh.geometry.dispose()
+  this.flameMesh.material.map?.dispose()
+  this.flameMesh.material.dispose()
+  this.flameMesh=null;this.flameCapturePosition=null
  }
  /** 相机对准当前火区覆盖层（不改动几何坐标，仅取景）。 */
  frameFire(){
@@ -313,8 +512,10 @@ select(id:string|null,focus=false){
   this.resizeObserver.disconnect();this.controls.removeEventListener('change',this.requestRender);this.controls.dispose()
   this.renderer.domElement.removeEventListener('pointerdown',this.onPointerDown);this.renderer.domElement.removeEventListener('pointerup',this.onPointerUp)
   if(this.selectedBox){this.selectedBox.geometry.dispose();(this.selectedBox.material as THREE.Material).dispose()}
+  if(this.gridLayer){this.scene.remove(this.gridLayer.group);this.gridLayer.dispose();this.gridLayer=null}
+  if(this.plantPreviewLayer){this.scene.remove(this.plantPreviewLayer.group);this.plantPreviewLayer.dispose();this.plantPreviewLayer=null}
   if(this.root)releaseModel(this.root)
-  this.disposeFireOverlay();this.disposeReferenceMarkers();this.terrainMesh=null;this.pendingFirePatches=null
+  this.disposeFireOverlay();this.disposeFlameEstimate();this.disposeVoxelLayer();this.disposeReferenceMarkers();this.terrainMesh=null;this.pendingFirePatches=null
   this.renderer.dispose();this.renderer.forceContextLoss();this.renderer.domElement.remove();this.meshes=[];this.objects=[];this.root=null;this.profile=null
  }
 }

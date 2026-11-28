@@ -1,6 +1,6 @@
 {
   "date": "2026-10-11",
-  "count": 34,
+  "count": 36,
   "checks": [
     {
       "id": "DATA-01-unique-plant-ids",
@@ -103,6 +103,10 @@
       "result": "passed"
     },
     {
+      "id": "SIM-GRID-01-corridor-uses-the-actual-terrain",
+      "result": "passed"
+    },
+    {
       "id": "FIRE-DEMO-01-contract-valid",
       "result": "passed"
     },
@@ -124,6 +128,10 @@
     },
     {
       "id": "BACKEND-01-state-validation-rejects-invalid",
+      "result": "passed"
+    },
+    {
+      "id": "BACKEND-YOLO-geometry-required-only-for-patch-results",
       "result": "passed"
     },
     {

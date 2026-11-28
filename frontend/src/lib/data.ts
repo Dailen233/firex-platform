@@ -50,24 +50,24 @@ export function prototypeScenesFor(id:string){return sceneLinks.value.filter(s=>
 export function sceneBySceneId(sceneId:string){return sceneLinks.value.find(s=>s.scene_id===sceneId)}
 export function capacityScope(p:Plant){
   switch(p.properties.plant_id){
-    case 'GEM_HYDRO_WUDONGDE':return '电站总装机容量；三峡集团资料'
-    case 'GEM_HYDRO_XIANGJIABA':return '2025-11-10 官方报道总装机；非实时出力'
-    case 'GEM_COAL_ZHIJIN':return '一期两台 660 MW 运行机组；未计入扩建'
-    case 'GEM_HYDRO_XILUODU':return 'GEM 电站容量；当前运行调整待核查'
-    case 'GEM_HYDRO_SHUANGJIANGKOU':return 'GEM 记录 2000 MW（4×500 MW）；口径待核'
-    default:return 'GEM 名义装机容量；非实时出力'
+    case 'GEM_HYDRO_WUDONGDE':return '公开资料所列电站总装机容量'
+    case 'GEM_HYDRO_XIANGJIABA':return '2025 年公开报道的装机容量，不代表实时发电功率'
+    case 'GEM_COAL_ZHIJIN':return '按一期两台 660 MW 机组统计，不含后续扩建'
+    case 'GEM_HYDRO_XILUODU':return '公开数据库记录的电站容量，当前运行情况待核实'
+    case 'GEM_HYDRO_SHUANGJIANGKOU':return '公开数据库记录为 2,000 MW，统计口径待核实'
+    default:return '公开数据库所列名义装机容量，不代表实时发电功率'
   }
 }
 export function identityLabel(status:string){
-  if(status.includes('模拟')||status.includes('simulated'))return '模拟设施 · 演示设计'
-  if(status.includes('unverified')||status==='unassigned')return '身份未核实'
-  if(status.includes('report'))return '资料参考'
-  return '参考对象，待核实'
+  if(status.includes('模拟')||status.includes('simulated'))return '场景展示设施 · 非实测'
+  if(status.includes('unverified')||status==='unassigned')return '身份尚未核实'
+  if(status.includes('report'))return '公开资料参考'
+  return '参考模型，尚未核实'
 }
 export function heightLabel(o:{object_id:string;height_status?:string}){
-  if(o.height_status?.includes('模拟')||o.height_status?.includes('simulated'))return '模拟尺寸 · 非实测'
-  if(o.object_id==='terrain')return o.height_status?.includes('文件')?'文件相对标高（未配准）':'地形与平台估计'
-  if(o.object_id==='CH01')return '报告记载高度；外形仍含假设'
-  if(o.object_id==='B01'||o.object_id.startsWith('CT-'))return '展示假设，非实测'
-  return '资料预测，非实测'
+  if(o.height_status?.includes('模拟')||o.height_status?.includes('simulated'))return '场景设定尺寸 · 非实测'
+  if(o.object_id==='terrain')return o.height_status?.includes('文件')?'模型参考高度 · 尚未校准':'地形高度为估算值'
+  if(o.object_id==='CH01')return '报告记载高度 · 外形未核实'
+  if(o.object_id==='B01'||o.object_id.startsWith('CT-'))return '场景参考尺寸 · 非实测'
+  return '资料参考值 · 非实测'
 }

@@ -29,10 +29,40 @@ export interface BackendRunRecord {
   time_origin_utc: string | null
 }
 
+export interface BackendRunCreate {
+  plant_id: string
+  scene_id: string
+  asset_version: string
+  coordinate_frame_id: string | null
+  input_source: InputSource
+  simulation_time_origin_s?: number | null
+  time_origin_utc?: string | null
+}
+
 export interface BackendFirePatch {
   patch_id: string
   /** Local XZ closed ring (X east, Z south, metres); Y is sampled by the viewer. */
   geometry: [number, number][]
+}
+
+export interface BackendDetection2D {
+  class_id: number
+  class_name: string
+  confidence: number
+  bbox: [number, number, number, number]
+}
+
+type XYZ = [number, number, number]
+export interface BackendFlameEstimate {
+  method: 'single_view_flame_silhouette'
+  capture_id: string
+  glb_sha256: string
+  anchor_xyz_m: XYZ
+  camera_xyz_m: XYZ
+  vertices: XYZ[]
+  triangles: [number, number, number][]
+  uv: [number, number][]
+  texture_png_base64: string
 }
 
 export interface BackendRunState {
@@ -50,6 +80,10 @@ export interface BackendRunState {
   provider_version: string | null
   evidence_capture_ids: string[]
   patches: BackendFirePatch[]
+  detections?: BackendDetection2D[]
+  fire_detected?: boolean | null
+  flame?: BackendFlameEstimate | null
+  observation_expires_at?: string | null
   produced_at: string | null
   time_basis: TimeBasis
   simulation_time_origin_s: number | null
@@ -87,6 +121,54 @@ export interface AtlasFireStatus {
   fresh_after_s: number
   monitored_run_ids: string[]
   items: AtlasFireStatusItem[]
+}
+
+export interface BackendReconstructionSummary {
+  run_id: string
+  status: 'none' | 'available'
+  revision: number | null
+  group_id: string | null
+  simulation_time_s: number | null
+  source: string | null
+  mask_source: string | null
+  voxel_count: number | null
+  voxel_size_m: number | null
+  byte_size: number | null
+  ply_sha256: string | null
+  glb_sha256: string | null
+  produced_at: string | null
+}
+
+export interface BackendReconstructionJob {
+  job_id: string
+  run_id: string
+  status: 'queued' | 'processing' | 'completed' | 'failed'
+  source: string
+  received_at: string
+  started_at: string | null
+  finished_at: string | null
+  error: string | null
+  simulation_time_s: number | null
+  group_id: string | null
+  voxel_count: number | null
+  mask_source: string | null
+  revision: number | null
+  zip_sha256: string
+  zip_byte_size: number
+}
+
+export interface BackendReconstructionFrame {
+  revision: number
+  group_id: string
+  simulation_time_s: number
+  source: string
+  mask_source: string | null
+  voxel_count: number
+  voxel_size_m: number
+  byte_size: number
+  ply_sha256: string
+  glb_sha256: string | null
+  produced_at: string
 }
 
 export type Validation<T> = { ok: true; value: T } | { ok: false; errors: string[] }
@@ -205,6 +287,44 @@ export function validateRunRecord(raw: unknown): Validation<BackendRunRecord> {
   }
 }
 
+function isXYZ(v: unknown): v is XYZ {
+  return Array.isArray(v) && v.length === 3 && v.every(isFiniteNumber)
+}
+
+function validateDetections(value: unknown, errors: string[]): BackendDetection2D[] {
+  if (value === undefined) return []
+  if (!Array.isArray(value) || !value.every((d: unknown) =>
+    isRecord(d) && isNonNegativeInteger(d.class_id) && isNonEmptyString(d.class_name)
+    && isFiniteNumber(d.confidence) && d.confidence >= 0 && d.confidence <= 1
+    && Array.isArray(d.bbox) && d.bbox.length === 4 && d.bbox.every(isFiniteNumber)
+    && d.bbox[0] < d.bbox[2] && d.bbox[1] < d.bbox[3]
+  )) {
+    errors.push('run/state.detections 包含无效的检测框')
+    return []
+  }
+  return value
+}
+
+function validateFlame(value: unknown): BackendFlameEstimate | null {
+  if (!isRecord(value) || value.method !== 'single_view_flame_silhouette'
+      || !isNonEmptyString(value.capture_id) || typeof value.glb_sha256 !== 'string'
+      || !/^[a-f0-9]{64}$/.test(value.glb_sha256)
+      || !isXYZ(value.anchor_xyz_m) || !isXYZ(value.camera_xyz_m)) return null
+  const {vertices, triangles, uv, texture_png_base64} = value
+  if (!Array.isArray(vertices) || vertices.length < 3 || vertices.length > 64 || !vertices.every(isXYZ)) return null
+  if (!Array.isArray(triangles) || triangles.length < 1 || triangles.length > 62
+      || !triangles.every((f: unknown) => Array.isArray(f) && f.length === 3 && new Set(f).size === 3
+          && f.every(i => isNonNegativeInteger(i) && i < vertices.length))) return null
+  if (!Array.isArray(uv) || uv.length !== vertices.length || !uv.every((p: unknown) =>
+      Array.isArray(p) && p.length === 2 && p.every(v => isFiniteNumber(v) && v >= 0 && v <= 1))) return null
+  if (typeof texture_png_base64 !== 'string' || texture_png_base64.length < 4 || texture_png_base64.length > 100000
+      || texture_png_base64.length % 4 !== 0 || !/^[A-Za-z0-9+/]+={0,2}$/.test(texture_png_base64)) return null
+  return {
+    method: value.method, capture_id: value.capture_id, glb_sha256: value.glb_sha256,
+    anchor_xyz_m: value.anchor_xyz_m, camera_xyz_m: value.camera_xyz_m, vertices, triangles, uv, texture_png_base64,
+  }
+}
+
 export function validateRunState(raw: unknown): Validation<BackendRunState> {
   const errors: string[] = []
   if (!isRecord(raw)) return { ok: false, errors: ['run/state 不是对象'] }
@@ -276,18 +396,39 @@ export function validateRunState(raw: unknown): Validation<BackendRunState> {
   const result_origin = readNullableString(raw, 'result_origin', errors, 'run/state')
   const provider_version = readNullableString(raw, 'provider_version', errors, 'run/state')
 
-  // Cross-field semantics for the two states (B3).
+  const detections = validateDetections(raw.detections, errors)
+  const fire_detected = typeof raw.fire_detected === 'boolean' ? raw.fire_detected : null
+  if (raw.fire_detected != null && fire_detected === null) errors.push('run/state.fire_detected 必须为布尔值或 null')
+  const observation_expires_at = raw.observation_expires_at == null ? null
+    : readString(raw, 'observation_expires_at', errors, 'run/state')
+  if (observation_expires_at && !Number.isFinite(Date.parse(observation_expires_at))) {
+    errors.push('run/state.observation_expires_at 不是有效时间')
+  }
+  const flame = raw.flame == null ? null : validateFlame(raw.flame)
+  if (raw.flame != null && (!flame || input_source !== 'simulation' || result_origin !== 'yolo'
+      || fire_detected !== true || !evidence_capture_ids.includes(flame.capture_id) || !observation_expires_at)) {
+    errors.push('run/state.flame 无效或与本次仿真观测不匹配')
+  }
+
+  // Cross-field semantics for the two states.
+
   if (state_status === 'observation') {
     if (observation_time_s === null) errors.push('observation 状态必须提供 observation_time_s')
     if (result_origin === null) errors.push('observation 状态必须提供 result_origin')
     if (provider_version === null) errors.push('observation 状态必须提供 provider_version')
-    if (patches.length === 0) errors.push('observation 状态必须提供非空 patches')
+    if (result_origin === 'yolo') {
+      if (fire_detected === null || !Array.isArray(raw.detections) || evidence_capture_ids.length === 0) {
+        errors.push('YOLO 观测必须提供检测结果和证据帧')
+      }
+    } else if (patches.length === 0) {
+      errors.push('轮廓观测必须提供非空 patches')
+    }
   } else {
     if (revision !== 0) errors.push('no_observation 状态 revision 必须为 0')
     if (observation_time_s !== null) errors.push('no_observation 状态 observation_time_s 必须为 null')
     if (result_origin !== null) errors.push('no_observation 状态 result_origin 必须为 null')
     if (provider_version !== null) errors.push('no_observation 状态 provider_version 必须为 null')
-    if (patches.length !== 0) errors.push('no_observation 状态 patches 必须为空')
+    if (patches.length !== 0 || detections.length || flame || fire_detected !== null || observation_expires_at) errors.push('no_observation 状态不应携带火情观测')
   }
 
   if (errors.length) return { ok: false, errors }
@@ -296,7 +437,7 @@ export function validateRunState(raw: unknown): Validation<BackendRunState> {
     value: {
       run_id, plant_id, scene_id, asset_version, coordinate_frame_id,
       input_source, schema_version, state_status, revision, observation_time_s,
-      result_origin, provider_version, evidence_capture_ids, patches, produced_at,
+      result_origin, provider_version, evidence_capture_ids, patches, detections, fire_detected, flame, observation_expires_at, produced_at,
       time_basis, simulation_time_origin_s, time_origin_utc,
     },
   }
@@ -381,6 +522,130 @@ export function validateAtlasFireStatus(raw: unknown): Validation<AtlasFireStatu
   }
   if (errors.length) return { ok: false, errors }
   return { ok: true, value: { generated_at, fresh_after_s: fresh_after_s as number, monitored_run_ids, items } }
+}
+
+function readNullableNonNegativeInt(raw: Record<string, unknown>, key: string, errors: string[], where: string): number | null {
+  const v = raw[key]
+  if (v === null || v === undefined) return null
+  if (typeof v !== 'number' || !Number.isInteger(v) || v < 0) {
+    errors.push(`${where}.${key} 必须为 null 或非负整数`)
+    return null
+  }
+  return v
+}
+
+export function validateReconstructionSummary(raw: unknown): Validation<BackendReconstructionSummary> {
+  const errors: string[] = []
+  if (!isRecord(raw)) return { ok: false, errors: ['reconstruction 不是对象'] }
+  const run_id = readString(raw, 'run_id', errors, 'reconstruction')
+  let status: BackendReconstructionSummary['status'] = 'none'
+  if (raw.status !== 'none' && raw.status !== 'available') {
+    errors.push('reconstruction.status 必须为 none/available')
+  } else {
+    status = raw.status
+  }
+  const revision = readNullableNonNegativeInt(raw, 'revision', errors, 'reconstruction')
+  const group_id = readNullableString(raw, 'group_id', errors, 'reconstruction')
+  const simulation_time_s = readNullableNumber(raw, 'simulation_time_s', errors, 'reconstruction')
+  const source = readNullableString(raw, 'source', errors, 'reconstruction')
+  const mask_source = readNullableString(raw, 'mask_source', errors, 'reconstruction')
+  const voxel_count = readNullableNonNegativeInt(raw, 'voxel_count', errors, 'reconstruction')
+  const voxel_size_m = readNullableNumber(raw, 'voxel_size_m', errors, 'reconstruction')
+  const byte_size = readNullableNonNegativeInt(raw, 'byte_size', errors, 'reconstruction')
+  const ply_sha256 = readNullableString(raw, 'ply_sha256', errors, 'reconstruction')
+  const glb_sha256 = readNullableString(raw, 'glb_sha256', errors, 'reconstruction')
+  const produced_at = readNullableString(raw, 'produced_at', errors, 'reconstruction')
+
+  if (status === 'available') {
+    if (revision === null) errors.push('reconstruction 有结果时必须提供 revision')
+    if (simulation_time_s === null) errors.push('reconstruction 有结果时必须提供 simulation_time_s')
+    if (voxel_count === null) errors.push('reconstruction 有结果时必须提供 voxel_count')
+    if (byte_size === null) errors.push('reconstruction 有结果时必须提供 byte_size')
+    if (group_id === null) errors.push('reconstruction 有结果时必须提供 group_id')
+    if (ply_sha256 === null || !/^[a-f0-9]{64}$/.test(ply_sha256)) errors.push('reconstruction 有结果时必须提供有效的 ply_sha256')
+  }
+  if (errors.length) return { ok: false, errors }
+  return {
+    ok: true,
+    value: {
+      run_id, status, revision, group_id, simulation_time_s, source, mask_source,
+      voxel_count, voxel_size_m, byte_size, ply_sha256, glb_sha256, produced_at,
+    },
+  }
+}
+
+export function validateReconstructionJob(raw: unknown): Validation<BackendReconstructionJob> {
+  const errors: string[] = []
+  if (!isRecord(raw)) return { ok: false, errors: ['reconstruction job 不是对象'] }
+  const job_id = readString(raw, 'job_id', errors, 'job')
+  const run_id = readString(raw, 'run_id', errors, 'job')
+  let status: BackendReconstructionJob['status'] = 'queued'
+  if (!['queued', 'processing', 'completed', 'failed'].includes(raw.status as string)) {
+    errors.push('job.status 必须为 queued/processing/completed/failed')
+  } else {
+    status = raw.status as BackendReconstructionJob['status']
+  }
+  const source = readString(raw, 'source', errors, 'job')
+  const received_at = readString(raw, 'received_at', errors, 'job')
+  const started_at = readNullableString(raw, 'started_at', errors, 'job')
+  const finished_at = readNullableString(raw, 'finished_at', errors, 'job')
+  const error = readNullableString(raw, 'error', errors, 'job')
+  const simulation_time_s = readNullableNumber(raw, 'simulation_time_s', errors, 'job')
+  const group_id = readNullableString(raw, 'group_id', errors, 'job')
+  const voxel_count = readNullableNonNegativeInt(raw, 'voxel_count', errors, 'job')
+  const mask_source = readNullableString(raw, 'mask_source', errors, 'job')
+  const revision = readNullableNonNegativeInt(raw, 'revision', errors, 'job')
+  const zip_sha256 = readString(raw, 'zip_sha256', errors, 'job')
+  const zip_byte_size = readNullableNonNegativeInt(raw, 'zip_byte_size', errors, 'job')
+  if (errors.length) return { ok: false, errors }
+  return {
+    ok: true,
+    value: {
+      job_id, run_id, status, source, received_at, started_at, finished_at, error,
+      simulation_time_s, group_id, voxel_count, mask_source, revision, zip_sha256, zip_byte_size: zip_byte_size ?? 0,
+    },
+  }
+}
+
+export function validateReconstructionFrame(raw: unknown): Validation<BackendReconstructionFrame> {
+  const errors: string[] = []
+  if (!isRecord(raw)) return { ok: false, errors: ['reconstruction frame 不是对象'] }
+  const revision = readNullableNonNegativeInt(raw, 'revision', errors, 'frame')
+  const group_id = readString(raw, 'group_id', errors, 'frame')
+  const simulation_time_s = readNullableNumber(raw, 'simulation_time_s', errors, 'frame')
+  const source = readString(raw, 'source', errors, 'frame')
+  const mask_source = readNullableString(raw, 'mask_source', errors, 'frame')
+  const voxel_count = readNullableNonNegativeInt(raw, 'voxel_count', errors, 'frame')
+  const voxel_size_m = readNullableNumber(raw, 'voxel_size_m', errors, 'frame')
+  const byte_size = readNullableNonNegativeInt(raw, 'byte_size', errors, 'frame')
+  const ply_sha256 = readString(raw, 'ply_sha256', errors, 'frame')
+  const glb_sha256 = readNullableString(raw, 'glb_sha256', errors, 'frame')
+  const produced_at = readString(raw, 'produced_at', errors, 'frame')
+  if (revision === null || simulation_time_s === null || voxel_count === null || voxel_size_m === null || byte_size === null) {
+    errors.push('reconstruction frame 缺少必填字段')
+  }
+  if (errors.length) return { ok: false, errors }
+  return {
+    ok: true,
+    value: {
+      revision: revision!, group_id, simulation_time_s: simulation_time_s!, source, mask_source,
+      voxel_count: voxel_count!, voxel_size_m: voxel_size_m!, byte_size: byte_size!,
+      ply_sha256, glb_sha256, produced_at,
+    },
+  }
+}
+
+export function validateReconstructionFrames(raw: unknown): Validation<BackendReconstructionFrame[]> {
+  if (!Array.isArray(raw)) return { ok: false, errors: ['reconstruction frames 必须为数组'] }
+  const errors: string[] = []
+  const frames: BackendReconstructionFrame[] = []
+  for (let i = 0; i < raw.length; i++) {
+    const r = validateReconstructionFrame(raw[i])
+    if (!r.ok) { errors.push(`frames[${i}]：${r.errors.join('；')}`); continue }
+    frames.push(r.value)
+  }
+  if (errors.length) return { ok: false, errors }
+  return { ok: true, value: frames }
 }
 
 /** Immutable binding fields that a snapshot must share with its run record. */

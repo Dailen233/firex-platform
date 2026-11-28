@@ -3,9 +3,10 @@
 静态Vue前端，无算法或服务端请求。AtlasView→GeoJSON数据，SceneView→scene_index→manifest→GLB与对象表。
 
 - AtlasView：省份、电厂选择在hash路由查询参数中；省份变更清除旧电厂。
-- ProvinceMap：注册34真实省级面；原始8个MultiLineString境界线单独显示。
+- ProvinceMap：注册34真实省级面；原始8个MultiLineString境界线单独显示。路由选择省份时根据该省边界范围聚焦并缩放，选择电厂时以其原始点位为中心缩放；仅火情/数据状态刷新时保留用户手动平移缩放，重置按钮回到当前路由选择。
 - PlantDetail：按项目ID关联；无模型不给假入口，保留来源差异。
 - SceneCanvas/ModelViewer：进入创建，退出销毁；下载和校验原始GLB，用相机取景及raycast选择。
+- 双江口厂区近景预览：在模拟场景叠加候选厂房群、场坪、道路和辅助建筑；只用于浏览效果，不修改原GLB根变换、不把候选设施写为真实设备。仿真塔线导线可额外抬升18 m以提高山坡可视性，塔脚、地形和走向仍为未配准演示，不作安全净空依据。
 - SoftwareRenderer：只在无WebGL时使用。v4地形为401×401网格，按6格步长采样原始顶点；设施保留原三角形，近似着色与深度排序。不可作精细材质或遮挡评价。
 
 ## ADR

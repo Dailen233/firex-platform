@@ -15,13 +15,16 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
-from . import db, results
+from . import db, reconstruction_jobs, results
+from .config import JOBS_DIRNAME, RECONSTRUCTION_DIRNAME
 from .config import captures_dir as default_captures_dir
 from .config import db_path as default_db_path
 from .config import processing_mode as env_processing_mode
 from .errors import ApiError
 from .provider import make_provider
-from .routes import atlas, captures, health, runs
+from .reconstruction_worker import ReconstructionWorker
+from .routes import atlas, captures, health, reconstruction, runs
+from .routes import reconstruction_jobs as reconstruction_jobs_routes
 from .worker import Worker
 
 TITLE = "Fire-X Backend"
@@ -41,15 +44,20 @@ def create_app(
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         # Actual service startup only: initialize/migrate the database, re-queue
-        # any interrupted processing, and start the worker when a provider runs.
+        # any interrupted processing, and start the workers. The reconstruction
+        # worker is independent of the YOLO provider (separate queue + thread).
         db.init_db(app.state.db_path)
         results.recover_interrupted(app.state.db_path)
+        reconstruction_jobs.recover_interrupted_jobs(app.state.db_path)
         provider = make_provider(app.state.processing_mode)
         worker = None
         if provider is not None:
             worker = Worker(app.state.db_path, app.state.captures_dir, provider)
             worker.start()
         app.state.worker = worker
+        recon_worker = ReconstructionWorker(app.state.db_path, app.state.jobs_dir, app.state.recon_dir)
+        recon_worker.start()
+        app.state.reconstruction_worker = recon_worker
         try:
             yield
         finally:
@@ -57,6 +65,7 @@ def create_app(
                 # Offload the blocking join so the event loop stays responsive
                 # while waiting for the in-flight task to finish.
                 await asyncio.to_thread(worker.stop)
+            await asyncio.to_thread(recon_worker.stop)
 
     app = FastAPI(title=TITLE, version=VERSION, description=DESCRIPTION, lifespan=lifespan)
 
@@ -64,6 +73,8 @@ def create_app(
     app.state.captures_dir = (
         captures_dir_override if captures_dir_override is not None else default_captures_dir()
     )
+    app.state.recon_dir = Path(app.state.captures_dir).parent / RECONSTRUCTION_DIRNAME
+    app.state.jobs_dir = Path(app.state.captures_dir).parent / JOBS_DIRNAME
     app.state.processing_mode = (
         processing_mode if processing_mode is not None else env_processing_mode()
     )
@@ -92,6 +103,8 @@ def create_app(
     app.include_router(runs.router, prefix="/api/v1")
     app.include_router(captures.router)
     app.include_router(atlas.router)
+    app.include_router(reconstruction.router)
+    app.include_router(reconstruction_jobs_routes.router)
 
     return app
 

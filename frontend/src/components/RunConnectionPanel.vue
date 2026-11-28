@@ -4,7 +4,7 @@ import { PlugZap, Unplug, ShieldQuestion, RefreshCw, FlaskConical, CircleCheck, 
 import { useRunConnection } from '../lib/run-connection'
 
 const {
-  status, runId, health, run, snapshot, error,
+  status, runId, health, snapshot, error,
   lastSuccessfulQueryAt, lastNewRevisionAt, observationTimeLabel,
   connect, disconnect,
 } = useRunConnection()
@@ -22,18 +22,19 @@ function submit(): void {
 
 <template>
   <section class="run-connection">
-    <div class="panel-eyebrow">连接已有运行<PlugZap :size="16" /></div>
+    <div class="panel-eyebrow">火情监测<PlugZap :size="16" /></div>
+    <p class="small muted">输入由平台提供的监测任务编号，查看该任务收到的火情信息。</p>
 
     <div v-if="status !== 'disconnected'" class="run-status-line">
       <span v-if="status === 'connecting'" class="tag neutral"><RefreshCw :size="13" class="spin" />正在连接…</span>
       <span v-else-if="status === 'connected'" class="tag ok"><CircleCheck :size="13" />已连接</span>
       <span v-else class="tag danger"><TriangleAlert :size="13" />连接异常</span>
-      <span class="run-id">{{ runId }}</span>
+      <span class="run-id">当前任务：{{ runId }}</span>
     </div>
 
     <div class="conn-form">
-      <input v-model="input" type="text" placeholder="输入 run_id" spellcheck="false" :disabled="status === 'connecting'" @keyup.enter="submit" />
-      <button v-if="status === 'disconnected' || status === 'error'" class="primary-button small" @click="submit" :disabled="!input.trim()">连接</button>
+      <input v-model="input" type="text" placeholder="监测任务编号（由平台提供）" spellcheck="false" :disabled="status === 'connecting'" @keyup.enter="submit" />
+      <button v-if="status === 'disconnected' || status === 'error'" class="primary-button small" @click="submit" :disabled="!input.trim()">连接数据</button>
       <button v-else class="secondary-button small" @click="disconnect"><Unplug :size="14" />断开</button>
     </div>
 
@@ -41,36 +42,25 @@ function submit(): void {
 
     <template v-if="health">
       <dl class="conn-facts">
-        <div><dt>算法模式</dt><dd>{{ health.algorithm_mode === 'unconfigured' ? '未接入图像算法' : health.algorithm_mode }}</dd></div>
-        <div><dt>处理模式</dt><dd>{{ health.processing_mode === 'fixture' ? 'fixture（接口测试）' : health.processing_mode }}</dd></div>
+        <div><dt>火点识别</dt><dd>{{ health.algorithm_mode === 'unconfigured' ? '暂未启用' : '已启用' }}</dd></div>
+        <div><dt>运行模式</dt><dd>{{ health.processing_mode === 'fixture' ? '平台演示数据' : health.processing_mode === 'unconfigured' ? '暂未启用' : '运行中' }}</dd></div>
       </dl>
     </template>
 
-    <template v-if="run">
-      <div class="run-binding">
-        <span class="tag neutral">{{ run.plant_id }}</span>
-        <span class="tag neutral">{{ run.scene_id }}</span>
-        <span class="tag neutral">{{ run.asset_version }}</span>
-      </div>
-    </template>
-
     <template v-if="snapshot">
-      <div v-if="snapshot.state_status !== 'observation'" class="notice amber"><ShieldQuestion :size="14" />等待观测数据，不能解释为确认无火。</div>
+      <div v-if="snapshot.state_status !== 'observation'" class="notice amber"><ShieldQuestion :size="14" />尚未收到观测数据，当前情况未知，不能视为无火。</div>
       <div v-else class="snapshot-facts">
-        <div class="snapshot-head"><FlaskConical :size="15" /><strong>{{snapshot.result_origin==='yolo'?'数据来源：仿真':'数据来源：接口测试'}}，不代表图像重建</strong></div>
+        <div class="snapshot-head"><FlaskConical :size="15" /><strong>{{snapshot.result_origin==='yolo'?(snapshot.input_source==='simulation'?'模拟观测数据':'现场影像数据'):'平台测试数据'}}</strong></div>
         <dl class="conn-facts">
-          <div><dt>revision</dt><dd>{{ snapshot.revision }}</dd></div>
           <div><dt>观测时间</dt><dd>{{ observationTimeLabel }}</dd></div>
-          <div><dt>来源</dt><dd>{{ snapshot.result_origin }}</dd></div>
-          <div><dt>提供者版本</dt><dd>{{ snapshot.provider_version }}</dd></div>
-          <div><dt>火区</dt><dd>{{ snapshot.patches.length }} 个</dd></div>
+          <div><dt>识别到的火点</dt><dd v-if="snapshot.result_origin==='yolo'">{{ snapshot.detections?.length??0 }} 个</dd><dd v-else>{{ snapshot.patches.length }} 个区域</dd></div>
         </dl>
       </div>
     </template>
 
     <div class="timing-facts">
-      <span>最近成功查询：{{ fmtTime(lastSuccessfulQueryAt) }}</span>
-      <span>最近新 revision：{{ fmtTime(lastNewRevisionAt) }}</span>
+      <span>最近同步：{{ fmtTime(lastSuccessfulQueryAt) }}</span>
+      <span>最近收到新结果：{{ fmtTime(lastNewRevisionAt) }}</span>
     </div>
   </section>
 </template>

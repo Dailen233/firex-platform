@@ -7,6 +7,7 @@ import type { Plant,SceneLink,SceneObject,SceneManifest,Boundaries,SceneProfile,
 import { validateFireStateDemo,resolveActivePatches,pointInRingXZ } from '../src/lib/fire-demo-schema.ts'
 import { EXPECTED_SAMPLE_PLANTS } from '../src/lib/catalog-config.ts'
 import { sampleHeightOnTerrain } from '../src/lib/terrain-sampling.ts'
+import { buildSjkCorridor, conductorAttachment, SJK_CORRIDOR_TERRAIN } from '../src/lib/sjk-grid.ts'
 import { validateRunState,snapshotToActiveFirePatches,revisionDecision,validateSnapshotAgainstRun,type BackendRunState,type BackendRunRecord,type SceneBinding } from '../src/lib/backend-contract.ts'
 // 脚本位于 frontend/scripts/，路径解析与 cwd 无关：
 // - public/* 资源相对于 frontend/ 解析；
@@ -159,6 +160,53 @@ check('SIM-04-unregistered-frame-isolated',()=>{
  assert.notEqual(simProfile.coordinate_frame_id,'SJK_REFERENCE_UTM47N_EGM2008_v1')
  assert.ok(simProfile.coordinate_frame_id!.includes('UNREGISTERED'))
 })
+check('SIM-GRID-01-corridor-uses-the-actual-terrain',()=>{
+ const jsonEnd=20+simGlb.readUInt32LE(12)
+ const glb=JSON.parse(simGlb.subarray(20,jsonEnd).toString()) as {
+  nodes:{name?:string;mesh:number}[];meshes:{primitives:{attributes:{POSITION:number};indices:number}[]}[];
+  accessors:{bufferView:number;byteOffset?:number;componentType:number;count:number}[];
+  bufferViews:{buffer:number;byteOffset?:number;byteStride?:number}[];
+ }
+ const node=glb.nodes.find(n=>n.name===SJK_CORRIDOR_TERRAIN)!
+ const prim=glb.meshes[node.mesh]!.primitives[0]!
+ const packed=(n:number,component:number,cols:number,read:(offset:number)=>number)=>{
+  const a=glb.accessors[n]!,v=glb.bufferViews[a.bufferView]!
+  assert.equal(a.componentType,component);assert.equal(v.buffer,0)
+  assert.equal(v.byteStride??4*cols,4*cols)
+  const start=jsonEnd+8+(a.byteOffset??0)+(v.byteOffset??0)
+  return Array.from({length:a.count*cols},(_,i)=>read(start+i*4))
+ }
+ const positions=Float32Array.from(packed(prim.attributes.POSITION,5126,3,p=>simGlb.readFloatLE(p)))
+ const indices=Uint32Array.from(packed(prim.indices,5125,1,p=>simGlb.readUInt32LE(p)))
+ const height=(x:number,z:number)=>sampleHeightOnTerrain(x,z,positions,indices)
+ const grid=buildSjkCorridor(simProfile,simObjects,height)
+ assert.throws(()=>buildSjkCorridor({...simProfile,asset_version:'different'},simObjects,height),/模型版本不匹配/)
+ assert.equal(grid.summary.towers,13)
+ assert.equal(grid.summary.spans,13)
+ assert.equal(grid.supports[0]!.id,'S0')
+ assert.equal(grid.supports[0]!.feet.length,2)
+ assert.equal(grid.supports[0]!.y,simObjects.find(o=>o.object_id==='grid_terrace')!.bounds_local_xyz_m[1][1])
+ for(const tower of grid.supports.slice(1)){
+  assert.equal(tower.feet.length,4)
+  for(const [x,y,z] of tower.feet)assert.equal(y,height(x,z))
+ }
+ assert.equal(grid.conductors.length,13*6)
+ assert.ok(Math.abs(grid.summary.lengthM-4500)<10)
+ let minGap=Infinity
+ for(const [i,line] of grid.conductors.entries()){
+  const span=Math.floor(i/6)
+  assert.deepEqual(line.xyz[0],conductorAttachment(grid.supports[span]!,line.circuit,line.phase))
+  const expected=conductorAttachment(grid.supports[span+1]!,line.circuit,line.phase)
+  assert.ok(line.xyz.at(-1)!.every((v,k)=>Math.abs(v-expected[k]!)<1e-9))
+  for(const [x,y,z] of line.xyz){
+   const ground=height(x,z)
+   assert.notEqual(ground,null)
+   minGap=Math.min(minGap,y-ground!)
+  }
+ }
+ assert.ok(minGap>0,`仿真导线采样点与地形相交：${minGap.toFixed(3)} m`)
+ console.log(`SIM-GRID 仿真导线采样最小地形间隔 ${minGap.toFixed(2)} m（仅渲染检查）`)
+})
 const fireRaw=read<unknown>('public/data/fire_state_demo.json')
 const fireResult=validateFireStateDemo(fireRaw)
 check('FIRE-DEMO-01-contract-valid',()=>{assert.ok(fireResult.ok,fireResult.ok?'':`演示契约校验失败：${fireResult.errors.join('；')}`);if(fireResult.ok)assert.equal(fireResult.demo.patches.length,2)})
@@ -209,6 +257,21 @@ check('BACKEND-01-state-validation-rejects-invalid',()=>{
  assert.equal(validateRunState({...base,result_origin:null}).ok,false) // 缺失来源
  assert.equal(validateRunState({...base,evidence_capture_ids:[123]}).ok,false) // 非字符串证据 ID
  assert.equal(validateRunState({...base,patches:[{patch_id:'p1',geometry:[[0,0],[1,0],[1,1],[0,1]]}]}).ok,false) // 未闭合
+})
+check('BACKEND-YOLO-geometry-required-only-for-patch-results',()=>{
+ const yolo={run_id:'r1',plant_id:'P',scene_id:'S',asset_version:'v1',coordinate_frame_id:'F',input_source:'simulation',schema_version:'1.0',state_status:'observation',revision:1,observation_time_s:5.0,result_origin:'yolo',provider_version:'1.0',evidence_capture_ids:['c1'],patches:[],produced_at:'2026-01-01T00:00:00Z',time_basis:'simulation_relative',simulation_time_origin_s:0,time_origin_utc:null}
+ const positive={...yolo,fire_detected:true,detections:[{class_id:0,class_name:'fire',confidence:0.8,bbox:[0,0,20,30]}]}
+ assert.equal(validateRunState(positive).ok,true)
+ assert.equal(validateRunState({...yolo,fire_detected:false,detections:[]}).ok,true)
+ assert.equal(validateRunState({...positive,fire_detected:undefined}).ok,false)
+ assert.equal(validateRunState({...positive,result_origin:'fixture'}).ok,false)
+ const flame={method:'single_view_flame_silhouette',capture_id:'c1',glb_sha256:'a'.repeat(64),anchor_xyz_m:[0,0,0],camera_xyz_m:[0,5,5],vertices:[[0,0,0],[1,0,0],[0,1,0]],triangles:[[0,1,2]],uv:[[0,0],[1,0],[0,1]],texture_png_base64:'cG5n'}
+ const withFlame={...positive,flame,observation_expires_at:'2026-01-01T00:02:00Z'}
+ assert.equal(validateRunState(withFlame).ok,true)
+ assert.equal(validateRunState({...withFlame,flame:{...flame,capture_id:'other'}}).ok,false)
+ assert.equal(validateRunState({...withFlame,flame:{...flame,triangles:[[0,1,4]]}}).ok,false)
+ assert.equal(validateRunState({...withFlame,flame:{...flame,uv:[[0,0],[1,0],[0,1.5]]}}).ok,false)
+ assert.equal(validateRunState({...withFlame,fire_detected:false}).ok,false)
 })
 check('BACKEND-02-mapping-requires-frame-and-binding',()=>{
  const snap:BackendRunState={run_id:'r1',plant_id:'P',scene_id:'S',asset_version:'v1',coordinate_frame_id:null,input_source:'simulation',schema_version:'1.0',state_status:'observation',revision:1,observation_time_s:5.0,result_origin:'fixture',provider_version:'1.0',evidence_capture_ids:['c1'],patches:[{patch_id:'p1',geometry:[[0,0],[1,0],[1,1],[0,0]]}],produced_at:'x',time_basis:'simulation_relative',simulation_time_origin_s:10.0,time_origin_utc:null}
